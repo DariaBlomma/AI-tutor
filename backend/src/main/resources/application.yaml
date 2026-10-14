@@ -1,3 +1,48 @@
 spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
   application:
     name: backend
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+  jpa:
+    open-in-view: false
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  jackson:
+    default-property-inclusion: non_null
+#  mail:
+#    host: ${MAIL_HOST}
+#    port: ${MAIL_PORT}
+#    username: ${MAIL_USERNAME}
+#    password: ${MAIL_PASSWORD}
+#    properties:
+#      mail:
+#        smtp:
+#          ssl:
+#            enable: true
+#          starttls:
+#            enable: false
+#          connectiontimeout: 30000
+#          timeout: 30000
+#          writetimeout: 30000
+#    default-charset: UTF-8
+#    jndi-name: null
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+#logging:
+#  level:
+#    org.springframework.mail: DEBUG
+#    com.sun.mail.smtp: DEBUG
+
