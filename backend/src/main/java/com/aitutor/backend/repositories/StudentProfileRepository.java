@@ -1,4 +1,4 @@
-package com.aitutor.backend.repositories.student;
+package com.aitutor.backend.repositories;
 
 import com.aitutor.backend.entities.StudentProfile;
 import org.springframework.data.jpa.repository.JpaRepository;

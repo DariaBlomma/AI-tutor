@@ -1,4 +1,4 @@
-package com.aitutor.backend.repositories.user;
+package com.aitutor.backend.repositories;
 
 import com.aitutor.backend.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;

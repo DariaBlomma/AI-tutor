@@ -25,3 +25,7 @@ databaseChangeLog:
      file: db/changelog/changes/012-create-password-reset-tokens-table.sql
   - include:
      file: db/changelog/changes/013-create-task-types-table.sql
+  - include:
+     file: db/changelog/changes/014-create-task-topics.sql
+  - include:
+      file: db/changelog/changes/015-create-task-types-table.sql

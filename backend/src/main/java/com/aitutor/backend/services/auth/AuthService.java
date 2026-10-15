@@ -11,7 +11,7 @@ import com.aitutor.backend.exceptions.ResourceNotFoundException;
 import com.aitutor.backend.exceptions.UnauthorizedException;
 import com.aitutor.backend.mappers.UserMapper;
 import com.aitutor.backend.repositories.auth.PasswordResetTokenRepository;
-import com.aitutor.backend.repositories.user.UserRepository;
+import com.aitutor.backend.repositories.UserRepository;
 import com.aitutor.backend.security.AccessTokenService;
 import com.aitutor.backend.services.EmailService;
 import com.aitutor.backend.services.user.UserService;

@@ -1,7 +1,7 @@
 package com.aitutor.backend.security;
 
 import com.aitutor.backend.entities.User;
-import com.aitutor.backend.repositories.user.UserRepository;
+import com.aitutor.backend.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.userdetails.UserDetails;

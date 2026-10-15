@@ -4,7 +4,7 @@ import com.aitutor.backend.dto.student.StudentBriefResponse;
 import com.aitutor.backend.entities.StudentProfile;
 import com.aitutor.backend.entities.User;
 import com.aitutor.backend.mappers.teacher.TeacherMapper;
-import com.aitutor.backend.repositories.student.StudentProfileRepository;
+import com.aitutor.backend.repositories.StudentProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -7,7 +7,7 @@ import com.aitutor.backend.entities.User;
 import com.aitutor.backend.exceptions.ConflictException;
 import com.aitutor.backend.exceptions.ResourceNotFoundException;
 import com.aitutor.backend.mappers.UserMapper;
-import com.aitutor.backend.repositories.user.UserRepository;
+import com.aitutor.backend.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
