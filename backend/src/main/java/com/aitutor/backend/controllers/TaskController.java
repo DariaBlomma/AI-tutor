@@ -2,6 +2,7 @@ package com.aitutor.backend.controllers;
 
 import com.aitutor.backend.dto.task.TaskCreateRequest;
 import com.aitutor.backend.dto.task.TaskResponse;
+import com.aitutor.backend.dto.task.TaskUpdateRequest;
 import com.aitutor.backend.security.CustomUserDetails;
 import com.aitutor.backend.services.task.TaskService;
 import jakarta.validation.Valid;
@@ -33,5 +34,17 @@ public class TaskController {
     public TaskResponse create(@Valid @RequestBody TaskCreateRequest request,
                                @AuthenticationPrincipal CustomUserDetails userDetails) {
         return taskService.create(request, userDetails.getId());
+    }
+
+    @PutMapping("/{id}")
+    public TaskResponse update(@PathVariable Long id,
+                               @Valid @RequestBody TaskUpdateRequest request) {
+        return taskService.update(id, request);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) {
+        taskService.delete(id);
     }
 }

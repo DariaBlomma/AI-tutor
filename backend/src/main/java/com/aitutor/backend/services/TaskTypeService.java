@@ -6,7 +6,7 @@ import com.aitutor.backend.entities.TaskType;
 import com.aitutor.backend.exceptions.ConflictException;
 import com.aitutor.backend.exceptions.ResourceNotFoundException;
 import com.aitutor.backend.mappers.TaskTypeMapper;
-import com.aitutor.backend.repositories.TaskTypeRepository;
+import com.aitutor.backend.repositories.task.TaskTypeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

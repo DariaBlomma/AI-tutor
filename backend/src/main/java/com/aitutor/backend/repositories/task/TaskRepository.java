@@ -1,4 +1,4 @@
-package com.aitutor.backend.repositories;
+package com.aitutor.backend.repositories.task;
 
 import com.aitutor.backend.entities.Task;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -13,6 +13,6 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     @EntityGraph(attributePaths = {"topics", "taskTypes"})
     List<Task> findAllByOrderByCreatedAtDesc();
 
-    @EntityGraph(attributePaths = {"topics", "taskTypes"})
+    @EntityGraph(attributePaths = {"topics", "taskTypes", "items"})
     Optional<Task> findWithRelationsById(Long id);
 }

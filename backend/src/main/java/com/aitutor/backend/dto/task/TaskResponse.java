@@ -4,6 +4,7 @@ import com.aitutor.backend.dto.topic.TopicResponse;
 import com.aitutor.backend.dto.tasktype.TaskTypeResponse;
 import lombok.*;
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -13,8 +14,10 @@ import java.util.Set;
 public class TaskResponse {
     private Long id;
     private String name;
+    private String context;
     private Boolean isMixed;
     private Set<TopicResponse> topics;
     private Set<TaskTypeResponse> taskTypes;
+    private List<TaskItemResponse> items;
     private Instant createdAt;
 }

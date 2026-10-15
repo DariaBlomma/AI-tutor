@@ -1,4 +1,4 @@
-package com.aitutor.backend.repositories;
+package com.aitutor.backend.repositories.task;
 
 import com.aitutor.backend.entities.TaskType;
 import org.springframework.data.jpa.repository.JpaRepository;

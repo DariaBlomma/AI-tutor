@@ -2,6 +2,9 @@ package com.aitutor.backend.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,6 +29,10 @@ public class Task {
 
     @Column(nullable = false)
     private Boolean isMixed = false;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private String context;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)
