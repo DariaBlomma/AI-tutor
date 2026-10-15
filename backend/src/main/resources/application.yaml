@@ -18,23 +18,23 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   jackson:
     default-property-inclusion: non_null
-#  mail:
-#    host: ${MAIL_HOST}
-#    port: ${MAIL_PORT}
-#    username: ${MAIL_USERNAME}
-#    password: ${MAIL_PASSWORD}
-#    properties:
-#      mail:
-#        smtp:
-#          ssl:
-#            enable: true
-#          starttls:
-#            enable: false
-#          connectiontimeout: 30000
-#          timeout: 30000
-#          writetimeout: 30000
-#    default-charset: UTF-8
-#    jndi-name: null
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          ssl:
+            enable: true
+          starttls:
+            enable: false
+          connectiontimeout: 30000
+          timeout: 30000
+          writetimeout: 30000
+    default-charset: UTF-8
+    jndi-name: null
 
 server:
   port: 8080

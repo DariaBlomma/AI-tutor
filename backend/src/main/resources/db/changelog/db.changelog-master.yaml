@@ -19,3 +19,7 @@ databaseChangeLog:
       file: db/changelog/changes/009-create-courses-table.sql
   - include:
       file: db/changelog/changes/010-create-course-tasks-table.sql
+  - include:
+     file: db/changelog/changes/011-create-refresh-tokens-table.sql
+  - include:
+     file: db/changelog/changes/012-create-password-reset-tokens-table.sql
