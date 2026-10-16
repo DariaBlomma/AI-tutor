@@ -69,6 +69,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/tasks/**", "/topics/**", "/task-types/**").authenticated()
                         .requestMatchers("/tasks/**", "/topics/**", "/task-types/**").hasRole("TEACHER")
 
+                        // Курсы — полностью закрытая зона учителя
+                        .requestMatchers("/courses/**").hasRole("TEACHER")
+
                         .requestMatchers("/teacher/**").hasRole("TEACHER")
                         .requestMatchers("/student/**").hasRole("STUDENT")
                         .anyRequest().authenticated()
