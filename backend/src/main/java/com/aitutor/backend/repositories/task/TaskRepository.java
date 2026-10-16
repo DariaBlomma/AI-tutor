@@ -19,8 +19,6 @@ public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificat
     @EntityGraph(attributePaths = {"topics", "taskTypes", "items"})
     Optional<Task> findWithRelationsById(Long id);
 
-    long countByDeletedAtIsNull();
-
     /**
      * Пересчёт флага is_mixed после деактивации типа в справочнике.
      * Смешанным считается задание с 2+ АКТИВНЫМИ типами (неактивные/soft-deleted не считаются):

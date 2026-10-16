@@ -1,3 +1,4 @@
+// Сущность элемента задания (task_items). Контент хранится в JSONB-колонке content.
 package com.aitutor.backend.entities;
 
 import com.aitutor.backend.enums.ItemType;
@@ -42,7 +43,4 @@ public class TaskItem {
     @Column(nullable = false)
     @Builder.Default
     private Integer position = 0;
-
-    @Column(name = "library_ref")
-    private Long libraryRef;
 }
