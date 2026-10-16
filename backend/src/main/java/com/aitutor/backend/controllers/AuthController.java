@@ -3,13 +3,11 @@ package com.aitutor.backend.controllers;
 import com.aitutor.backend.dto.auth.*;
 import com.aitutor.backend.helpers.JwtHelper;
 import com.aitutor.backend.security.AccessTokenService;
-import com.aitutor.backend.security.CustomUserDetails;
 import com.aitutor.backend.services.auth.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -33,8 +31,8 @@ public class AuthController {
 
     @PostMapping("/refresh")
     @ResponseStatus(HttpStatus.OK)
-    public AuthResponse refresh(@Valid @RequestBody RefreshTokenRequest request, @AuthenticationPrincipal CustomUserDetails userDetails) {
-        return authService.refresh(userDetails.getId(), request);
+    public AuthResponse refresh(@Valid @RequestBody RefreshTokenRequest request) {
+        return authService.refresh(request);
     }
 
     @PostMapping("/logout")

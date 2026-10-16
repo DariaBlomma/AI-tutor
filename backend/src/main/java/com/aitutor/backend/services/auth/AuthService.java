@@ -61,11 +61,15 @@ public class AuthService {
         return buildAuthResponse(userMapper.fromWithPasswordToResponse(user), refreshToken);
     }
 
+    /**
+     * Обновление пары токенов. Личность берётся ИЗ refresh-токена (он — доказательство),
+     * а не из access-токена: refresh вызывается именно тогда, когда access уже протух.
+     */
     @Transactional
-    public AuthResponse refresh(Long userId, RefreshTokenRequest request) {
+    public AuthResponse refresh(RefreshTokenRequest request) {
+        Long userId = refreshTokenService.verifyRefreshToken(request.refreshToken());
         User user = userRepository.findActiveById(userId).orElseThrow(
                 () -> new ResourceNotFoundException("Пользователь не найден или удален: " + userId));
-        refreshTokenService.verifyRefreshToken(request.refreshToken());
         UUID refresh = refreshTokenService.rotateRefreshToken(userId);
         log.info("Обновление токенов пользователя: id={}", userId);
         return buildAuthResponse(userMapper.toResponse(user), refresh);

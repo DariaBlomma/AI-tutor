@@ -1,7 +1,3 @@
---- backend/README.md (原始)
-
-
-+++ backend/README.md (修改后)
 # AI Tutor Platform — Backend
 
 Java 21 · Spring Boot · Maven · PostgreSQL · Liquibase.

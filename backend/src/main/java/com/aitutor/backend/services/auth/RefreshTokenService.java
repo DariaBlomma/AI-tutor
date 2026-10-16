@@ -40,7 +40,11 @@ public class RefreshTokenService {
         return saved.getToken();
     }
 
-    public UUID verifyRefreshToken(String tokenValue) {
+    /**
+     * Проверяет refresh-токен и возвращает id владельца из записи в БД.
+     * Вызывается из транзакционных методов AuthService — работает с БД корректно.
+     */
+    public Long verifyRefreshToken(String tokenValue) {
         UUID tokenUuid;
         try {
             tokenUuid = UUID.fromString(tokenValue);
@@ -65,7 +69,7 @@ public class RefreshTokenService {
             throw new InvalidTokenException("Refresh token has expired");
         }
 
-        return refreshToken.getToken();
+        return refreshToken.getUser().getId();
     }
 
     @Transactional

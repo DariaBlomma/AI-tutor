@@ -38,6 +38,7 @@ public class TaskService {
     private final UserRepository userRepository;
     private final TaskMapper taskMapper;
     private final TaskPreviewBuilder previewBuilder;
+    private final TaskContentValidator contentValidator;
 
     /**
      * Лёгкий список банка заданий: без контента (items), только мета + превью.
@@ -65,6 +66,8 @@ public class TaskService {
         User teacher = userRepository.findActiveById(teacherId)
                 .orElseThrow(() -> new ResourceNotFoundException("Учитель не найден: id=" + teacherId));
 
+        validateContent(request.getContext(), request.getItems());
+
         Set<Topic> topics = resolveTopics(request.getTopicIds());
         Set<TaskType> taskTypes = resolveTaskTypes(request.getTaskTypeIds());
 
@@ -89,6 +92,8 @@ public class TaskService {
     public TaskResponse update(Long id, TaskUpdateRequest request) {
         Task task = findActiveWithRelations(id);
 
+        validateContent(request.getContext(), request.getItems());
+
         Set<Topic> topics = resolveTopics(request.getTopicIds());
         Set<TaskType> taskTypes = resolveTaskTypes(request.getTaskTypeIds());
 
@@ -111,6 +116,7 @@ public class TaskService {
     /** Мягкое удаление: физическое удаление засорило бы БД, ссылки учеников — сломались бы. */
     @Transactional
     public void delete(Long id) {
+        // Проверку «не удалено» делает findActiveWithRelations: повторный DELETE вернёт 404, а не 500.
         Task task = findActiveWithRelations(id);
         task.setDeletedAt(Instant.now());
     }
@@ -122,6 +128,15 @@ public class TaskService {
             throw new ResourceNotFoundException("Задание удалено: id=" + id);
         }
         return task;
+    }
+
+    /**
+     * Валидация JSONB-контента до записи в БД (InvalidRequestException → 400 Bad Request).
+     * Форматы описаны в README; без этой проверки битый JSON попадал бы в tasks.context / task_items.content.
+     */
+    private void validateContent(String contextJson, List<TaskItemRequest> items) {
+        contentValidator.validateContext(contextJson, items);
+        items.forEach(contentValidator::validateItem);
     }
 
     private List<TaskItem> mapItems(List<TaskItemRequest> requests) {
