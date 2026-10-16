@@ -23,7 +23,6 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 --                      MATCHING       : {"left_label": "...", "right_label": "...", "explanation": "..."}
 --                    Неизвестные поля отклоняются.
 --   position       - порядок пункта внутри задания (сортировка учителем).
---   library_ref    - опциональная ссылка на заготовку из word_formation_library (для аудита происхождения).
 CREATE TABLE task_items (
                             id BIGSERIAL PRIMARY KEY,
                             task_id BIGINT NOT NULL,
@@ -32,10 +31,8 @@ CREATE TABLE task_items (
                             correct_answer VARCHAR(200),
                             content JSONB,
                             position INT NOT NULL DEFAULT 0,
-                            library_ref BIGINT,
 
-                            CONSTRAINT fk_ti_task FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
-                            CONSTRAINT fk_ti_library FOREIGN KEY (library_ref) REFERENCES word_formation_library(id) ON DELETE SET NULL
+                            CONSTRAINT fk_ti_task FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_task_items_task_position ON task_items(task_id, position);

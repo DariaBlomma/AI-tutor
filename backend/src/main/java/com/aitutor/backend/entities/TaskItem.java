@@ -42,7 +42,4 @@ public class TaskItem {
     @Column(nullable = false)
     @Builder.Default
     private Integer position = 0;
-
-    @Column(name = "library_ref")
-    private Long libraryRef;
 }
