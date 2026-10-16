@@ -47,7 +47,6 @@ public class TopicController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTopic(@PathVariable Long id) {
-//        todo: что делать с заданиями внутри?
         topicService.deleteTopic(id);
         return ResponseEntity.noContent().build();
     }

@@ -32,9 +32,17 @@ public class TaskTypeController {
         return taskTypeService.update(id, request);
     }
 
-    @DeleteMapping("/{id}")
+    /** Деактивация: тип перестаёт предлагаться при создании новых заданий */
+    @PatchMapping("/{id}/deactivate")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deactivate(@PathVariable Long id) {
         taskTypeService.deactivate(id);
+    }
+
+    /** Мягкое удаление: скрыть тип из справочника целиком */
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) {
+        taskTypeService.delete(id);
     }
 }

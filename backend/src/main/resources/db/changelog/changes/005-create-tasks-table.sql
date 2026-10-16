@@ -7,7 +7,10 @@
 -- Формат JSON: {"text": "...", "title": "..."} — структура свободная, зависит от типов задания.
 CREATE TABLE tasks (
                        id BIGSERIAL PRIMARY KEY,
+                       public_id VARCHAR(20) NOT NULL UNIQUE,     -- публичный id для UI и поиска (TSK-000123)
                        name VARCHAR(200) NOT NULL,
+                       preview_text TEXT,                         -- превью для списка банка заданий
+                       deleted_at TIMESTAMP WITH TIME ZONE,       -- мягкое удаление
                        is_mixed BOOLEAN DEFAULT FALSE,
                        context JSONB,
                        created_by BIGINT NOT NULL,            -- ID учителя

@@ -1,6 +1,8 @@
 package com.aitutor.backend.entities;
 
 import jakarta.persistence.*;
+
+import java.time.Instant;
 import lombok.*;
 
 @Getter
@@ -26,4 +28,7 @@ public class TaskType {
 
     @Column(nullable = false)
     private Boolean isActive = true;
+
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
 }

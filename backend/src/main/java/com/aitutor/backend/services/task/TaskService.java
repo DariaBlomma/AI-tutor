@@ -3,6 +3,7 @@ package com.aitutor.backend.services.task;
 import com.aitutor.backend.dto.task.TaskCreateRequest;
 import com.aitutor.backend.dto.task.TaskItemRequest;
 import com.aitutor.backend.dto.task.TaskResponse;
+import com.aitutor.backend.dto.task.TaskSummaryResponse;
 import com.aitutor.backend.dto.task.TaskUpdateRequest;
 import com.aitutor.backend.entities.Task;
 import com.aitutor.backend.entities.TaskItem;
@@ -12,14 +13,17 @@ import com.aitutor.backend.entities.User;
 import com.aitutor.backend.exceptions.InvalidRequestException;
 import com.aitutor.backend.exceptions.ResourceNotFoundException;
 import com.aitutor.backend.mappers.TaskMapper;
-import com.aitutor.backend.repositories.task.TaskItemRepository;
-import com.aitutor.backend.repositories.task.TaskRepository;
-import com.aitutor.backend.repositories.task.TaskTypeRepository;
 import com.aitutor.backend.repositories.TopicRepository;
 import com.aitutor.backend.repositories.UserRepository;
+import com.aitutor.backend.repositories.task.TaskRepository;
+import com.aitutor.backend.repositories.task.TaskTypeRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -29,24 +33,31 @@ import java.util.Set;
 public class TaskService {
 
     private final TaskRepository taskRepository;
-    private final TaskItemRepository taskItemRepository;
     private final TopicRepository topicRepository;
     private final TaskTypeRepository taskTypeRepository;
     private final UserRepository userRepository;
     private final TaskMapper taskMapper;
+    private final TaskPreviewBuilder previewBuilder;
 
+    /**
+     * Лёгкий список банка заданий: без контента (items), только мета + превью.
+     * Поддерживает фильтры: тип задания (строгий/с смешанными) и поиск по name/publicId.
+     */
     @Transactional(readOnly = true)
-    public List<TaskResponse> getAll() {
-        return taskRepository.findAllByOrderByCreatedAtDesc().stream()
-                .map(this::toFullResponse)
+    public List<TaskSummaryResponse> getAll(Long taskTypeId, boolean includeMixed, String search) {
+        Specification<Task> spec = TaskSpecifications.notDeleted()
+                .and(TaskSpecifications.byTaskType(taskTypeId, includeMixed))
+                .and(TaskSpecifications.byNameOrPublicId(search));
+
+        return taskRepository.findAll(spec).stream()
+                .map(taskMapper::toSummary)
                 .toList();
     }
 
+    /** Детальная карточка: полный контент (topics, taskTypes, items). */
     @Transactional(readOnly = true)
     public TaskResponse getById(Long id) {
-        Task task = taskRepository.findWithRelationsById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Задание не найдено: id=" + id));
-        return taskMapper.toResponse(task);
+        return taskMapper.toResponse(findActiveWithRelations(id));
     }
 
     @Transactional
@@ -63,21 +74,20 @@ public class TaskService {
                 .createdBy(teacher)
                 .topics(topics)
                 .taskTypes(taskTypes)
+                // Бизнес-правило: больше одного типа => задание "смешанное"
+                .isMixed(taskTypes.size() > 1)
+                .items(mapItems(request.getItems()))
                 .build();
 
-        // Бизнес-правило: больше одного типа => задание "смешанное"
-        task.setIsMixed(taskTypes.size() > 1);
+        task.setPreviewText(previewBuilder.build(task.getItems()));
+        taskRepository.save(task);
 
-        Task saved = taskRepository.save(task);
-        saveItems(saved, request.getItems());
-
-        return getById(saved.getId());
+        return getById(task.getId());
     }
 
     @Transactional
     public TaskResponse update(Long id, TaskUpdateRequest request) {
-        Task task = taskRepository.findWithRelationsById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Задание не найдено: id=" + id));
+        Task task = findActiveWithRelations(id);
 
         Set<Topic> topics = resolveTopics(request.getTopicIds());
         Set<TaskType> taskTypes = resolveTaskTypes(request.getTaskTypeIds());
@@ -86,34 +96,43 @@ public class TaskService {
         task.setContext(request.getContext());
         task.setTopics(topics);
         task.setTaskTypes(taskTypes);
-        task.setIsMixed(taskTypes.size() > 1); // перегенерация флага
+        // TODO: продумать стратегию — нужно ли пересчитывать is_mixed,
+        //  если один из типов задания был деактивирован (soft-delete справочника). Пока пересчитываем по текущему составу.
+        task.setIsMixed(taskTypes.size() > 1);
+
+        // Полная замена списка пунктов: отсутствующие в запросе удаляются через orphanRemoval
+        task.getItems().clear();
+        task.getItems().addAll(mapItems(request.getItems()));
+        task.setPreviewText(previewBuilder.build(task.getItems()));
 
         return taskMapper.toResponse(task);
     }
 
+    /** Мягкое удаление: физическое удаление засорило бы БД, ссылки учеников — сломались бы. */
     @Transactional
     public void delete(Long id) {
-        Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Задание не найдено: id=" + id));
-        taskRepository.delete(task); // task_items чистятся через ON DELETE CASCADE
+        Task task = findActiveWithRelations(id);
+        task.setDeletedAt(Instant.now());
     }
 
-    private void saveItems(Task task, List<TaskItemRequest> requests) {
+    private Task findActiveWithRelations(Long id) {
+        Task task = taskRepository.findWithRelationsById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Задание не найдено: id=" + id));
+        if (task.getDeletedAt() != null) {
+            throw new ResourceNotFoundException("Задание удалено: id=" + id);
+        }
+        return task;
+    }
+
+    private List<TaskItem> mapItems(List<TaskItemRequest> requests) {
+        List<TaskItem> items = new ArrayList<>();
         int pos = 0;
         for (TaskItemRequest r : requests) {
             TaskItem item = taskMapper.toEntity(r);
-            item.setTask(task);
             item.setPosition(pos++);
-            taskItemRepository.save(item);
+            items.add(item);
         }
-    }
-
-    private TaskResponse toFullResponse(Task task) {
-        TaskResponse response = taskMapper.toResponse(task);
-        response.setItems(taskItemRepository.findByTaskIdOrderByPositionAsc(task.getId()).stream()
-                .map(taskMapper::toResponse)
-                .toList());
-        return response;
+        return items;
     }
 
     private Set<Topic> resolveTopics(Set<Long> ids) {

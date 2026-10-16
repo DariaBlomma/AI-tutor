@@ -1,9 +1,12 @@
 package com.aitutor.backend.dto.task;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -17,6 +20,11 @@ public class TaskUpdateRequest {
     private String name;
 
     private String context;
+
+    /** Полный список пунктов: старые, отсутствующие в запросе, удаляются (orphanRemoval). */
+    @NotEmpty(message = "Добавьте хотя бы один пункт задания")
+    @Valid
+    private List<TaskItemRequest> items;
 
     private Set<Long> topicIds;
 

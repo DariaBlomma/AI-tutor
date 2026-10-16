@@ -1,12 +1,15 @@
 package com.aitutor.backend.entities;
 
+import com.aitutor.backend.helpers.PublicIdGenerator;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -24,11 +27,20 @@ public class Task {
     @EqualsAndHashCode.Include
     private Long id;
 
+    @Column(name = "public_id", nullable = false, unique = true, updatable = false, length = 20)
+    private String publicId;
+
     @Column(nullable = false, length = 200)
     private String name;
 
+    @Column(name = "preview_text", columnDefinition = "TEXT")
+    private String previewText;
+
     @Column(nullable = false)
     private Boolean isMixed = false;
+
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
@@ -59,8 +71,16 @@ public class Task {
     @Builder.Default
     private Set<TaskType> taskTypes = new HashSet<>();
 
+    @OneToMany(mappedBy = "task", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("position ASC")
+    @Builder.Default
+    private List<TaskItem> items = new ArrayList<>();
+
     @PrePersist
     protected void onCreate() {
         createdAt = Instant.now();
+        if (publicId == null) {
+            publicId = PublicIdGenerator.nextTaskId(id);
+        }
     }
 }
