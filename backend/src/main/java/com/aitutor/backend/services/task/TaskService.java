@@ -12,6 +12,7 @@ import com.aitutor.backend.entities.Topic;
 import com.aitutor.backend.entities.User;
 import com.aitutor.backend.exceptions.InvalidRequestException;
 import com.aitutor.backend.exceptions.ResourceNotFoundException;
+import com.aitutor.backend.helpers.PublicIdGenerator;
 import com.aitutor.backend.mappers.TaskMapper;
 import com.aitutor.backend.repositories.TopicRepository;
 import com.aitutor.backend.repositories.UserRepository;
@@ -28,7 +29,10 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +49,8 @@ public class TaskService {
     /**
      * Лёгкий список банка заданий: без контента (items), только мета + превью.
      * Поддерживает фильтры: тип задания (строгий/с смешанными) и поиск по name/publicId.
+     * Против N+1: сначала берём только id спецификацией, затем одним запросом грузим полный граф
+     * (topics, taskTypes, items) через EntityGraph — итого 2 запроса вместо 1+3N.
      */
     @Transactional(readOnly = true)
     public List<TaskSummaryResponse> getAll(Long taskTypeId, boolean includeMixed, String search) {
@@ -53,7 +59,18 @@ public class TaskService {
                 .and(TaskSpecifications.byNameOrPublicId(search));
 
         // Стабильный порядок для UI банка заданий: новые сверху
-        return taskRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "createdAt")).stream()
+        List<Long> ids = taskRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "createdAt"))
+                .stream().map(Task::getId).toList();
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+
+        Map<Long, Task> byId = taskRepository.findAllByIdIn(ids).stream()
+                .collect(Collectors.toMap(Task::getId, t -> t));
+        // Сохраняем порядок сортировки из первого запроса
+        return ids.stream()
+                .map(byId::get)
+                .filter(Objects::nonNull)
                 .map(taskMapper::toSummary)
                 .toList();
     }
@@ -74,6 +91,9 @@ public class TaskService {
         Set<Topic> topics = resolveTopics(request.getTopicIds());
         Set<TaskType> taskTypes = resolveTaskTypes(request.getTaskTypeIds());
 
+        // task build() ещё не вызван — items создаём отдельно, связь с task проставим после build()
+        List<TaskItem> items = mapItems(request.getItems());
+
         Task task = Task.builder()
                 .name(request.getName())
                 .context(request.getContext())
@@ -82,11 +102,23 @@ public class TaskService {
                 .taskTypes(taskTypes)
                 // Бизнес-правило: больше одного типа => задание "смешанное"
                 .isMixed(taskTypes.size() > 1)
-                .items(mapItems(request.getItems()))
+                .items(items)
                 .build();
 
+        // Явная двусторонняя связь item -> task (task_id NOT NULL в БД)
+        items.forEach(i -> i.setTask(task));
+
         task.setPreviewText(previewBuilder.build(task.getItems()));
-        taskRepository.save(task);
+        taskRepository.saveAndFlush(task); // flush -> INSERT, id доступен
+
+        // public_id генерируется только после вставки (IDENTITY): точечный UPDATE вместо @PrePersist,
+        // где id ещё null. Проставляем и в managed-сущность — иначе dirty-check при commit
+        // затёр бы её null'ом (столбцы NOT NULL).
+        if (task.getPublicId() == null) {
+            String publicId = PublicIdGenerator.nextTaskId(task.getId());
+            task.setPublicId(publicId);
+            taskRepository.updatePublicId(task.getId(), publicId);
+        }
 
         return getById(task.getId());
     }
@@ -104,13 +136,16 @@ public class TaskService {
         task.setContext(request.getContext());
         task.setTopics(topics);
         task.setTaskTypes(taskTypes);
-        // TODO: продумать стратегию — нужно ли пересчитывать is_mixed,
-        //  если один из типов задания был деактивирован (soft-delete справочника). Пока пересчитываем по текущему составу.
+        // Состав типов в запросе заведомо активный (resolveTaskTypes), поэтому is_mixed
+        // пересчитываем по нему; деактивация типа в справочнике обрабатывается TaskTypeService.
         task.setIsMixed(taskTypes.size() > 1);
 
         // Полная замена списка пунктов: отсутствующие в запросе удаляются через orphanRemoval
         task.getItems().clear();
-        task.getItems().addAll(mapItems(request.getItems()));
+        List<TaskItem> newItems = mapItems(request.getItems());
+        // Явная двусторонняя связь: task_id в БД NOT NULL; на managed-сущности cascade её не проставит сам
+        newItems.forEach(i -> i.setTask(task));
+        task.getItems().addAll(newItems);
         task.setPreviewText(previewBuilder.build(task.getItems()));
 
         return taskMapper.toResponse(task);

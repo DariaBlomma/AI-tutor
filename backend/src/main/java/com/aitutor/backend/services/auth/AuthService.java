@@ -7,6 +7,7 @@ import com.aitutor.backend.dto.user.UserResponse;
 import com.aitutor.backend.dto.user.UserResponseWithPassword;
 import com.aitutor.backend.entities.PasswordResetToken;
 import com.aitutor.backend.entities.User;
+import com.aitutor.backend.exceptions.InvalidTokenException;
 import com.aitutor.backend.exceptions.ResourceNotFoundException;
 import com.aitutor.backend.exceptions.UnauthorizedException;
 import com.aitutor.backend.mappers.UserMapper;
@@ -103,17 +104,20 @@ public class AuthService {
     @Transactional
     public void resetPassword(ResetPasswordRequest request) {
         PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(request.getToken())
-                .orElseThrow(() -> new IllegalArgumentException("Недействительный токен восстановления"));
+                .orElseThrow(() -> new InvalidTokenException("Недействительный токен восстановления"));
 
         if (Instant.now().isAfter(resetToken.getExpiresAt())) {
             passwordResetTokenRepository.delete(resetToken);
             log.warn("Попытка использования просроченного токена восстановления");
-            throw new IllegalArgumentException("Срок действия токена истек. Запросите восстановление пароля заново.");
+            throw new InvalidTokenException("Срок действия токена истек. Запросите восстановление пароля заново.");
         }
 
         User user = resetToken.getUser();
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
+
+        // Смена пароля — старый refresh-токен больше не должен действовать
+        refreshTokenService.revokeRefreshToken(user.getId());
 
         passwordResetTokenRepository.delete(resetToken);
         log.info("Пароль успешно изменен для пользователя: id={}", user.getId());

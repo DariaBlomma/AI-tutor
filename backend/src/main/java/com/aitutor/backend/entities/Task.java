@@ -1,6 +1,5 @@
 package com.aitutor.backend.entities;
 
-import com.aitutor.backend.helpers.PublicIdGenerator;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -79,8 +78,11 @@ public class Task {
     @PrePersist
     protected void onCreate() {
         createdAt = Instant.now();
-        if (publicId == null) {
-            publicId = PublicIdGenerator.nextTaskId(id);
-        }
     }
+
+    /**
+     * publicId НЕ генерируется в @PrePersist/@PostPersist: при IDENTITY-стратегии Hibernate выполняет
+     * INSERT сразу, и на момент PrePersist id ещё null. Значение проставляется точечным
+     * UPDATE после persist (см. TaskService.create) — надёжно и без хрупких lifecycle-хуков.
+     */
 }

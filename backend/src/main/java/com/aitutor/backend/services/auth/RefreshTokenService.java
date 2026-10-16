@@ -4,10 +4,12 @@ import com.aitutor.backend.entities.RefreshToken;
 import com.aitutor.backend.entities.User;
 import com.aitutor.backend.exceptions.InvalidTokenException;
 import com.aitutor.backend.exceptions.ResourceNotFoundException;
+import com.aitutor.backend.repositories.auth.PasswordResetTokenRepository;
 import com.aitutor.backend.repositories.auth.RefreshTokenRepository;
 import com.aitutor.backend.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
@@ -19,6 +21,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final UserRepository userRepository;
 
     @Transactional
@@ -88,9 +91,15 @@ public class RefreshTokenService {
         return createRefreshToken(userId);
     }
 
+    /**
+     * Плановая очистка просроченных токенов (ежедневно в 03:00).
+     * Без этого таблицы refresh_tokens/password_reset_tokens растут бесконечно.
+     */
+    @Scheduled(cron = "0 0 3 * * *")
     @Transactional
     public void cleanExpiredTokens() {
         log.info("Запущена плановая очистка просроченных refresh токенов");
         refreshTokenRepository.deleteByExpiresAtBefore(Instant.now());
+        passwordResetTokenRepository.deleteByExpiresAtBefore(Instant.now());
     }
 }
