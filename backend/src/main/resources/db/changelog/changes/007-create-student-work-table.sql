@@ -17,6 +17,7 @@ CREATE TABLE student_work (
                               correct_after_hints INT DEFAULT 0,
                               total_hints_given INT DEFAULT 0,
                               teacher_report TEXT,                   -- Текстовый отчет от ИИ
+                              deleted_at TIMESTAMP WITH TIME ZONE,   -- Soft-delete назначения
 
                               CONSTRAINT fk_work_student FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
                               CONSTRAINT fk_work_task FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE RESTRICT
@@ -24,5 +25,12 @@ CREATE TABLE student_work (
 
 CREATE INDEX idx_student_work_student ON student_work(student_id);
 CREATE INDEX idx_student_work_status ON student_work(status);
+
+-- Частичный уникальный индекс: у одной пары (student_id, task_id) может быть
+-- только ОДНО активное (не удалённое) назначение. Завершённые (COMPLETED/EXPIRED/CANCELLED)
+-- строки остаются в истории и не мешают назначить задание повторно.
+CREATE UNIQUE INDEX uq_student_work_active_task
+    ON student_work(student_id, task_id)
+    WHERE deleted_at IS NULL;
 
 --rollback DROP TABLE IF EXISTS student_work;
