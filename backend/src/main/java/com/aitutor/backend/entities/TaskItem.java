@@ -1,3 +1,4 @@
+// Сущность элемента задания (task_items). Контент хранится в JSONB-колонке content.
 package com.aitutor.backend.entities;
 
 import com.aitutor.backend.enums.ItemType;
