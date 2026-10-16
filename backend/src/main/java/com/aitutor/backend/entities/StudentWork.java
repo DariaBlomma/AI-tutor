@@ -52,7 +52,7 @@ public class StudentWork {
     @Column(name = "completed_at")
     private Instant completedAt;
 
-    // Статистика для отчётов (фича «Отчёты» — позже): заполняется при выполнении, не сейчас.
+    // Статистика для отчётов: заполняется фичей «Выполнение задания» (пишется при сдаче работы).
     @Column(name = "first_try_correct")
     private Integer firstTryCorrect;
 

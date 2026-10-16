@@ -16,7 +16,7 @@ CREATE TABLE student_work (
                               first_try_correct INT DEFAULT 0,
                               correct_after_hints INT DEFAULT 0,
                               total_hints_given INT DEFAULT 0,
-                              teacher_report TEXT,                   -- Текстовый отчет от ИИ
+                              teacher_report TEXT,                   -- Комментарий ИИ по выполненной работе (заполняется позже; сейчас всегда NULL)
                               deleted_at TIMESTAMP WITH TIME ZONE,   -- Soft-delete назначения
 
                               CONSTRAINT fk_work_student FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
