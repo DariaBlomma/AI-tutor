@@ -6,6 +6,7 @@ import com.aitutor.backend.entities.TaskType;
 import com.aitutor.backend.exceptions.ConflictException;
 import com.aitutor.backend.exceptions.ResourceNotFoundException;
 import com.aitutor.backend.mappers.TaskTypeMapper;
+import com.aitutor.backend.repositories.task.TaskRepository;
 import com.aitutor.backend.repositories.task.TaskTypeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import java.util.List;
 public class TaskTypeService {
 
     private final TaskTypeRepository taskTypeRepository;
+    private final TaskRepository taskRepository;
     private final TaskTypeMapper taskTypeMapper;
 
     /** onlyActive=true — список для создания заданий; false — справочный, включая деактивированные */
@@ -57,14 +59,16 @@ public class TaskTypeService {
 
     /**
      * Удаление справочника — двухшаговое:
-     * 1) deactivate (is_active=false) — тип перестаёт предлагаться при создании новых заданий,
-     *    но старые задания сохраняют метку (TODO: стратегия is_mixed при деактивации типов — продумать позже);
+     * 1) deactivate (is_active=false) — тип перестаёт предлагаться при создании новых заданий;
      * 2) delete (soft-delete deleted_at) — скрыть тип из справочника целиком.
+     * При deactivate пересчитываем is_mixed у всех заданий: смешанным считается задание
+     * с 2+ активными типами, иначе деактивация типа навсегда ломает строгий поиск по заданию.
      */
     @Transactional
     public void deactivate(Long id) {
         TaskType type = getOrThrow(id);
         type.setIsActive(false);
+        taskRepository.recalculateMixedFlags();
     }
 
     @Transactional

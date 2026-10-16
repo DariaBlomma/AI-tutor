@@ -18,6 +18,7 @@ import com.aitutor.backend.repositories.UserRepository;
 import com.aitutor.backend.repositories.task.TaskRepository;
 import com.aitutor.backend.repositories.task.TaskTypeRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -51,7 +52,8 @@ public class TaskService {
                 .and(TaskSpecifications.byTaskType(taskTypeId, includeMixed))
                 .and(TaskSpecifications.byNameOrPublicId(search));
 
-        return taskRepository.findAll(spec).stream()
+        // Стабильный порядок для UI банка заданий: новые сверху
+        return taskRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "createdAt")).stream()
                 .map(taskMapper::toSummary)
                 .toList();
     }
@@ -163,21 +165,25 @@ public class TaskService {
         return items;
     }
 
+    /** Soft-deleted темы и типы нельзя привязывать к заданиям. */
     private Set<Topic> resolveTopics(Set<Long> ids) {
         if (ids == null || ids.isEmpty()) {
             return new LinkedHashSet<>(); // темы опциональны
         }
-        List<Topic> found = topicRepository.findAllById(ids);
+        List<Topic> found = topicRepository.findAllByIdAndDeletedAtIsNull(new ArrayList<>(ids));
         if (found.size() != ids.size()) {
-            throw new InvalidRequestException("Некоторые темы не найдены");
+            throw new InvalidRequestException("Некоторые темы не найдены или удалены");
         }
         return new LinkedHashSet<>(found);
     }
 
     private Set<TaskType> resolveTaskTypes(Set<Long> ids) {
-        List<TaskType> found = taskTypeRepository.findAllById(ids);
+        if (ids == null || ids.isEmpty()) {
+            throw new InvalidRequestException("Задание должно иметь хотя бы один тип");
+        }
+        List<TaskType> found = taskTypeRepository.findAllByIdAndDeletedAtIsNull(new ArrayList<>(ids));
         if (found.size() != ids.size()) {
-            throw new InvalidRequestException("Некоторые типы заданий не найдены");
+            throw new InvalidRequestException("Некоторые типы заданий не найдены или удалены");
         }
         if (found.stream().anyMatch(t -> !Boolean.TRUE.equals(t.getIsActive()))) {
             throw new InvalidRequestException("Нельзя использовать отключенные типы заданий");
