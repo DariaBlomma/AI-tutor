@@ -39,6 +39,13 @@ public class User {
     @Column(nullable = false)
     private UserRole role;
 
+    /**
+     * Уникальный код учителя для ссылки-приглашения (T-XXXXXX).
+     * Заполняется только у TEACHER; ученик при регистрации передаёт этот код и привязывается к учителю.
+     */
+    @Column(unique = true, length = 50)
+    private String teacherCode;
+
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 

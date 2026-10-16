@@ -1,5 +1,6 @@
 package com.aitutor.backend.dto.auth;
 
+import com.aitutor.backend.enums.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,4 +19,6 @@ public class AuthResponse {
     private Instant expiresAt;
     private String userName;
     private Long userId;
+    /** Роль пользователя — фронт по ней выбирает интерфейс (учитель/ученик). */
+    private UserRole role;
 }

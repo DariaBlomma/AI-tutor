@@ -46,13 +46,15 @@ public class TaskController {
 
     @PutMapping("/{id}")
     public TaskResponse update(@PathVariable Long id,
-                               @Valid @RequestBody TaskUpdateRequest request) {
-        return taskService.update(id, request);
+                               @Valid @RequestBody TaskUpdateRequest request,
+                               @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return taskService.update(id, request, userDetails.getId());
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
-        taskService.delete(id);
+    public void delete(@PathVariable Long id,
+                       @AuthenticationPrincipal CustomUserDetails userDetails) {
+        taskService.delete(id, userDetails.getId());
     }
 }

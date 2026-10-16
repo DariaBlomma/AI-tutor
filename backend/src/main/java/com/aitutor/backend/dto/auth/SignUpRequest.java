@@ -1,7 +1,9 @@
 package com.aitutor.backend.dto.auth;
 
+import com.aitutor.backend.enums.UserRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,4 +27,14 @@ public class SignUpRequest {
 
     @NotBlank(message = "Фамилия обязательна")
     private String lastName;
+
+    // Роль выбирается в UI: TEACHER или STUDENT (см. UserRole)
+    @NotNull(message = "Роль обязательна")
+    private UserRole role;
+
+    /**
+     * Код учителя (T-XXXXXX). Обязателен для STUDENT — по нему ученик привязывается к учителю
+     * при регистрации. Для TEACHER игнорируется (его собственный код генерируется автоматически).
+     */
+    private String teacherCode;
 }

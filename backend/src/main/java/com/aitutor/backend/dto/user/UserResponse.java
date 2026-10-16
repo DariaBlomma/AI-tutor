@@ -18,4 +18,6 @@ public class UserResponse {
     private String firstName;
     private String lastName;
     private UserRole role;
+    /** Код учителя (T-XXXXXX) — только для роли TEACHER; ученики получают null. */
+    private String teacherCode;
 }

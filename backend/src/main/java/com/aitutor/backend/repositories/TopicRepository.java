@@ -17,4 +17,7 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
     List<Topic> findByDeletedAtIsNullOrderByNameAsc();
 
     Optional<Topic> findByIdAndDeletedAtIsNull(Long id);
+
+    /** Soft-deleted темы нельзя привязывать к заданиям. */
+    List<Topic> findAllByIdAndDeletedAtIsNull(List<Long> ids);
 }

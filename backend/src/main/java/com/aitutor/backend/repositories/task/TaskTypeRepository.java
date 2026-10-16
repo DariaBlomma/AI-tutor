@@ -19,4 +19,7 @@ public interface TaskTypeRepository extends JpaRepository<TaskType, Long> {
     List<TaskType> findByDeletedAtIsNullOrderByNameAsc();
 
     Optional<TaskType> findByIdAndDeletedAtIsNull(Long id);
+
+    /** Удалённые типы нельзя привязывать к заданиям (soft-delete). */
+    List<TaskType> findAllByIdAndDeletedAtIsNull(List<Long> ids);
 }

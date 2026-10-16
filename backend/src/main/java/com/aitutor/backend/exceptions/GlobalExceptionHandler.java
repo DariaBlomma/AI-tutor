@@ -1,6 +1,7 @@
 package com.aitutor.backend.exceptions;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -12,6 +13,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -83,8 +85,12 @@ public class GlobalExceptionHandler {
             Exception ex,
             HttpServletRequest request
     ) {
-        ex.printStackTrace();
-        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex, request);
+        // Реальную причину пишем только в логи: наружу отдаём нейтральное сообщение,
+        // чтобы не сливать внутренние детали (SQL, стектрейсы и т.п.) клиентам.
+        log.error("Необработанная ошибка при обработке {} {}", request.getMethod(), request.getRequestURI(), ex);
+        return buildErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR, ex, request,
+                "Произошла внутренняя ошибка сервера. Попробуйте позже.", null);
     }
 
     private ResponseEntity<ErrorResponse> buildErrorResponse(

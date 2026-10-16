@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -62,6 +63,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
+
+                        // Справочники и банк заданий: читать могут все аутентифицированные,
+                        // создавать/менять/удалять — только учителя
+                        .requestMatchers(HttpMethod.GET, "/tasks/**", "/topics/**", "/task-types/**").authenticated()
+                        .requestMatchers("/tasks/**", "/topics/**", "/task-types/**").hasRole("TEACHER")
+
                         .requestMatchers("/teacher/**").hasRole("TEACHER")
                         .requestMatchers("/student/**").hasRole("STUDENT")
                         .anyRequest().authenticated()

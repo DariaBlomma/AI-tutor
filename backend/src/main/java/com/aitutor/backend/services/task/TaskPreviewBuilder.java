@@ -1,6 +1,8 @@
 package com.aitutor.backend.services.task;
 
 import com.aitutor.backend.entities.TaskItem;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -16,6 +18,13 @@ public class TaskPreviewBuilder {
 
     private static final int MAX_LINES = 3;
     private static final int MAX_LINE_LENGTH = 120;
+
+    // Единый ObjectMapper внедряется из контекста (поток-безопасен), а не создаётся на каждый пункт.
+    private final ObjectMapper objectMapper;
+
+    public TaskPreviewBuilder(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     public String build(List<TaskItem> items) {
         if (items == null || items.isEmpty()) {
@@ -48,8 +57,7 @@ public class TaskPreviewBuilder {
             return truncate(item.getPrompt());
         }
         try {
-            com.fasterxml.jackson.databind.JsonNode content =
-                    new com.fasterxml.jackson.databind.ObjectMapper().readTree(item.getContent());
+            JsonNode content = objectMapper.readTree(item.getContent());
             String left = content.path("left_label").asText(null);
             return left != null ? truncate(left) : null;
         } catch (Exception e) {

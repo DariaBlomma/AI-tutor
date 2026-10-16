@@ -24,12 +24,12 @@ public class EmailService {
 
             helper.setTo(toEmail);
             try {
-                helper.setFrom(appConfig.getMailFrom(), "Recipe App");
+                helper.setFrom(appConfig.getMailFrom(), appConfig.getMail().getFromName());
             } catch (UnsupportedEncodingException e) {
                 log.error("Ошибка кодировки имени отправителя для email: {}", toEmail, e);
                 throw new RuntimeException("Ошибка кодировки имени отправителя", e);
             }
-            helper.setSubject("Восстановление пароля в Recipe App");
+            helper.setSubject(appConfig.getMail().getPasswordResetSubject());
 
             String resetUrl = appConfig.getFrontendBaseUrl() + "/auth/reset-password?token=" + token;
 
