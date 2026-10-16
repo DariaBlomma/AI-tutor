@@ -132,6 +132,7 @@ public class AuthService {
                 .expiresAt(accessTokenService.getExpiresAt())
                 .userName(user.getUserName())
                 .userId(user.getId())
+                .role(user.getRole())
                 .build();
     }
 

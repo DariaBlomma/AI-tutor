@@ -19,6 +19,7 @@ import com.aitutor.backend.repositories.task.TaskRepository;
 import com.aitutor.backend.repositories.task.TaskTypeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -89,8 +90,8 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskResponse update(Long id, TaskUpdateRequest request) {
-        Task task = findActiveWithRelations(id);
+    public TaskResponse update(Long id, TaskUpdateRequest request, Long teacherId) {
+        Task task = findOwnedActiveTask(id, teacherId);
 
         validateContent(request.getContext(), request.getItems());
 
@@ -115,9 +116,9 @@ public class TaskService {
 
     /** Мягкое удаление: физическое удаление засорило бы БД, ссылки учеников — сломались бы. */
     @Transactional
-    public void delete(Long id) {
-        // Проверку «не удалено» делает findActiveWithRelations: повторный DELETE вернёт 404, а не 500.
-        Task task = findActiveWithRelations(id);
+    public void delete(Long id, Long teacherId) {
+        // Проверку «не удалено» делает findOwnedActiveTask: повторный DELETE вернёт 404, а не 500.
+        Task task = findOwnedActiveTask(id, teacherId);
         task.setDeletedAt(Instant.now());
     }
 
@@ -126,6 +127,18 @@ public class TaskService {
                 .orElseThrow(() -> new ResourceNotFoundException("Задание не найдено: id=" + id));
         if (task.getDeletedAt() != null) {
             throw new ResourceNotFoundException("Задание удалено: id=" + id);
+        }
+        return task;
+    }
+
+    /**
+     * Задания в банке общие (читать может каждый), но редактировать и удалять может только автор.
+     * Чужое задание возвращает 403 Forbidden (AccessDeniedException → обработчик в GlobalExceptionHandler).
+     */
+    private Task findOwnedActiveTask(Long id, Long teacherId) {
+        Task task = findActiveWithRelations(id);
+        if (!task.getCreatedBy().getId().equals(teacherId)) {
+            throw new AccessDeniedException("Редактировать и удалять задание может только его автор");
         }
         return task;
     }

@@ -20,4 +20,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findActiveByEmail(@Param("email") String email);
 
     boolean existsByUserNameAndDeletedAtIsNull(String userName);
+
+    /** Поиск учителя по коду приглашения (без учёта регистра), только активные пользователи. */
+    @Query("SELECT u FROM User u WHERE LOWER(u.teacherCode) = LOWER(:code) AND u.deletedAt IS NULL")
+    Optional<User> findByTeacherCodeIgnoreCase(@Param("code") String code);
+
+    boolean existsByTeacherCode(String teacherCode);
 }

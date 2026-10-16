@@ -11,7 +11,9 @@ import org.mapstruct.ReportingPolicy;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface UserMapper {
 
+    // role маппится из запроса (выбирается в UI); password и teacherCode сервис заполняет сам
     @Mapping(target = "password", ignore = true)
+    @Mapping(target = "teacherCode", ignore = true)
     User toEntityWithoutPassword(SignUpRequest request);
 
     UserResponse toResponse(User user);
