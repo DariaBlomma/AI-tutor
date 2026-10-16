@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Строит превью задания для отображения в общем списке банка заданий.
  * Зависит от типа пунктов:
- * - пропуски (WORD_FORMATION, GAP_FILL, OPEN_GAP) — первые несколько prompt'ов с "___";
+ * - пропуски (WORD_FORMATION, GAP_FILL) — первые несколько prompt'ов с "___";
  * - форматы с материалом/вариантами (TFNS, MATCHING) — первые несколько утверждений/заголовков.
  */
 @Component
@@ -33,15 +33,28 @@ public class TaskPreviewBuilder {
         if (item.getItemType() == null) {
             return truncate(item.getPrompt());
         }
+        // todo: fix 'switch' expression does not cover all possible input values
         return switch (item.getItemType()) {
-            case WORD_FORMATION, GAP_FILL, OPEN_GAP -> truncate(item.getPrompt());
-            // Для TFNS/MATCHING и прочих форматных заданий показываем сам пункт,
-            // при отсутствии prompt'а — content (список утверждений/заголовков).
-            case TFNS, MATCHING, TRANSLATION, FREE_TEXT ->
-                    item.getPrompt() != null && !item.getPrompt().isBlank()
-                            ? truncate(item.getPrompt())
-                            : truncate(item.getContent());
+            case WORD_FORMATION, GAP_FILL -> truncate(item.getPrompt());
+            // TFNS: показываем утверждение из prompt.
+            case TFNS -> truncate(item.getPrompt());
+            // MATCHING: промпта может не быть — показываем левую часть пары из content.
+            case MATCHING -> matchingLine(item);
         };
+    }
+
+    private String matchingLine(TaskItem item) {
+        if (item.getPrompt() != null && !item.getPrompt().isBlank()) {
+            return truncate(item.getPrompt());
+        }
+        try {
+            com.fasterxml.jackson.databind.JsonNode content =
+                    new com.fasterxml.jackson.databind.ObjectMapper().readTree(item.getContent());
+            String left = content.path("left_label").asText(null);
+            return left != null ? truncate(left) : null;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private String truncate(String text) {

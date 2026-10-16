@@ -14,10 +14,13 @@ public class TaskItemRequest {
     @NotNull(message = "Тип пункта обязателен")
     private ItemType itemType;
 
-    @NotBlank(message = "Текст вопроса обязателен")
+    /**
+     * Основной текст вопроса. Для WORD_FORMATION/GAP_FILL содержит пропуск "___";
+     * для TFNS — само утверждение; для MATCHING не используется (пара — в content).
+     */
     private String prompt;
 
     private String correctAnswer;   // NULL для free-form/ИИ-проверки
 
-    private String content;         // JSON-строка со спецификой формата
+    private String content;         // JSON-строка со спецификой формата (см. README: «Формат контента заданий»)
 }

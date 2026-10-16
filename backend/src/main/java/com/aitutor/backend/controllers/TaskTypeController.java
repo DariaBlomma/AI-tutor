@@ -2,7 +2,7 @@ package com.aitutor.backend.controllers;
 
 import com.aitutor.backend.dto.tasktype.TaskTypeRequest;
 import com.aitutor.backend.dto.tasktype.TaskTypeResponse;
-import com.aitutor.backend.services.TaskTypeService;
+import com.aitutor.backend.services.task.TaskTypeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

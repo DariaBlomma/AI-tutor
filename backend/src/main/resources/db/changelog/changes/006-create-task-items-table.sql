@@ -16,10 +16,12 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 --                    Всегда заполнен и индексируется — по нему работает поиск по содержимому.
 --   correct_answer - эталонный ответ (текстовый). NULL для free-form заданий (раскройте скобки и т.п.,
 --                    где проверка на стороне ИИ).
---   content        - JSONB со спецификой формата, ВСЁ остальное хранится здесь:
---                      GAP_FILL / WORD_FORMATION : {"options": ["..."], "explanation": "..."}
---                      TFNS                       : {"statement_id": ...} (сам текст — в tasks.context)
---                      MATCHING                   : {"left_label": "...", "right_label": "..."}
+--   content        - JSONB со спецификой формата, ВСЁ остальное хранится здесь (валидируется бэкендом):
+--                      WORD_FORMATION : {"base": "HAPPY", "explanation": "..."}  (base — слово в скобках)
+--                      GAP_FILL       : {"options": ["..."], "explanation": "..."}  (options опциональны)
+--                      TFNS           : {"explanation": "..."}  (утверждение — в prompt, материал — в tasks.context)
+--                      MATCHING       : {"left_label": "...", "right_label": "...", "explanation": "..."}
+--                    Неизвестные поля отклоняются.
 --   position       - порядок пункта внутри задания (сортировка учителем).
 --   library_ref    - опциональная ссылка на заготовку из word_formation_library (для аудита происхождения).
 CREATE TABLE task_items (

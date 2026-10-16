@@ -1,4 +1,4 @@
-package com.aitutor.backend.services;
+package com.aitutor.backend.services.task;
 
 import com.aitutor.backend.dto.tasktype.TaskTypeRequest;
 import com.aitutor.backend.dto.tasktype.TaskTypeResponse;
