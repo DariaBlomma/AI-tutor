@@ -13,7 +13,9 @@ import java.util.Set;
 @AllArgsConstructor
 public class TaskResponse {
     private Long id;
+    private String publicId;
     private String name;
+    private String previewText;
     private String context;
     private Boolean isMixed;
     private Set<TopicResponse> topics;

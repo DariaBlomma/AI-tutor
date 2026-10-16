@@ -10,6 +10,9 @@ import com.aitutor.backend.repositories.task.TaskTypeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -19,15 +22,16 @@ public class TaskTypeService {
     private final TaskTypeRepository taskTypeRepository;
     private final TaskTypeMapper taskTypeMapper;
 
-    /** onlyActive=false — админский/справочный список, включая отключенные */
+    /** onlyActive=true — список для создания заданий; false — справочный, включая деактивированные */
     @Transactional(readOnly = true)
     public List<TaskTypeResponse> getAll(boolean onlyActive) {
         List<TaskType> list = onlyActive
-                ? taskTypeRepository.findByIsActiveTrueOrderByNameAsc()
-                : taskTypeRepository.findAll().stream()
-                .sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName()))
+                ? taskTypeRepository.findByIsActiveTrueAndDeletedAtIsNullOrderByNameAsc()
+                : taskTypeRepository.findByDeletedAtIsNullOrderByNameAsc();
+        return list.stream()
+                .sorted(Comparator.comparing(TaskType::getName, String.CASE_INSENSITIVE_ORDER))
+                .map(taskTypeMapper::toResponse)
                 .toList();
-        return list.stream().map(taskTypeMapper::toResponse).toList();
     }
 
     @Transactional
@@ -51,15 +55,26 @@ public class TaskTypeService {
         return taskTypeMapper.toResponse(type);
     }
 
-    /** Мягкое удаление: деактивация вместо DELETE (задания и история не ломаются) */
+    /**
+     * Удаление справочника — двухшаговое:
+     * 1) deactivate (is_active=false) — тип перестаёт предлагаться при создании новых заданий,
+     *    но старые задания сохраняют метку (TODO: стратегия is_mixed при деактивации типов — продумать позже);
+     * 2) delete (soft-delete deleted_at) — скрыть тип из справочника целиком.
+     */
     @Transactional
     public void deactivate(Long id) {
         TaskType type = getOrThrow(id);
         type.setIsActive(false);
     }
 
+    @Transactional
+    public void delete(Long id) {
+        TaskType type = getOrThrow(id);
+        type.setDeletedAt(Instant.now());
+    }
+
     private TaskType getOrThrow(Long id) {
-        return taskTypeRepository.findById(id)
+        return taskTypeRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Тип задания не найден: id=" + id));
     }
 }

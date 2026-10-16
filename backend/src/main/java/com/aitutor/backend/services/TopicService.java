@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 
 @Slf4j
@@ -24,7 +25,7 @@ public class TopicService {
 
     @Transactional(readOnly = true)
     public List<TopicResponse> getAllTopics() {
-        return topicMapper.toResponseList(topicRepository.findAll());
+        return topicMapper.toResponseList(topicRepository.findByDeletedAtIsNullOrderByNameAsc());
     }
 
     @Transactional(readOnly = true)
@@ -36,7 +37,9 @@ public class TopicService {
     public TopicResponse createTopic(TopicRequest request) {
         String name = request.getName().trim();
 
-        if (topicRepository.existsByNameIgnoreCase(name)) {
+        // Проверка уникальности только по активным (не удалённым) темам
+        Topic byName = topicRepository.findByNameIgnoreCase(name);
+        if (byName != null && byName.getDeletedAt() == null) {
             throw new ConflictException("Topic with name '" + name + "' already exists");
         }
 
@@ -53,7 +56,7 @@ public class TopicService {
         String name = request.getName().trim();
 
         Topic existing = topicRepository.findByNameIgnoreCase(name);
-        if (existing != null && !existing.getId().equals(id)) {
+        if (existing != null && !existing.getId().equals(id) && existing.getDeletedAt() == null) {
             throw new ConflictException("Topic with name '" + name + "' already exists");
         }
 
@@ -61,17 +64,18 @@ public class TopicService {
         return topicMapper.toResponse(topicRepository.save(topic));
     }
 
+    /** Мягкое удаление: тема могла использоваться в заданиях и их истории. */
     @Transactional
     public void deleteTopic(Long id) {
         Topic topic = findTopicOrThrow(id);
-        topicRepository.delete(topic);
-        log.info("Deleted topic id={}", id);
+        topic.setDeletedAt(Instant.now());
+        log.info("Soft-deleted topic id={}", id);
     }
 
-    /** Используется сервисом заданий: вернуть существующую тему или 404. */
+    /** Используется сервисом заданий: вернуть существующую (не удалённую) тему или 404. */
     @Transactional(readOnly = true)
     public Topic findTopicOrThrow(Long id) {
-        return topicRepository.findById(id)
+        return topicRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Topic not found with id: " + id));
     }
 }
