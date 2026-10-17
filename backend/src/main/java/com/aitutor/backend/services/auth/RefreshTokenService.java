@@ -85,6 +85,24 @@ public class RefreshTokenService {
         log.info("Все refresh токены отозваны для пользователя: userId={}", userId);
     }
 
+    /**
+     * Logout: отзываем только предъявленный refresh-токен (сессия конкретного устройства),
+     * а не все токены пользователя. Привязка проверяется по БД: владелец токена должен
+     * совпадать с userId из access-токена — иначе чужой refresh не будет отозван.
+     */
+    @Transactional
+    public void revokePresentedToken(String tokenValue, Long expectedUserId) {
+        Long ownerId = verifyRefreshToken(tokenValue);
+        if (!ownerId.equals(expectedUserId)) {
+            log.warn("Попытка отзыва refresh токена чужого пользователя: tokenOwnerId={}, accessUserId={}",
+                    ownerId, expectedUserId);
+            throw new InvalidTokenException("Refresh token does not match the authenticated user");
+        }
+        refreshTokenRepository.findByToken(UUID.fromString(tokenValue))
+                .ifPresent(refreshTokenRepository::delete);
+        log.info("Refresh токен отозван (logout текущего устройства): userId={}", ownerId);
+    }
+
     /** Ротация при refresh: удалить только предъявленный токен, другие устройства не затрагиваются. */
     @Transactional
     public UUID rotateRefreshToken(String tokenValue) {

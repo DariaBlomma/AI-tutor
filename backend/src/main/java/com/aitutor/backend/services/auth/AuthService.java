@@ -78,10 +78,14 @@ public class AuthService {
         return buildAuthResponse(userMapper.toResponse(user), refresh);
     }
 
+    /**
+     * Logout текущего устройства: отзывается только предъявленный refresh-токен,
+     * сверенный с владельцем из access-токена (защита от отзыва чужой сессии).
+     */
     @Transactional
-    public void logout(Long userId) {
-        refreshTokenService.revokeRefreshToken(userId);
-        log.info("Выход пользователя: id={}", userId);
+    public void logout(String refreshToken, Long accessUserId) {
+        refreshTokenService.revokePresentedToken(refreshToken, accessUserId);
+        log.info("Выход пользователя (текущее устройство): id={}", accessUserId);
     }
 
     @Transactional
