@@ -66,6 +66,10 @@ public class AuthService {
     /**
      * Обновление пары токенов. Личность берётся ИЗ refresh-токена (он — доказательство),
      * а не из access-токена: refresh вызывается именно тогда, когда access уже протух.
+     * verifyRefreshToken выполняется внутри общей транзакции метода (не отдельным чтением),
+     * затем rotateRefreshToken атомарно удаляет предъявленный токен под блокировкой FOR UPDATE —
+     * повторное использование (reuse) того же токена даёт 401, гонка двух параллельных
+     * refresh сериализуется и тоже завершается 401 для второго запроса.
      */
     @Transactional
     public AuthResponse refresh(RefreshTokenRequest request) {
