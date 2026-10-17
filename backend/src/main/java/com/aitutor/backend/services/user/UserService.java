@@ -87,7 +87,8 @@ public class UserService {
 
         log.info("Успешно создан новый пользователь: username='{}', role='{}', id={}",
                 savedUser.getUserName(), savedUser.getRole(), savedUser.getId());
-        return userMapper.toResponse(savedUser);
+        // enrichWithTeacher читает profile.getTeacher() в пределах этой транзакции (LAZY-ассоциация)
+        return enrichWithTeacher(userMapper.toResponse(savedUser), savedUser);
     }
 
     @Transactional(readOnly = true)
@@ -95,14 +96,30 @@ public class UserService {
         User user = userRepository.findActiveById(userId).orElseThrow(
                 () -> new ResourceNotFoundException("User does not exist or deleted with such id " + userId)
         );
-        return userMapper.toResponse(user);
+        return enrichWithTeacher(userMapper.toResponse(user), user);
+    }
+
+    /**
+     * Для STUDENT подтягивает привязанного учителя из student_profiles в поле teacher ответа,
+     * чтобы фронтенд мог показать ученику имя его учителя (после регистрации/во входа в профиль).
+     * Для TEACHER остаётся null — собственные данные учителя видны в полях самого UserResponse.
+     */
+    private UserResponse enrichWithTeacher(UserResponse response, User user) {
+        if (user.getRole() == UserRole.STUDENT) {
+            studentProfileRepository.findByUserId(user.getId())
+                    .ifPresent(profile -> response.setTeacher(userMapper.toTeacherBrief(profile.getTeacher())));
+        }
+        return response;
     }
 
     @Transactional(readOnly = true)
     public UserResponseWithPassword getMeWithPassword(String userName) {
         User user = userRepository.findActiveByUserName(userName)
                 .orElseThrow(() -> new ResourceNotFoundException("User does not exist or deleted with username: " + userName));
-        return userMapper.toResponseWithPassword(user);
+        UserResponseWithPassword response = userMapper.toResponseWithPassword(user);
+        // teacher заполняется в той же транзакции, что и загрузка user (LAZY-ассоциация profile.getTeacher())
+        enrichWithTeacher(response, user);
+        return response;
     }
 
     private User resolveTeacherByCode(String teacherCode) {

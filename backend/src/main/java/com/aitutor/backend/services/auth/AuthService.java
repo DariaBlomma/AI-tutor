@@ -60,7 +60,7 @@ public class AuthService {
         // Вход на новом устройстве НЕ отзывает сессии остальных (мульти-девайс, см. changeset 011)
         UUID refreshToken = refreshTokenService.createRefreshToken(user.getId());
         log.info("Успешный вход пользователя: username='{}', id={}", user.getUserName(), user.getId());
-        return buildAuthResponse(userMapper.fromWithPasswordToResponse(user), refreshToken);
+        return buildAuthResponse(userService.getMe(user.getId()), refreshToken);
     }
 
     /**
@@ -79,7 +79,7 @@ public class AuthService {
         // Ротация предъявленного токена: старый экземпляр удаляется, остальные устройства живут
         UUID refresh = refreshTokenService.rotateRefreshToken(request.refreshToken());
         log.info("Обновление токенов пользователя: id={}", userId);
-        return buildAuthResponse(userMapper.toResponse(user), refresh);
+        return buildAuthResponse(userService.getMe(user.getId()), refresh);
     }
 
     /**
