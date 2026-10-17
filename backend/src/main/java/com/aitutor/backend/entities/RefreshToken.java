@@ -19,8 +19,9 @@ public class RefreshToken {
     private Long id;
 
     /**
-     * UNIQUE на user_id снят (changeset 017): пользователь может быть залогинен с нескольких устройств.
-     * Один refresh-токен на устройство, ротация при логине удаляет токен только этого устройства.
+     * Мульти-девайс: пользователь может быть залогинен с нескольких устройств,
+     * UNIQUE на user_id снят (см. changeset 011). Ротация при refresh удаляет
+     * только предъявленный токен, logout/revoke отзывают все токены пользователя.
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

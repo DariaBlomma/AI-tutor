@@ -16,7 +16,7 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
 
     Optional<RefreshToken> findByToken(UUID token);
 
-    /** UNIQUE на user_id снят (changeset 017) — у пользователя может быть несколько токенов (мульти-девайс). */
+    /** UNIQUE на user_id снят (см. changeset 011): у пользователя может быть несколько токенов (мульти-девайс). */
     @Query("SELECT t FROM RefreshToken t WHERE t.user.id = :userId")
     List<RefreshToken> findAllByUserId(@Param("userId") Long userId);
 

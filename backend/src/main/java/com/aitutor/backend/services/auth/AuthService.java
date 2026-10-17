@@ -57,7 +57,7 @@ public class AuthService {
             throw new UnauthorizedException("Неверный логин или пароль");
         }
 
-        // Вход на новом устройстве НЕ отзывает сессии остальных (мульти-девайс, changeset 017)
+        // Вход на новом устройстве НЕ отзывает сессии остальных (мульти-девайс, см. changeset 011)
         UUID refreshToken = refreshTokenService.createRefreshToken(user.getId());
         log.info("Успешный вход пользователя: username='{}', id={}", user.getUserName(), user.getId());
         return buildAuthResponse(userMapper.fromWithPasswordToResponse(user), refreshToken);

@@ -29,7 +29,7 @@ public class RefreshTokenService {
         User user = userRepository.findActiveById(userId).orElseThrow(
                 () -> new ResourceNotFoundException("User not found or deleted: " + userId)
         );
-        // Мульти-девайс (changeset 017): не удаляем прежние токены — новый логин с телефона
+        // Мульти-девайс: не удаляем прежние токены — новый логин с телефона
         // не должен выбрасывать сессию с компьютера. Просроченные чистит cleanExpiredTokens.
         RefreshToken refreshToken = RefreshToken.builder()
                 .user(user)

@@ -28,6 +28,4 @@ databaseChangeLog:
   - include:
       file: db/changelog/changes/015-create-task-types-table.sql
   - include:
-      file: db/changelog/changes/016-fix-timestamps-usernames.sql
-  - include:
-      file: db/changelog/changes/017-refresh-tokens-drop-user-unique.sql
+      file: db/changelog/changes/016-users-partial-unique-indexes.sql
