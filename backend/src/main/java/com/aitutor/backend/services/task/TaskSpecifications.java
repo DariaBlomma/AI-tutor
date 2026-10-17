@@ -37,7 +37,7 @@ public final class TaskSpecifications {
         };
     }
 
-    /** Поиск по названию или публичному id (TSK-000123), регистронезависимо. */
+    /** Поиск по названию или публичному id (TSK-1), регистронезависимо. */
     public static Specification<Task> byNameOrPublicId(String search) {
         return (root, query, cb) -> {
             if (search == null || search.isBlank()) {

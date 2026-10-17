@@ -7,9 +7,15 @@
 -- Формат JSON строго фиксирован (валидируется на бэкенде, см. README «Формат контента заданий»):
 --   {"type": "TEXT",  "title": "...", "text": "..."}  — текст для чтения (TFNS/MATCHING)
 --   {"type": "AUDIO", "title": "...", "url": "..."}   — аудио-материал
+
+-- Отдельная последовательность для публичного id: выдаёт минимальные подряд идущие числа
+-- (1, 2, 3, ...), значение берётся приложением ДО INSERT (nextval не зависит от транзакции,
+-- уникальность гарантирована атомарно, без UPDATE после вставки).
+CREATE SEQUENCE task_public_id_seq;
+
 CREATE TABLE tasks (
                        id BIGSERIAL PRIMARY KEY,
-                       public_id VARCHAR(20) NOT NULL UNIQUE,     -- публичный id для UI и поиска (TSK-000123)
+                       public_id VARCHAR(20) NOT NULL UNIQUE,     -- публичный id для UI и поиска (TSK-1)
                        name VARCHAR(200) NOT NULL,
                        preview_text TEXT,                         -- превью для списка банка заданий
                        deleted_at TIMESTAMP WITH TIME ZONE,       -- мягкое удаление
@@ -22,3 +28,4 @@ CREATE TABLE tasks (
 );
 
 --rollback DROP TABLE IF EXISTS tasks;
+--rollback DROP SEQUENCE IF EXISTS task_public_id_seq;

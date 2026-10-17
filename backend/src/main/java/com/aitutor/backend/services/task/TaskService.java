@@ -45,6 +45,7 @@ public class TaskService {
     private final TaskMapper taskMapper;
     private final TaskPreviewBuilder previewBuilder;
     private final TaskContentValidator contentValidator;
+    private final PublicIdGenerator publicIdGenerator;
 
     /**
      * Лёгкий список банка заданий: без контента (items), только мета + превью.
@@ -95,6 +96,9 @@ public class TaskService {
         List<TaskItem> items = mapItems(request.getItems());
 
         Task task = Task.builder()
+                // публичный id из отдельной последовательности — известен до INSERT,
+                // попадает сразу в INSERT (без UPDATE после вставки)
+                .publicId(publicIdGenerator.nextTaskId())
                 .name(request.getName())
                 .context(request.getContext())
                 .createdBy(teacher)
@@ -109,16 +113,7 @@ public class TaskService {
         items.forEach(i -> i.setTask(task));
 
         task.setPreviewText(previewBuilder.build(task.getItems()));
-        taskRepository.saveAndFlush(task); // flush -> INSERT, id доступен
-
-        // public_id генерируется только после вставки (IDENTITY): точечный UPDATE вместо @PrePersist,
-        // где id ещё null. Проставляем и в managed-сущность — иначе dirty-check при commit
-        // затёр бы её null'ом (столбцы NOT NULL).
-        if (task.getPublicId() == null) {
-            String publicId = PublicIdGenerator.nextTaskId(task.getId());
-            task.setPublicId(publicId);
-            taskRepository.updatePublicId(task.getId(), publicId);
-        }
+        taskRepository.saveAndFlush(task); // flush -> INSERT с уже заполненным public_id
 
         return getById(task.getId());
     }

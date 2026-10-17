@@ -49,14 +49,6 @@ public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificat
             """)
     void recalculateMixedFlag(@Param("taskId") Long taskId);
 
-    /**
-     * Точечный UPDATE public_id сразу после INSERT (см. TaskService.create):
-     * при IDENTITY-стратегии id известен только после вставки, а генерация в @PrePersist падала.
-     */
-    @Modifying(flushAutomatically = true)
-    @Query("UPDATE Task t SET t.publicId = :publicId WHERE t.id = :id")
-    void updatePublicId(@Param("id") Long id, @Param("publicId") String publicId);
-
     /** Список с полным графом (topics, taskTypes, items) за фиксированное число запросов — против N+1 в банке заданий. */
     @EntityGraph(attributePaths = {"topics", "taskTypes", "items"})
     List<Task> findAllByIdIn(List<Long> ids);
