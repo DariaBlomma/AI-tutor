@@ -37,12 +37,19 @@ public class UserService {
      */
     @Transactional
     public UserResponse create(SignUpRequest request) {
-        if (userRepository.existsByUserNameAndDeletedAtIsNull(request.getUserName())) {
-            log.warn("Попытка регистрации с существующим именем пользователя: username='{}'", request.getUserName());
+        // Нормализация: username trim (хранится как ввёл пользователь), email — в нижний регистр.
+        // Меняем DTO до маппинга, чтобы userMapper.toEntityWithoutPassword не мог их перезаписать.
+        request.setUserName(request.getUserName().trim());
+        request.setEmail(request.getEmail().trim().toLowerCase());
+        final String userName = request.getUserName();
+        final String email = request.getEmail();
+
+        if (userRepository.existsByUserNameIgnoreCaseAndDeletedAtIsNull(userName)) {
+            log.warn("Попытка регистрации с существующим именем пользователя: username='{}'", userName);
             throw new ConflictException("User with such name already exists");
         }
-        if (userRepository.findActiveByEmail(request.getEmail()).isPresent()) {
-            log.warn("Попытка регистрации с существующим email: email='{}'", request.getEmail());
+        if (userRepository.findActiveByEmail(email).isPresent()) {
+            log.warn("Попытка регистрации с существующим email: email='{}'", email);
             throw new ConflictException("User with such email already exists");
         }
 
@@ -59,7 +66,15 @@ public class UserService {
             userForSaving.setTeacherCode(generateUniqueTeacherCode());
         }
 
-        User savedUser = userRepository.save(userForSaving);
+        User savedUser;
+        try {
+            savedUser = userRepository.saveAndFlush(userForSaving);
+        } catch (DataIntegrityViolationException e) {
+            // Гонка при параллельной регистрации ловится частичными уникальными индексами
+            // uq_users_user_name_active / uq_users_email_active (см. changeset 016)
+            log.warn("Конфликт уникальности при регистрации: username='{}', email='{}'", userName, email);
+            throw new ConflictException("Имя пользователя или email уже заняты");
+        }
 
         if (request.getRole() == UserRole.STUDENT) {
             studentProfileRepository.save(StudentProfile.builder()
@@ -72,7 +87,8 @@ public class UserService {
 
         log.info("Успешно создан новый пользователь: username='{}', role='{}', id={}",
                 savedUser.getUserName(), savedUser.getRole(), savedUser.getId());
-        return userMapper.toResponse(savedUser);
+        // enrichWithTeacher читает profile.getTeacher() в пределах этой транзакции (LAZY-ассоциация)
+        return enrichWithTeacher(userMapper.toResponse(savedUser), savedUser);
     }
 
     @Transactional(readOnly = true)
@@ -80,14 +96,30 @@ public class UserService {
         User user = userRepository.findActiveById(userId).orElseThrow(
                 () -> new ResourceNotFoundException("User does not exist or deleted with such id " + userId)
         );
-        return userMapper.toResponse(user);
+        return enrichWithTeacher(userMapper.toResponse(user), user);
+    }
+
+    /**
+     * Для STUDENT подтягивает привязанного учителя из student_profiles в поле teacher ответа,
+     * чтобы фронтенд мог показать ученику имя его учителя (после регистрации/во входа в профиль).
+     * Для TEACHER остаётся null — собственные данные учителя видны в полях самого UserResponse.
+     */
+    private UserResponse enrichWithTeacher(UserResponse response, User user) {
+        if (user.getRole() == UserRole.STUDENT) {
+            studentProfileRepository.findByUserId(user.getId())
+                    .ifPresent(profile -> response.setTeacher(userMapper.toTeacherBrief(profile.getTeacher())));
+        }
+        return response;
     }
 
     @Transactional(readOnly = true)
     public UserResponseWithPassword getMeWithPassword(String userName) {
         User user = userRepository.findActiveByUserName(userName)
                 .orElseThrow(() -> new ResourceNotFoundException("User does not exist or deleted with username: " + userName));
-        return userMapper.toResponseWithPassword(user);
+        UserResponseWithPassword response = userMapper.toResponseWithPassword(user);
+        // teacher заполняется в той же транзакции, что и загрузка user (LAZY-ассоциация profile.getTeacher())
+        enrichWithTeacher(response, user);
+        return response;
     }
 
     private User resolveTeacherByCode(String teacherCode) {

@@ -9,6 +9,9 @@ import java.util.Optional;
 @Repository
 public interface PasswordResetTokenRepository extends JpaRepository<PasswordResetToken, Long> {
     Optional<PasswordResetToken> findByToken(String token);
-    void deleteByUserId(Long userId);
+
+    /** При повторном forgot-password все прежние токены пользователя инвалидируются. */
+    void deleteAllByUserId(Long userId);
+
     void deleteByExpiresAtBefore(Instant cutoff);
 }

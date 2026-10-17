@@ -4,7 +4,8 @@
 CREATE TABLE refresh_tokens (
                                 id BIGSERIAL PRIMARY KEY,
                                 token UUID NOT NULL UNIQUE,
-                                user_id BIGINT NOT NULL UNIQUE,
+                                -- без UNIQUE: пользователь может быть активен с нескольких устройств
+                                user_id BIGINT NOT NULL,
                                 expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
                                 revoked BOOLEAN NOT NULL DEFAULT FALSE,
 

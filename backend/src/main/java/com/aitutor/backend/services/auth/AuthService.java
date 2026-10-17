@@ -57,34 +57,47 @@ public class AuthService {
             throw new UnauthorizedException("Неверный логин или пароль");
         }
 
-        UUID refreshToken = refreshTokenService.rotateRefreshToken(user.getId());
+        // Вход на новом устройстве НЕ отзывает сессии остальных (мульти-девайс, см. changeset 011)
+        UUID refreshToken = refreshTokenService.createRefreshToken(user.getId());
         log.info("Успешный вход пользователя: username='{}', id={}", user.getUserName(), user.getId());
-        return buildAuthResponse(userMapper.fromWithPasswordToResponse(user), refreshToken);
+        return buildAuthResponse(userService.getMe(user.getId()), refreshToken);
     }
 
     /**
      * Обновление пары токенов. Личность берётся ИЗ refresh-токена (он — доказательство),
      * а не из access-токена: refresh вызывается именно тогда, когда access уже протух.
+     * verifyRefreshToken выполняется внутри общей транзакции метода (не отдельным чтением),
+     * затем rotateRefreshToken атомарно удаляет предъявленный токен под блокировкой FOR UPDATE —
+     * повторное использование (reuse) того же токена даёт 401, гонка двух параллельных
+     * refresh сериализуется и тоже завершается 401 для второго запроса.
      */
     @Transactional
     public AuthResponse refresh(RefreshTokenRequest request) {
         Long userId = refreshTokenService.verifyRefreshToken(request.refreshToken());
         User user = userRepository.findActiveById(userId).orElseThrow(
                 () -> new ResourceNotFoundException("Пользователь не найден или удален: " + userId));
-        UUID refresh = refreshTokenService.rotateRefreshToken(userId);
+        // Ротация предъявленного токена: старый экземпляр удаляется, остальные устройства живут
+        UUID refresh = refreshTokenService.rotateRefreshToken(request.refreshToken());
         log.info("Обновление токенов пользователя: id={}", userId);
-        return buildAuthResponse(userMapper.toResponse(user), refresh);
+        return buildAuthResponse(userService.getMe(user.getId()), refresh);
     }
 
+    /**
+     * Logout текущего устройства: отзывается только предъявленный refresh-токен,
+     * сверенный с владельцем из access-токена (защита от отзыва чужой сессии).
+     */
     @Transactional
-    public void logout(Long userId) {
-        refreshTokenService.revokeRefreshToken(userId);
-        log.info("Выход пользователя: id={}", userId);
+    public void logout(String refreshToken, Long accessUserId) {
+        refreshTokenService.revokePresentedToken(refreshToken, accessUserId);
+        log.info("Выход пользователя (текущее устройство): id={}", accessUserId);
     }
 
     @Transactional
     public void handleForgotPassword(ForgotPasswordRequest request) {
         userRepository.findActiveByEmail(request.getEmail()).ifPresent(user -> {
+            // Инвалидируем прежние токены: активным остаётся только последний выданный
+            passwordResetTokenRepository.deleteAllByUserId(user.getId());
+
             String token = generateSecureToken();
 
             Instant expiresAt = Instant.now().plus(appConfig.getPasswordResetTtlMinutes(), ChronoUnit.MINUTES);
