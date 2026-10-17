@@ -38,7 +38,10 @@ public class TaskTypeService {
 
     @Transactional
     public TaskTypeResponse create(TaskTypeRequest request) {
-        if (taskTypeRepository.existsByNameIgnoreCase(request.getName())) {
+        // Нормализация как в TopicService: trim перед проверкой уникальности и сохранением
+        // (частичный индекс uq_task_types_name_active сравнивает lower(name)).
+        request.setName(request.getName().trim());
+        if (taskTypeRepository.existsByNameIgnoreCaseAndDeletedAtIsNull(request.getName())) {
             throw new ConflictException("Тип задания с таким названием уже существует");
         }
         TaskType entity = taskTypeMapper.toEntity(request);
@@ -49,7 +52,8 @@ public class TaskTypeService {
     @Transactional
     public TaskTypeResponse update(Long id, TaskTypeRequest request) {
         TaskType type = getOrThrow(id);
-        if (taskTypeRepository.existsByNameIgnoreCaseAndIdNot(request.getName(), id)) {
+        request.setName(request.getName().trim());
+        if (taskTypeRepository.existsByNameIgnoreCaseAndIdNotAndDeletedAtIsNull(request.getName(), id)) {
             throw new ConflictException("Тип задания с таким названием уже существует");
         }
         type.setName(request.getName());
@@ -71,10 +75,13 @@ public class TaskTypeService {
         taskRepository.recalculateMixedFlags();
     }
 
+    /** Soft-delete типа: как и при деактивации, пересчитываем is_mixed — удалённый тип
+     *  больше не участвует в правиле «2+ активных типов => mixed» (см. recalculateMixedFlags). */
     @Transactional
     public void delete(Long id) {
         TaskType type = getOrThrow(id);
         type.setDeletedAt(Instant.now());
+        taskRepository.recalculateMixedFlags();
     }
 
     private TaskType getOrThrow(Long id) {

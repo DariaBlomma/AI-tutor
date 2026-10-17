@@ -57,7 +57,8 @@ public class AuthService {
             throw new UnauthorizedException("Неверный логин или пароль");
         }
 
-        UUID refreshToken = refreshTokenService.rotateRefreshToken(user.getId());
+        // Вход на новом устройстве НЕ отзывает сессии остальных (мульти-девайс, changeset 017)
+        UUID refreshToken = refreshTokenService.createRefreshToken(user.getId());
         log.info("Успешный вход пользователя: username='{}', id={}", user.getUserName(), user.getId());
         return buildAuthResponse(userMapper.fromWithPasswordToResponse(user), refreshToken);
     }
@@ -71,7 +72,8 @@ public class AuthService {
         Long userId = refreshTokenService.verifyRefreshToken(request.refreshToken());
         User user = userRepository.findActiveById(userId).orElseThrow(
                 () -> new ResourceNotFoundException("Пользователь не найден или удален: " + userId));
-        UUID refresh = refreshTokenService.rotateRefreshToken(userId);
+        // Ротация предъявленного токена: старый экземпляр удаляется, остальные устройства живут
+        UUID refresh = refreshTokenService.rotateRefreshToken(request.refreshToken());
         log.info("Обновление токенов пользователя: id={}", userId);
         return buildAuthResponse(userMapper.toResponse(user), refresh);
     }
@@ -85,6 +87,9 @@ public class AuthService {
     @Transactional
     public void handleForgotPassword(ForgotPasswordRequest request) {
         userRepository.findActiveByEmail(request.getEmail()).ifPresent(user -> {
+            // Инвалидируем прежние токены: активным остаётся только последний выданный
+            passwordResetTokenRepository.deleteAllByUserId(user.getId());
+
             String token = generateSecureToken();
 
             Instant expiresAt = Instant.now().plus(appConfig.getPasswordResetTtlMinutes(), ChronoUnit.MINUTES);

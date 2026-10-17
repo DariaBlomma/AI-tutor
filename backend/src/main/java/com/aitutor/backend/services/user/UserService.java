@@ -37,12 +37,19 @@ public class UserService {
      */
     @Transactional
     public UserResponse create(SignUpRequest request) {
-        if (userRepository.existsByUserNameAndDeletedAtIsNull(request.getUserName())) {
-            log.warn("Попытка регистрации с существующим именем пользователя: username='{}'", request.getUserName());
+        // Нормализация: username trim (хранится как ввёл пользователь), email — в нижний регистр.
+        // Меняем DTO до маппинга, чтобы userMapper.toEntityWithoutPassword не мог их перезаписать.
+        request.setUserName(request.getUserName().trim());
+        request.setEmail(request.getEmail().trim().toLowerCase());
+        final String userName = request.getUserName();
+        final String email = request.getEmail();
+
+        if (userRepository.existsByUserNameIgnoreCaseAndDeletedAtIsNull(userName)) {
+            log.warn("Попытка регистрации с существующим именем пользователя: username='{}'", userName);
             throw new ConflictException("User with such name already exists");
         }
-        if (userRepository.findActiveByEmail(request.getEmail()).isPresent()) {
-            log.warn("Попытка регистрации с существующим email: email='{}'", request.getEmail());
+        if (userRepository.findActiveByEmail(email).isPresent()) {
+            log.warn("Попытка регистрации с существующим email: email='{}'", email);
             throw new ConflictException("User with such email already exists");
         }
 
@@ -59,7 +66,15 @@ public class UserService {
             userForSaving.setTeacherCode(generateUniqueTeacherCode());
         }
 
-        User savedUser = userRepository.save(userForSaving);
+        User savedUser;
+        try {
+            savedUser = userRepository.saveAndFlush(userForSaving);
+        } catch (DataIntegrityViolationException e) {
+            // Гонка при параллельной регистрации ловится частичными уникальными индексами
+            // uq_users_user_name_active / uq_users_email_active (см. changeset 016)
+            log.warn("Конфликт уникальности при регистрации: username='{}', email='{}'", userName, email);
+            throw new ConflictException("Имя пользователя или email уже заняты");
+        }
 
         if (request.getRole() == UserRole.STUDENT) {
             studentProfileRepository.save(StudentProfile.builder()

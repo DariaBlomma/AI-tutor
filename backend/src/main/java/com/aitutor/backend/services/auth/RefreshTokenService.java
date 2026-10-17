@@ -29,8 +29,8 @@ public class RefreshTokenService {
         User user = userRepository.findActiveById(userId).orElseThrow(
                 () -> new ResourceNotFoundException("User not found or deleted: " + userId)
         );
-        refreshTokenRepository.findByUserId(userId).ifPresent(refreshTokenRepository::delete);
-
+        // Мульти-девайс (changeset 017): не удаляем прежние токены — новый логин с телефона
+        // не должен выбрасывать сессию с компьютера. Просроченные чистит cleanExpiredTokens.
         RefreshToken refreshToken = RefreshToken.builder()
                 .user(user)
                 .token(UUID.randomUUID())
@@ -80,14 +80,18 @@ public class RefreshTokenService {
         userRepository.findActiveById(userId).orElseThrow(
                 () -> new ResourceNotFoundException("User not found or deleted: " + userId)
         );
-        refreshTokenRepository.findByUserId(userId)
-                .ifPresent(refreshTokenRepository::delete);
-        log.info("Refresh токен отозван для пользователя: userId={}", userId);
+        // Logout / смена пароля — отзываем ВСЕ токены пользователя со всех устройств
+        refreshTokenRepository.deleteAll(refreshTokenRepository.findAllByUserId(userId));
+        log.info("Все refresh токены отозваны для пользователя: userId={}", userId);
     }
 
-    public UUID rotateRefreshToken(Long userId) {
-        log.info("Выполнена ротация refresh токена для пользователя: userId={}", userId);
-        revokeRefreshToken(userId);
+    /** Ротация при refresh: удалить только предъявленный токен, другие устройства не затрагиваются. */
+    @Transactional
+    public UUID rotateRefreshToken(String tokenValue) {
+        Long userId = verifyRefreshToken(tokenValue);
+        refreshTokenRepository.findByToken(UUID.fromString(tokenValue))
+                .ifPresent(refreshTokenRepository::delete);
+        log.info("Ротация refresh токена для пользователя: userId={}", userId);
         return createRefreshToken(userId);
     }
 

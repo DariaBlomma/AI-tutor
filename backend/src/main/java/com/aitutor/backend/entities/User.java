@@ -23,7 +23,8 @@ public class User {
     @Column(nullable = false, length = 100)
     private String userName;
 
-    @Column(length = 200, unique = true, nullable = false)
+    /** Уникальность email — частичный индекс uq_users_email_active только среди неудалённых (см. changeset 016). */
+    @Column(length = 200, nullable = false)
     private String email;
 
     @Column(nullable = false)

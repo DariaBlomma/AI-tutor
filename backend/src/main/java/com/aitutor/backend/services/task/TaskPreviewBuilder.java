@@ -42,7 +42,6 @@ public class TaskPreviewBuilder {
         if (item.getItemType() == null) {
             return truncate(item.getPrompt());
         }
-        // todo: fix 'switch' expression does not cover all possible input values
         return switch (item.getItemType()) {
             case WORD_FORMATION, GAP_FILL -> truncate(item.getPrompt());
             // TFNS: показываем утверждение из prompt.

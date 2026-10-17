@@ -18,8 +18,12 @@ public class RefreshToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    /**
+     * UNIQUE на user_id снят (changeset 017): пользователь может быть залогинен с нескольких устройств.
+     * Один refresh-токен на устройство, ротация при логине удаляет токен только этого устройства.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Column(nullable = false, unique = true)
