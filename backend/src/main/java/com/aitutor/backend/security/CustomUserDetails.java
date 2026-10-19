@@ -1,6 +1,7 @@
 package com.aitutor.backend.security;
 
 import com.aitutor.backend.entities.User;
+import com.aitutor.backend.enums.UserRole;
 import lombok.Getter;
 import lombok.NonNull;
 import org.springframework.security.core.GrantedAuthority;
@@ -25,6 +26,18 @@ public class CustomUserDetails implements UserDetails {
 
         // Добавляем префикс ROLE_, чтобы в SecurityConfig работал метод .hasRole("TEACHER")
         this.authority = new SimpleGrantedAuthority("ROLE_" + user.getRole().name());
+    }
+
+    /**
+     * Лёгкий вариант без обращения к БД: id и роль берутся из claims "userId"/"role"
+     * access-токена. password не заполняется (нужен только при проверке учёных данных,
+     * которая идёт через AuthService напрямую по username).
+     */
+    public CustomUserDetails(Long id, String username, UserRole role) {
+        this.id = id;
+        this.username = username;
+        this.password = null;
+        this.authority = new SimpleGrantedAuthority("ROLE_" + role.name());
     }
 
     @Override

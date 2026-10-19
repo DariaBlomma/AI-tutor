@@ -20,7 +20,9 @@ public class Topic {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 100)
+    // Уникальность обеспечивает частичный индекс uq_topics_name_active (WHERE deleted_at IS NULL) в Liquibase.
+    // unique=true здесь не ставим: Hibernate создал бы глобальный UNIQUE-констрейнт, запрещающий пересоздать имя удалённой темы.
+    @Column(nullable = false, length = 100)
     private String name;
 
     @Column(name = "deleted_at")

@@ -10,9 +10,10 @@ import java.util.Optional;
 @Repository
 public interface TaskTypeRepository extends JpaRepository<TaskType, Long> {
 
-    boolean existsByNameIgnoreCase(String name);
+    /** Уникальность имени — только среди НЕудалённых (согласовано с uq_task_types_name_active). */
+    boolean existsByNameIgnoreCaseAndDeletedAtIsNull(String name);
 
-    boolean existsByNameIgnoreCaseAndIdNot(String name, Long id);
+    boolean existsByNameIgnoreCaseAndIdNotAndDeletedAtIsNull(String name, Long id);
 
     List<TaskType> findByIsActiveTrueAndDeletedAtIsNullOrderByNameAsc();
 

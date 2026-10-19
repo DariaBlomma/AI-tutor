@@ -20,7 +20,7 @@ public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificat
     Optional<Task> findWithRelationsById(Long id);
 
     /**
-     * Пересчёт флага is_mixed после деактивации типа в справочнике.
+     * Пересчёт флага is_mixed после изменений в справочнике типов (деактивация/удаление типа).
      * Смешанным считается задание с 2+ АКТИВНЫМИ типами (неактивные/soft-deleted не считаются):
      * иначе деактивация одного из двух типов навсегда «ломает» строгий поиск по заданию.
      */
@@ -38,13 +38,16 @@ public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificat
             """)
     void recalculateMixedFlags();
 
-    /**
-     * Точечный UPDATE public_id сразу после INSERT (см. TaskService.create):
-     * при IDENTITY-стратегии id известен только после вставки, а генерация в @PrePersist падала.
-     */
-    @Modifying(flushAutomatically = true)
-    @Query("UPDATE Task t SET t.publicId = :publicId WHERE t.id = :id")
-    void updatePublicId(@Param("id") Long id, @Param("publicId") String publicId);
+    /** Точечный пересчёт is_mixed для одного задания — вызывается при привязке/отвязке типов в TaskService. */
+    @Modifying
+    @Query("""
+            UPDATE Task t SET t.isMixed = (
+                SELECT COUNT(tt) FROM Task t2 JOIN t2.taskTypes tt
+                WHERE t2 = t AND tt.isActive = TRUE AND tt.deletedAt IS NULL
+            ) >= 2
+            WHERE t.id = :taskId
+            """)
+    void recalculateMixedFlag(@Param("taskId") Long taskId);
 
     /** Список с полным графом (topics, taskTypes, items) за фиксированное число запросов — против N+1 в банке заданий. */
     @EntityGraph(attributePaths = {"topics", "taskTypes", "items"})

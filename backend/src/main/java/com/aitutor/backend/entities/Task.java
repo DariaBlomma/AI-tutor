@@ -81,8 +81,8 @@ public class Task {
     }
 
     /**
-     * publicId НЕ генерируется в @PrePersist/@PostPersist: при IDENTITY-стратегии Hibernate выполняет
-     * INSERT сразу, и на момент PrePersist id ещё null. Значение проставляется точечным
-     * UPDATE после persist (см. TaskService.create) — надёжно и без хрупких lifecycle-хуков.
+     * publicId генерируется из отдельной SQL-последовательности task_public_id_seq
+     * ДО persist (см. TaskService.create и PublicIdGenerator) — значение попадает сразу
+     * в INSERT, UPDATE после вставки не требуется.
      */
 }

@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.time.Duration;
-import java.time.Instant;
 
 @Data
 @ConfigurationProperties(prefix = "jwt")
@@ -17,10 +16,16 @@ import java.time.Instant;
 public class JwtProperties {
     private String secret;
 
+    /**
+     * Время жизни access-токена (jwt.token.expiration). Чистый геттер — возвращает
+     * настроенную длительность, а не момент времени: семантика поля и геттера совпадают.
+     */
     @Builder.Default
-    private Duration expiration = Duration.ofHours(24);
+    private Duration expiration = Duration.ofMinutes(15);
 
-    public Instant getExpiration() {
-        return Instant.now().plus(expiration);
-    }
+    /**
+     * Время жизни refresh-токена в БД (jwt.refresh-expiration).
+     */
+    @Builder.Default
+    private Duration refreshExpiration = Duration.ofDays(30);
 }

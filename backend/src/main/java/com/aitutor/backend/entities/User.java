@@ -20,10 +20,15 @@ public class User {
     @EqualsAndHashCode.Include
     private Long id;
 
+    /**
+     * Уникальность среди неудалённых обеспечивает частичный индекс uq_users_user_name_active (lower(user_name)) в Liquibase 016.
+     * unique=true здесь не ставим: Hibernate создал бы глобальный UNIQUE-констрейнт, запрещающий зарегистрировать имя удалённого пользователя.
+     */
     @Column(nullable = false, length = 100)
     private String userName;
 
-    @Column(length = 200, unique = true, nullable = false)
+    /** Уникальность email — частичный индекс uq_users_email_active только среди неудалённых (см. changeset 016). */
+    @Column(length = 200, nullable = false)
     private String email;
 
     @Column(nullable = false)

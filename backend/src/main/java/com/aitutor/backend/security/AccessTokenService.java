@@ -1,6 +1,7 @@
 package com.aitutor.backend.security;
 
 import com.aitutor.backend.configs.JwtProperties;
+import com.aitutor.backend.enums.UserRole;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,7 @@ import java.util.function.Function;
 public class AccessTokenService {
     private final JwtProperties jwtProperties;
 
-    public String generateToken(String userName, Long userId, String email) {
+    public String generateToken(String userName, Long userId, String email, UserRole role, Instant expiresAt) {
         Map<String, Object> claims = new HashMap<>();
         if (userId != null) {
             claims.put("userId", userId);
@@ -27,7 +28,10 @@ public class AccessTokenService {
         if (email != null) {
             claims.put("email", email);
         }
-        return createToken(claims, userName);
+        if (role != null) {
+            claims.put("role", role.name());
+        }
+        return createToken(claims, userName, expiresAt);
     }
 
     public boolean isValidToken(String token, String userName) {
@@ -47,18 +51,36 @@ public class AccessTokenService {
         return extractClaim(token, claims -> claims.get("userId", Long.class));
     }
 
-    public Instant getExpiresAt() {
-        return jwtProperties.getExpiration();
+    /**
+     * Роль из обязательного claim "role". Возвращает null только если роль отсутствует
+     * или содержит неизвестное значение — вызывающий код обязан отклонить такой токен
+     * (все access-токены выдаются с ролью, обратной совместимости нет).
+     */
+    public UserRole extractRole(String token) {
+        String role = extractClaim(token, claims -> claims.get("role", String.class));
+        if (role == null) {
+            return null;
+        }
+        try {
+            return UserRole.valueOf(role);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
-    private String createToken(Map<String, Object> claims, String subject) {
-        Instant now = Instant.now();
+    /**
+     * Момент истечения access-токена по текущей конфигурации (длительность из jwt.token.expiration).
+     */
+    public Instant calculateExpiresAt() {
+        return Instant.now().plus(jwtProperties.getExpiration());
+    }
 
+    private String createToken(Map<String, Object> claims, String subject, Instant expiresAt) {
         return Jwts.builder()
                 .claims(claims)
                 .subject(subject)
-                .issuedAt(Date.from(now))
-                .expiration(Date.from(jwtProperties.getExpiration()))
+                .issuedAt(Date.from(Instant.now()))
+                .expiration(Date.from(expiresAt))
                 .signWith(getSignKey())
                 .compact();
     }

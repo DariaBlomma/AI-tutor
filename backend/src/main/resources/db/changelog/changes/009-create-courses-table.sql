@@ -6,9 +6,9 @@ CREATE TABLE courses (
                          id BIGSERIAL PRIMARY KEY,
                          name VARCHAR(200) NOT NULL,
                          teacher_id BIGINT NOT NULL,          -- Владелец курса
-                         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                         updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                         deleted_at TIMESTAMP,
+                         created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                         updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                         deleted_at TIMESTAMP WITH TIME ZONE,
 
                          CONSTRAINT fk_course_teacher FOREIGN KEY (teacher_id) REFERENCES users(id) ON DELETE RESTRICT
 );

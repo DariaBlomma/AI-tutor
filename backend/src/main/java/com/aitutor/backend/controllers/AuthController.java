@@ -4,6 +4,7 @@ import com.aitutor.backend.dto.auth.*;
 import com.aitutor.backend.helpers.JwtHelper;
 import com.aitutor.backend.security.AccessTokenService;
 import com.aitutor.backend.services.auth.AuthService;
+import com.aitutor.backend.exceptions.UnauthorizedException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,15 +38,19 @@ public class AuthController {
 
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.OK)
-    public void logout(HttpServletRequest request) {
+    public void logout(HttpServletRequest request, @Valid @RequestBody RefreshTokenRequest body) {
         String jwtToken = JwtHelper.extractTokenFromHeader(request);
 
-        if (jwtToken != null) {
-            Long userId = accessTokenService.extractUserId(jwtToken);
-            if (userId != null) {
-                authService.logout(userId);
-            }
+        if (jwtToken == null) {
+            throw new UnauthorizedException("Access token is required for logout");
         }
+        Long userId = accessTokenService.extractUserId(jwtToken);
+        if (userId == null) {
+            throw new UnauthorizedException("Invalid access token");
+        }
+        // Отзывается именно предъявленный refresh-токен этого пользователя,
+        // а не все его сессии — остальные устройства остаются в системе.
+        authService.logout(body.refreshToken(), userId);
     }
 
     @PostMapping("/forgot-password")
