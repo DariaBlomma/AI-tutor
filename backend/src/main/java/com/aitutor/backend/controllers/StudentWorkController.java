@@ -2,13 +2,19 @@ package com.aitutor.backend.controllers;
 
 import com.aitutor.backend.dto.student.AssignTasksRequest;
 import com.aitutor.backend.dto.student.AssignmentResultResponse;
+import com.aitutor.backend.dto.student.StudentProgressOverviewResponse;
+import com.aitutor.backend.dto.student.StudentSubmitAnswerRequest;
+import com.aitutor.backend.dto.student.StudentSubmitAnswerResponse;
+import com.aitutor.backend.dto.student.StudentWorkCompleteResponse;
 import com.aitutor.backend.dto.student.StudentWorkDetailResponse;
 import com.aitutor.backend.dto.student.StudentWorkResponse;
+import com.aitutor.backend.dto.student.StudentWorkSummaryResponse;
 import com.aitutor.backend.security.CustomUserDetails;
 import com.aitutor.backend.services.student.StudentExecutionService;
 import com.aitutor.backend.services.student.StudentWorkService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -52,10 +58,28 @@ public class StudentWorkController {
         return studentWorkService.getStudentWork(userDetails.getId(), studentId);
     }
 
-    /** «Мои задания» ученика: статусы ASSIGNED / IN_PROGRESS / COMPLETED / CANCELLED / EXPIRED. */
+    /**
+     * «Мои задания» ученика: статусы ASSIGNED / IN_PROGRESS / COMPLETED / CANCELLED / EXPIRED.
+     * Пагинация и сортировка (deadline | status | createdAt, direction asc|desc).
+     * Без параметров — поведение как раньше: все работы, свежие сверху (createdAt desc).
+     */
     @GetMapping("/student/work")
-    public List<StudentWorkResponse> getMyWork(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        return studentWorkService.getMyWork(userDetails.getId());
+    public Page<StudentWorkResponse> getMyWork(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                               @RequestParam(defaultValue = "0") int page,
+                                               @RequestParam(defaultValue = "100") int size,
+                                               @RequestParam(required = false) String sort,
+                                               @RequestParam(required = false) String direction) {
+        return studentWorkService.getMyWorkPage(userDetails.getId(), page, size, sort, direction);
+    }
+
+    /**
+     * Краткий прогресс ученика («2 из 5») по актуальным назначениям (ASSIGNED / IN_PROGRESS):
+     * число работ, полностью решённых работ, пунктов решено/всего, использованные подсказки.
+     */
+    @GetMapping("/student/me/progress")
+    public StudentProgressOverviewResponse getProgressOverview(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return studentWorkService.getProgressOverview(userDetails.getId());
     }
 
     /** Старт выполнения: ASSIGNED → IN_PROGRESS; возвращает полный контент работы без эталонов. */
@@ -70,5 +94,31 @@ public class StudentWorkController {
     public StudentWorkDetailResponse getWorkDetail(@PathVariable Long workId,
                                                    @AuthenticationPrincipal CustomUserDetails userDetails) {
         return studentExecutionService.getDetail(userDetails.getId(), workId);
+    }
+
+    /**
+     * Сдача ответа по одному пункту: фронт присылает только ответ ученика,
+     * вердикт выносит бэкенд (AnswerChecker). Эталонный ответ в ответе не отдаётся никогда.
+     */
+    @PostMapping("/student/work/{workId}/items/{itemId}/submit")
+    public StudentSubmitAnswerResponse submitItem(@PathVariable Long workId,
+                                                  @PathVariable Long itemId,
+                                                  @Valid @RequestBody StudentSubmitAnswerRequest request,
+                                                  @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return studentExecutionService.submit(userDetails.getId(), workId, itemId, request);
+    }
+
+    /** Завершение работы: COMPLETED + итоговая статистика. Только когда все пункты SOLVED (force нет). */
+    @PostMapping("/student/work/{workId}/complete")
+    public StudentWorkCompleteResponse completeWork(@PathVariable Long workId,
+                                                    @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return studentExecutionService.complete(userDetails.getId(), workId);
+    }
+
+    /** Экран «Результаты»: агрегаты выполненной работы + длительность решения. */
+    @GetMapping("/student/work/{workId}/summary")
+    public StudentWorkSummaryResponse getSummary(@PathVariable Long workId,
+                                                 @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return studentExecutionService.getSummary(userDetails.getId(), workId);
     }
 }

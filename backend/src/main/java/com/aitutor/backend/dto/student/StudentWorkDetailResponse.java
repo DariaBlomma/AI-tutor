@@ -26,6 +26,7 @@ public class StudentWorkDetailResponse {
     private WorkStatus status;
     private Instant deadline;
     private Instant startedAt;
+    private Instant completedAt;
     private List<StudentTaskItemDto> items;
     private List<StudentItemProgressDto> progress;
 }
