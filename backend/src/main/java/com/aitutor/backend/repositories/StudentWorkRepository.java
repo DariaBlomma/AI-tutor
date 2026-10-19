@@ -2,6 +2,8 @@ package com.aitutor.backend.repositories;
 
 import com.aitutor.backend.entities.StudentWork;
 import com.aitutor.backend.enums.WorkStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -20,6 +22,9 @@ public interface StudentWorkRepository extends JpaRepository<StudentWork, Long> 
 
     /** Активные (не удалённые) назначения ученика: свежие сверху — список «Мои задания». */
     List<StudentWork> findByStudentIdAndDeletedAtIsNullOrderByCreatedAtDesc(Long studentId);
+
+    /** Пагинация «Моих заданий» с сортировкой на уровне БД (см. SORT_WHITELIST в сервисе). */
+    Page<StudentWork> findByStudentIdAndDeletedAtIsNull(Long studentId, Pageable pageable);
 
     /** Активные назначения ученика по конкретному заданию — проверка дубля при назначении. */
     @Query("""

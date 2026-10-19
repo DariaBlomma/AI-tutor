@@ -17,6 +17,9 @@ import com.aitutor.backend.repositories.task.TaskRepository;
 import com.aitutor.backend.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -132,6 +135,37 @@ public class StudentWorkService {
                 .stream()
                 .map(this::toResponse)
                 .toList();
+    }
+
+    /** Поля, по которым разрешена сортировка списка назначений (защита от произвольных полей). */
+    private static final Map<String, String> SORT_WHITELIST = Map.of(
+            "deadline", "deadline",
+            "status", "status",
+            "createdAt", "createdAt");
+    private static final int MAX_PAGE_SIZE = 100;
+
+    /**
+     * Пагинированный список работ ученика. Сортировка: sort — только из SORT_WHITELIST
+     * (по умолчанию createdAt desc), direction — asc|desc (по умолчанию desc).
+     * Второй ключ createdAt DESC — детерминированная раздача одинаковых значений.
+     */
+    @Transactional(readOnly = true)
+    public Page<StudentWorkResponse> getMyWorkPage(Long studentId, int page, int size,
+                                                   String sort, String direction) {
+        String property = SORT_WHITELIST.get(sort == null ? "createdAt" : sort);
+        if (property == null) {
+            throw new InvalidRequestException("Недопустимое поле сортировки: " + sort
+                    + ". Разрешено: " + SORT_WHITELIST.keySet());
+        }
+        Sort.Direction dir = "asc".equalsIgnoreCase(direction)
+                ? Sort.Direction.ASC : Sort.Direction.DESC;
+        // NULLS_LAST: работы без дедлайна не всплывают в начало списка.
+        Sort.Order primary = Sort.Order.by(property).with(dir).nullsLast();
+        Sort sortSpec = Sort.by(primary).and(Sort.by(Sort.Direction.DESC, "createdAt"));
+        PageRequest request = PageRequest.of(Math.max(page, 0),
+                Math.min(Math.max(size, 1), MAX_PAGE_SIZE), sortSpec);
+        return studentWorkRepository.findByStudentIdAndDeletedAtIsNull(studentId, request)
+                .map(this::toResponse);
     }
 
     /** Список назначений конкретного своего ученика — базовый строительный блок будущих отчётов. */

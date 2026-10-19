@@ -13,6 +13,7 @@ import com.aitutor.backend.services.student.StudentExecutionService;
 import com.aitutor.backend.services.student.StudentWorkService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -56,10 +57,18 @@ public class StudentWorkController {
         return studentWorkService.getStudentWork(userDetails.getId(), studentId);
     }
 
-    /** «Мои задания» ученика: статусы ASSIGNED / IN_PROGRESS / COMPLETED / CANCELLED / EXPIRED. */
+    /**
+     * «Мои задания» ученика: статусы ASSIGNED / IN_PROGRESS / COMPLETED / CANCELLED / EXPIRED.
+     * Пагинация и сортировка (deadline | status | createdAt, direction asc|desc).
+     * Без параметров — поведение как раньше: все работы, свежие сверху (createdAt desc).
+     */
     @GetMapping("/student/work")
-    public List<StudentWorkResponse> getMyWork(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        return studentWorkService.getMyWork(userDetails.getId());
+    public Page<StudentWorkResponse> getMyWork(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                               @RequestParam(defaultValue = "0") int page,
+                                               @RequestParam(defaultValue = "100") int size,
+                                               @RequestParam(required = false) String sort,
+                                               @RequestParam(required = false) String direction) {
+        return studentWorkService.getMyWorkPage(userDetails.getId(), page, size, sort, direction);
     }
 
     /** Старт выполнения: ASSIGNED → IN_PROGRESS; возвращает полный контент работы без эталонов. */
