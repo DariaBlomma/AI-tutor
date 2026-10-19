@@ -26,6 +26,22 @@ public interface StudentWorkRepository extends JpaRepository<StudentWork, Long> 
     /** Пагинация «Моих заданий» с сортировкой на уровне БД (см. SORT_WHITELIST в сервисе). */
     Page<StudentWork> findByStudentIdAndDeletedAtIsNull(Long studentId, Pageable pageable);
 
+    /**
+     * Активные назначения ученика (ASSIGNED / IN_PROGRESS) — база для краткого прогресса:
+     * COMPLETED / EXPIRED / CANCELLED в «2 из 5» не учитываются (только актуальные по времени).
+     */
+    List<StudentWork> findActiveByStudent(Long studentId);
+
+    /** То же, но списком id — чтобы агрегаты по прогрессу одним запросом (см. ProgressOverviewDto). */
+    @Query("""
+            SELECT sw.id FROM StudentWork sw
+            WHERE sw.student.id = :studentId
+              AND sw.deletedAt IS NULL
+              AND sw.status IN (com.aitutor.backend.enums.WorkStatus.ASSIGNED,
+                                com.aitutor.backend.enums.WorkStatus.IN_PROGRESS)
+            """)
+    List<Long> findActiveWorkIds(@Param("studentId") Long studentId);
+
     /** Активные назначения ученика по конкретному заданию — проверка дубля при назначении. */
     @Query("""
             SELECT sw FROM StudentWork sw

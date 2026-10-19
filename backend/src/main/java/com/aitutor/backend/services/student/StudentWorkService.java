@@ -2,6 +2,7 @@ package com.aitutor.backend.services.student;
 
 import com.aitutor.backend.dto.student.AssignTasksRequest;
 import com.aitutor.backend.dto.student.AssignmentResultResponse;
+import com.aitutor.backend.dto.student.StudentProgressOverviewResponse;
 import com.aitutor.backend.dto.student.StudentWorkResponse;
 import com.aitutor.backend.entities.StudentProfile;
 import com.aitutor.backend.entities.StudentWork;
@@ -12,6 +13,7 @@ import com.aitutor.backend.enums.WorkStatus;
 import com.aitutor.backend.exceptions.InvalidRequestException;
 import com.aitutor.backend.exceptions.ResourceNotFoundException;
 import com.aitutor.backend.repositories.StudentProfileRepository;
+import com.aitutor.backend.repositories.StudentWorkItemProgressRepository;
 import com.aitutor.backend.repositories.StudentWorkRepository;
 import com.aitutor.backend.repositories.task.TaskRepository;
 import com.aitutor.backend.repositories.UserRepository;
@@ -45,6 +47,7 @@ import java.util.stream.Collectors;
 public class StudentWorkService {
 
     private final StudentWorkRepository studentWorkRepository;
+    private final StudentWorkItemProgressRepository progressRepository;
     private final StudentProfileRepository studentProfileRepository;
     private final UserRepository userRepository;
     private final TaskRepository taskRepository;
@@ -173,6 +176,60 @@ public class StudentWorkService {
     public List<StudentWorkResponse> getStudentWork(Long teacherId, Long studentId) {
         assertTeacherOwnsStudent(teacherId, studentId);
         return getMyWork(studentId);
+    }
+
+    /**
+     * Краткий прогресс ученика («2 из 5») по АКТИВНЫМ назначениям: ASSIGNED / IN_PROGRESS.
+     * COMPLETED / EXPIRED / CANCELLED не учитываются — только то, что актуально по времени
+     * (просроченные работы фоновая задача заранее переводит в EXPIRED).
+     * totalItems — суммарное число пунктов во всех активных работах (считается по живому
+     * контенту заданий, т.к. строки прогресса создаются лениво); solvedItems — SOLVED-пункты.
+     */
+    @Transactional(readOnly = true)
+    public StudentProgressOverviewResponse getProgressOverview(Long studentId) {
+        List<StudentWork> activeWorks = studentWorkRepository.findActiveByStudent(studentId);
+        if (activeWorks.isEmpty()) {
+            return StudentProgressOverviewResponse.builder()
+                    .totalActiveWorks(0).worksFullySolved(0)
+                    .totalItems(0).solvedItems(0).hintsUsed(0)
+                    .build();
+        }
+
+        List<Long> workIds = activeWorks.stream().map(StudentWork::getId).toList();
+        Map<Long, StudentWorkItemProgressRepository.WorkProgressAggregate> aggByWork =
+                progressRepository.aggregateByWorkIds(workIds).stream()
+                        .collect(Collectors.toMap(
+                                StudentWorkItemProgressRepository.WorkProgressAggregate::getWorkId,
+                                Function.identity()));
+
+        int totalItems = 0;
+        int solvedItems = 0;
+        int hintsUsed = 0;
+        int worksFullySolved = 0;
+        for (StudentWork work : activeWorks) {
+            int itemsInWork = work.getTask().getItems().size();
+            var agg = aggByWork.get(work.getId());
+            int solved = agg == null ? 0 : intOf(agg.getSolvedCount());
+            totalItems += itemsInWork;
+            solvedItems += solved;
+            hintsUsed += agg == null ? 0 : intOf(agg.getHintsUsed());
+            // Работа «закрыта», когда все её пункты решены (complete ещё можно не нажимать).
+            if (itemsInWork > 0 && solved >= itemsInWork) {
+                worksFullySolved++;
+            }
+        }
+
+        return StudentProgressOverviewResponse.builder()
+                .totalActiveWorks(activeWorks.size())
+                .worksFullySolved(worksFullySolved)
+                .totalItems(totalItems)
+                .solvedItems(solvedItems)
+                .hintsUsed(hintsUsed)
+                .build();
+    }
+
+    private static int intOf(Number value) {
+        return value == null ? 0 : value.intValue();
     }
 
     /**

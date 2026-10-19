@@ -33,4 +33,33 @@ public interface StudentWorkItemProgressRepository extends JpaRepository<Student
             """)
     Optional<StudentWorkItemProgress> findByWorkAndItem(@Param("workId") Long workId,
                                                         @Param("itemId") Long itemId);
+
+    /**
+     * Агрегаты прогресса по списку работ ученика одним запросом — краткий «2 из 5»
+     * на дашборде (см. findActiveWorkIds в StudentWorkRepository).
+     * totalItems считается по строкам прогресса: они создаются лениво при первом submit,
+     * поэтому у ещё не начатой работы solved/attempted будут 0 (полный размер пунктов
+     * работы добавляет сервис, см. StudentWorkService.getProgressOverview).
+     */
+    @Query("""
+            SELECT p.studentWork.id AS workId,
+                   COUNT(p)        AS progressRows,
+                   SUM(CASE WHEN p.status = com.aitutor.backend.enums.ItemProgressStatus.SOLVED
+                            THEN 1 ELSE 0 END) AS solvedCount,
+                   SUM(CASE WHEN p.answerAttempts > 0 THEN 1 ELSE 0 END) AS attemptedCount,
+                   COALESCE(SUM(p.hintsGiven), 0) AS hintsUsed
+            FROM StudentWorkItemProgress p
+            WHERE p.studentWork.id IN :workIds
+            GROUP BY p.studentWork.id
+            """)
+    List<WorkProgressAggregate> aggregateByWorkIds(@Param("workIds") List<Long> workIds);
+
+    /** Projection для aggregateByWorkIds. */
+    interface WorkProgressAggregate {
+        Long getWorkId();
+        Long getProgressRows();
+        Long getSolvedCount();
+        Long getAttemptedCount();
+        Integer getHintsUsed();
+    }
 }

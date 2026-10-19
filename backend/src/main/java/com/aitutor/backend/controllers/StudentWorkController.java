@@ -2,6 +2,7 @@ package com.aitutor.backend.controllers;
 
 import com.aitutor.backend.dto.student.AssignTasksRequest;
 import com.aitutor.backend.dto.student.AssignmentResultResponse;
+import com.aitutor.backend.dto.student.StudentProgressOverviewResponse;
 import com.aitutor.backend.dto.student.StudentSubmitAnswerRequest;
 import com.aitutor.backend.dto.student.StudentSubmitAnswerResponse;
 import com.aitutor.backend.dto.student.StudentWorkCompleteResponse;
@@ -69,6 +70,16 @@ public class StudentWorkController {
                                                @RequestParam(required = false) String sort,
                                                @RequestParam(required = false) String direction) {
         return studentWorkService.getMyWorkPage(userDetails.getId(), page, size, sort, direction);
+    }
+
+    /**
+     * Краткий прогресс ученика («2 из 5») по актуальным назначениям (ASSIGNED / IN_PROGRESS):
+     * число работ, полностью решённых работ, пунктов решено/всего, использованные подсказки.
+     */
+    @GetMapping("/student/me/progress")
+    public StudentProgressOverviewResponse getProgressOverview(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return studentWorkService.getProgressOverview(userDetails.getId());
     }
 
     /** Старт выполнения: ASSIGNED → IN_PROGRESS; возвращает полный контент работы без эталонов. */
