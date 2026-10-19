@@ -26,6 +26,8 @@ public class StudentSubmitAnswerResponse {
     private Integer attemptsCount;
     /** Учтённых подсказок по пункту. */
     private Integer hintsGiven;
+    /** Сколько подсказок ещё можно запросить по пункту (0 — лимит исчерпан). */
+    private Integer hintsRemaining;
     /** Решена ли работа целиком (все пункты SOLVED) — сигнал фронту показать «Завершить». */
     private boolean allItemsSolved;
 }

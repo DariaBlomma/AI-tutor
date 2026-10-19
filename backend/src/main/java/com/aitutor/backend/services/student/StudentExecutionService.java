@@ -73,11 +73,14 @@ public class StudentExecutionService {
     }
 
     /**
-     * Фиксация результата проверки одного пункта: фронт присылает только ответ ученика,
-     * вердикт выносит бэкенд (ExactMatchChecker; позже — та же точка для ИИ-флоу).
-     * Логика: инкремент попыток/подсказок, при верном ответе — SOLVED,
-     * при исчерпании лимита подсказок — пункт тоже закрывается SOLVED, но эталон НЕ выдаётся
-     * и в student_answer НЕ пишется (статистика остаётся честной: видно расхождение с эталоном).
+     * Фиксация результата проверки одного пункта: клиент присылает только ответ ученика
+     * (+ опционально hintsUsed — будущий канал от ИИ-флоу), вердикт выносит бэкенд
+     * (ExactMatchChecker; позже — та же точка входа для ИИ).
+     * Повторная сдача по уже решённому пункту запрещена (409): решение финально,
+     * попытки/статистика не мутируются задним числом.
+     * При верном ответе — SOLVED; при исчерпании лимита подсказок — пункт тоже
+     * закрывается SOLVED, но эталон НЕ выдаётся и в student_answer НЕ пишется
+     * (статистика остаётся честной: видно расхождение с эталоном).
      */
     @Transactional
     public StudentSubmitAnswerResponse submit(Long studentId, Long workId, Long taskItemId,
@@ -89,9 +92,9 @@ public class StudentExecutionService {
         int hintsUsed = clampHints(request.getHintsUsed());
         StudentWorkItemProgress progress = findOrCreateProgress(work, item);
 
-        // Пункт уже закрыт — повторные submit идемпотентно возвращают текущее состояние.
+        // Пункт уже закрыт — защита от повторных попыток: решение финально.
         if (progress.getStatus() == ItemProgressStatus.SOLVED) {
-            return toSubmitResponse(progress, isAllSolved(work));
+            throw new ConflictException("Пункт уже решён, повторная сдача невозможна");
         }
 
         CheckResult result = pickChecker(item).check(item, request.getAnswer());
@@ -104,12 +107,15 @@ public class StudentExecutionService {
         // иначе countFinalErrors в отчётах перестанет видеть ошибки.
         progress.setStudentAnswer(result.normalizedStudentAnswer());
 
-        boolean revealByHintLimit = !result.correct() && progress.getHintsGiven() >= MAX_HINTS;
-        if (result.correct() || revealByHintLimit) {
-            // При исчерпании подсказок пункт тоже помечается SOLVED (решение по фиче),
-            // first_try_correct при этом остаётся false — метрика не искажается.
+        boolean hintLimitReached = progress.getHintsGiven() >= MAX_HINTS;
+        if (result.correct()) {
             progress.setStatus(ItemProgressStatus.SOLVED);
-            progress.setFirstTryCorrect(result.correct() && attempts == 1);
+            progress.setFirstTryCorrect(attempts == 1);
+            progress.setSolvedAt(Instant.now());
+        } else if (hintLimitReached) {
+            // Исчерпаны все подсказки, ответ всё ещё неверный: пункт закрываем SOLVED
+            // (решение по фиче), first_try_correct остаётся false — метрика не искажается.
+            progress.setStatus(ItemProgressStatus.SOLVED);
             progress.setSolvedAt(Instant.now());
         } else {
             progress.setStatus(ItemProgressStatus.IN_PROGRESS);
@@ -122,6 +128,8 @@ public class StudentExecutionService {
                 .status(progress.getStatus())
                 .attemptsCount(progress.getAnswerAttempts())
                 .hintsGiven(progress.getHintsGiven())
+                // Сколько подсказок ещё можно запросить (0 — лимит исчерпан, дальше reveal).
+                .hintsRemaining(Math.max(0, MAX_HINTS - progress.getHintsGiven()))
                 .allItemsSolved(isAllSolved(work))
                 .build();
     }
@@ -269,18 +277,6 @@ public class StudentExecutionService {
                 .build();
     }
 
-    private StudentSubmitAnswerResponse toSubmitResponse(StudentWorkItemProgress progress,
-                                                         boolean allItemsSolved) {
-        return StudentSubmitAnswerResponse.builder()
-                .taskItemId(progress.getTaskItem().getId())
-                .correct(true)
-                .status(progress.getStatus())
-                .attemptsCount(progress.getAnswerAttempts())
-                .hintsGiven(progress.getHintsGiven())
-                .allItemsSolved(allItemsSolved)
-                .build();
-    }
-
     private List<TaskItem> sortedItems(StudentWork work) {
         // Пункты живого задания, упорядоченные по position (soft-delete есть у Task, а не у TaskItem).
         if (work.getTask().getDeletedAt() != null) {
@@ -333,6 +329,7 @@ public class StudentExecutionService {
                     .status(ItemProgressStatus.NOT_STARTED)
                     .answerAttempts(0)
                     .hintsGiven(0)
+                    .hintsRemaining(MAX_HINTS)
                     .lastAnswer(null)
                     .build();
         }
@@ -341,6 +338,7 @@ public class StudentExecutionService {
                 .status(progress.getStatus())
                 .answerAttempts(progress.getAnswerAttempts())
                 .hintsGiven(progress.getHintsGiven())
+                .hintsRemaining(Math.max(0, MAX_HINTS - nullToZero(progress.getHintsGiven())))
                 .lastAnswer(progress.getStudentAnswer())
                 .build();
     }
