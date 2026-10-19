@@ -6,6 +6,7 @@ import com.aitutor.backend.dto.student.StudentSubmitAnswerResponse;
 import com.aitutor.backend.dto.student.StudentTaskItemDto;
 import com.aitutor.backend.dto.student.StudentWorkCompleteResponse;
 import com.aitutor.backend.dto.student.StudentWorkDetailResponse;
+import com.aitutor.backend.dto.student.StudentWorkSummaryResponse;
 import com.aitutor.backend.entities.StudentWork;
 import com.aitutor.backend.entities.StudentWorkItemProgress;
 import com.aitutor.backend.entities.TaskItem;
@@ -177,6 +178,62 @@ public class StudentExecutionService {
         studentWorkRepository.save(work);
 
         return toCompleteResponse(work);
+    }
+
+    /**
+     * Итог работы для экрана «Результаты» ученика: готовые агрегаты из student_work
+     * (записаны при complete) + длительность решения. Для незавершённой работы
+     * статистика считается по текущему прогрессу, durationSeconds = null.
+     */
+    @Transactional(readOnly = true)
+    public StudentWorkSummaryResponse getSummary(Long studentId, Long workId) {
+        StudentWork work = loadOwnedWork(studentId, workId);
+
+        List<TaskItem> items = sortedItems(work);
+        Map<Long, StudentWorkItemProgress> byItemId = progressByItem(work.getId());
+        List<StudentWorkItemProgress> progresses = items.stream()
+                .map(i -> byItemId.get(i.getId()))
+                .filter(java.util.Objects::nonNull)
+                .toList();
+
+        int totalItems = items.size();
+        int solvedItems = (int) progresses.stream()
+                .filter(p -> p.getStatus() == ItemProgressStatus.SOLVED).count();
+        int firstTryCorrect;
+        int correctAfterHints;
+        int totalHintsGiven;
+        if (work.getStatus() == WorkStatus.COMPLETED) {
+            // Доверяем сохранённым при complete агрегатам — они финальны.
+            firstTryCorrect = nullToZero(work.getFirstTryCorrect());
+            correctAfterHints = nullToZero(work.getCorrectAfterHints());
+            totalHintsGiven = nullToZero(work.getTotalHintsGiven());
+        } else {
+            firstTryCorrect = (int) progresses.stream()
+                    .filter(p -> Boolean.TRUE.equals(p.getFirstTryCorrect())).count();
+            correctAfterHints = (int) progresses.stream()
+                    .filter(p -> p.getStatus() == ItemProgressStatus.SOLVED)
+                    .filter(p -> !Boolean.TRUE.equals(p.getFirstTryCorrect())).count();
+            totalHintsGiven = progresses.stream()
+                    .mapToInt(p -> nullToZero(p.getHintsGiven())).sum();
+        }
+
+        Long durationSeconds = (work.getStartedAt() != null && work.getCompletedAt() != null)
+                ? work.getCompletedAt().getEpochSecond() - work.getStartedAt().getEpochSecond()
+                : null;
+
+        return StudentWorkSummaryResponse.builder()
+                .workId(work.getId())
+                .taskName(work.getTask().getName())
+                .status(work.getStatus())
+                .startedAt(work.getStartedAt())
+                .completedAt(work.getCompletedAt())
+                .durationSeconds(durationSeconds)
+                .totalItems(totalItems)
+                .solvedItems(solvedItems)
+                .firstTryCorrect(firstTryCorrect)
+                .correctAfterHints(correctAfterHints)
+                .totalHintsGiven(totalHintsGiven)
+                .build();
     }
 
     // ---------- helpers ----------

@@ -7,6 +7,7 @@ import com.aitutor.backend.dto.student.StudentSubmitAnswerResponse;
 import com.aitutor.backend.dto.student.StudentWorkCompleteResponse;
 import com.aitutor.backend.dto.student.StudentWorkDetailResponse;
 import com.aitutor.backend.dto.student.StudentWorkResponse;
+import com.aitutor.backend.dto.student.StudentWorkSummaryResponse;
 import com.aitutor.backend.security.CustomUserDetails;
 import com.aitutor.backend.services.student.StudentExecutionService;
 import com.aitutor.backend.services.student.StudentWorkService;
@@ -92,5 +93,12 @@ public class StudentWorkController {
     public StudentWorkCompleteResponse completeWork(@PathVariable Long workId,
                                                     @AuthenticationPrincipal CustomUserDetails userDetails) {
         return studentExecutionService.complete(userDetails.getId(), workId);
+    }
+
+    /** Экран «Результаты»: агрегаты выполненной работы + длительность решения. */
+    @GetMapping("/student/work/{workId}/summary")
+    public StudentWorkSummaryResponse getSummary(@PathVariable Long workId,
+                                                 @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return studentExecutionService.getSummary(userDetails.getId(), workId);
     }
 }
