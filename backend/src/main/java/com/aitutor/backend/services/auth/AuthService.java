@@ -136,17 +136,24 @@ public class AuthService {
         log.info("Пароль успешно изменен для пользователя: id={}", user.getId());
     }
 
+    /**
+     * Строит AuthResponse: exp-claim токена и expiresAt в ответе вычисляются ОДИН раз,
+     * поэтому клиент видит ровно тот момент истечения, который зашит в токен.
+     */
     private AuthResponse buildAuthResponse(UserResponse user, UUID refreshToken) {
+        Instant expiresAt = accessTokenService.calculateExpiresAt();
         String token = accessTokenService.generateToken(
                 user.getUserName(),
                 user.getId(),
-                user.getEmail()
+                user.getEmail(),
+                user.getRole(),
+                expiresAt
         );
 
         return AuthResponse.builder()
                 .accessToken(token)
                 .refreshToken(refreshToken)
-                .expiresAt(accessTokenService.getExpiresAt())
+                .expiresAt(expiresAt)
                 .userName(user.getUserName())
                 .userId(user.getId())
                 .role(user.getRole())

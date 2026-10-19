@@ -9,7 +9,10 @@ spring:
 jwt:
   secret: ${JWT_SECRET:ipWZ09+ueVq9sN5DXICY33Z9s8wYB2qtfmdA9uP6BsfRmJEWzD3iljR1UHQsFN3ic3UxvTjCCa/kmcp5aG9Rfg==}
   token:
-    expiration: 24h
+    # Access-токен короткоживущий: украденный токен живёт не больше 15 минут,
+    # длинную сессию держит refresh-токен (ротация в /auth/refresh).
+    expiration: 15m
+  refresh-expiration: 30d
 
 app:
   frontend-base-url: "http://localhost:5173"

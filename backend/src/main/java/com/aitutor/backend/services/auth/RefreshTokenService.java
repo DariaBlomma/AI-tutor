@@ -1,5 +1,6 @@
 package com.aitutor.backend.services.auth;
 
+import com.aitutor.backend.configs.JwtProperties;
 import com.aitutor.backend.entities.RefreshToken;
 import com.aitutor.backend.entities.User;
 import com.aitutor.backend.exceptions.InvalidTokenException;
@@ -13,7 +14,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 @Slf4j
@@ -23,6 +23,7 @@ public class RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final UserRepository userRepository;
+    private final JwtProperties jwtProperties;
 
     @Transactional
     public UUID createRefreshToken(Long userId) {
@@ -34,7 +35,7 @@ public class RefreshTokenService {
         RefreshToken refreshToken = RefreshToken.builder()
                 .user(user)
                 .token(UUID.randomUUID())
-                .expiresAt(Instant.now().plus(30, ChronoUnit.DAYS))
+                .expiresAt(Instant.now().plus(jwtProperties.getRefreshExpiration()))
                 .revoked(false)
                 .build();
 
