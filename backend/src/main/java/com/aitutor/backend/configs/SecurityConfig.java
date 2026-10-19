@@ -64,13 +64,14 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
 
-                        // Справочники и банк заданий: читать могут все аутентифицированные,
-                        // создавать/менять/удалять — только учителя
-                        .requestMatchers(HttpMethod.GET, "/tasks/**", "/topics/**", "/task-types/**").authenticated()
-                        .requestMatchers("/tasks/**", "/topics/**", "/task-types/**").hasRole("TEACHER")
-
                         // Курсы — полностью закрытая зона учителя
                         .requestMatchers("/courses/**").hasRole("TEACHER")
+
+                        // Банк заданий и темы: читать может только учитель. Ученик получает
+                        // контент назначенных работ через /student/work/** (без correctAnswer).
+                        .requestMatchers("/tasks/**", "/topics/**").hasRole("TEACHER")
+                        .requestMatchers(HttpMethod.GET, "/task-types/**").authenticated()
+                        .requestMatchers("/task-types/**").hasRole("TEACHER")
 
                         .requestMatchers("/teacher/**").hasRole("TEACHER")
                         .requestMatchers("/student/**").hasRole("STUDENT")

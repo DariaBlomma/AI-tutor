@@ -2,8 +2,10 @@ package com.aitutor.backend.controllers;
 
 import com.aitutor.backend.dto.student.AssignTasksRequest;
 import com.aitutor.backend.dto.student.AssignmentResultResponse;
+import com.aitutor.backend.dto.student.StudentWorkDetailResponse;
 import com.aitutor.backend.dto.student.StudentWorkResponse;
 import com.aitutor.backend.security.CustomUserDetails;
+import com.aitutor.backend.services.student.StudentExecutionService;
 import com.aitutor.backend.services.student.StudentWorkService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ import java.util.List;
 public class StudentWorkController {
 
     private final StudentWorkService studentWorkService;
+    private final StudentExecutionService studentExecutionService;
 
     /**
      * Назначить конкретные задания списку учеников (опционально — с дедлайном).
@@ -53,5 +56,19 @@ public class StudentWorkController {
     @GetMapping("/student/work")
     public List<StudentWorkResponse> getMyWork(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return studentWorkService.getMyWork(userDetails.getId());
+    }
+
+    /** Старт выполнения: ASSIGNED → IN_PROGRESS; возвращает полный контент работы без эталонов. */
+    @PostMapping("/student/work/{workId}/start")
+    public StudentWorkDetailResponse startWork(@PathVariable Long workId,
+                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return studentExecutionService.start(userDetails.getId(), workId);
+    }
+
+    /** Экран выполнения: весь контент задания (без correctAnswer) + прогресс по пунктам. */
+    @GetMapping("/student/work/{workId}")
+    public StudentWorkDetailResponse getWorkDetail(@PathVariable Long workId,
+                                                   @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return studentExecutionService.getDetail(userDetails.getId(), workId);
     }
 }
