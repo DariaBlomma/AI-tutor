@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface StudentWorkItemProgressRepository extends JpaRepository<StudentWorkItemProgress, Long> {
@@ -24,4 +25,12 @@ public interface StudentWorkItemProgressRepository extends JpaRepository<Student
               AND t.deletedAt IS NULL
             """)
     List<StudentWorkItemProgress> findByWorkIdWithItem(@Param("workId") Long workId);
+
+    /** Строка прогресса одного пункта одной работы — для ленивого создания при первом submit. */
+    @Query("""
+            SELECT p FROM StudentWorkItemProgress p
+            WHERE p.studentWork.id = :workId AND p.taskItem.id = :itemId
+            """)
+    Optional<StudentWorkItemProgress> findByWorkAndItem(@Param("workId") Long workId,
+                                                        @Param("itemId") Long itemId);
 }

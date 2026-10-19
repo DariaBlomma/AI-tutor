@@ -2,6 +2,9 @@ package com.aitutor.backend.controllers;
 
 import com.aitutor.backend.dto.student.AssignTasksRequest;
 import com.aitutor.backend.dto.student.AssignmentResultResponse;
+import com.aitutor.backend.dto.student.StudentSubmitAnswerRequest;
+import com.aitutor.backend.dto.student.StudentSubmitAnswerResponse;
+import com.aitutor.backend.dto.student.StudentWorkCompleteResponse;
 import com.aitutor.backend.dto.student.StudentWorkDetailResponse;
 import com.aitutor.backend.dto.student.StudentWorkResponse;
 import com.aitutor.backend.security.CustomUserDetails;
@@ -70,5 +73,24 @@ public class StudentWorkController {
     public StudentWorkDetailResponse getWorkDetail(@PathVariable Long workId,
                                                    @AuthenticationPrincipal CustomUserDetails userDetails) {
         return studentExecutionService.getDetail(userDetails.getId(), workId);
+    }
+
+    /**
+     * Сдача ответа по одному пункту: фронт присылает только ответ ученика,
+     * вердикт выносит бэкенд (AnswerChecker). Эталонный ответ в ответе не отдаётся никогда.
+     */
+    @PostMapping("/student/work/{workId}/items/{itemId}/submit")
+    public StudentSubmitAnswerResponse submitItem(@PathVariable Long workId,
+                                                  @PathVariable Long itemId,
+                                                  @Valid @RequestBody StudentSubmitAnswerRequest request,
+                                                  @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return studentExecutionService.submit(userDetails.getId(), workId, itemId, request);
+    }
+
+    /** Завершение работы: COMPLETED + итоговая статистика. Только когда все пункты SOLVED (force нет). */
+    @PostMapping("/student/work/{workId}/complete")
+    public StudentWorkCompleteResponse completeWork(@PathVariable Long workId,
+                                                    @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return studentExecutionService.complete(userDetails.getId(), workId);
     }
 }

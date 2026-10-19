@@ -10,6 +10,8 @@ CREATE TABLE student_work_item_progress (
                                                 CHECK (status IN ('NOT_STARTED', 'IN_PROGRESS', 'SOLVED')),
                                             answer_attempts INT DEFAULT 0,
                                             hints_given INT DEFAULT 0,             -- Максимум 3
+                                            first_try_correct BOOLEAN NOT NULL DEFAULT FALSE,
+                                                                                   -- Верно с первой попытки (агрегируется в student_work при complete)
                                             student_answer VARCHAR(100),           -- Последний введенный ответ
                                             solved_at TIMESTAMP WITH TIME ZONE,
 
