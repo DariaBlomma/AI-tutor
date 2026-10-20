@@ -30,6 +30,11 @@ export interface LoginModel {
     password: string;
 }
 
+// POST /api/auth/forgot-password -> 204 No Content (см. ForgotPasswordRequest)
+export interface ForgotPasswordModel {
+    email: string;
+}
+
 export interface AuthResponse {
     accessToken: string;
     refreshToken: string;

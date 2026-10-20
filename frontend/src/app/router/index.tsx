@@ -31,7 +31,18 @@ const loginRoute = createRoute({
     component: loadLoginRoute,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, registerRoute, loginRoute]);
+async function loadForgotPasswordRoute() {
+    const { AuthForgotPasswordPage } = await import('@/auth/views/AuthForgotPasswordPage/AuthForgotPasswordPage.tsx');
+    return { default: AuthForgotPasswordPage };
+}
+
+const forgotPasswordRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/auth/forgot-password',
+    component: loadForgotPasswordRoute,
+});
+
+const routeTree = rootRoute.addChildren([indexRoute, registerRoute, loginRoute, forgotPasswordRoute]);
 
 export const router = createRouter({ routeTree });
 

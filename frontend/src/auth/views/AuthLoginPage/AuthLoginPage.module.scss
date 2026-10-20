@@ -39,3 +39,22 @@
     color: $pd;
   }
 }
+
+.navForgot {
+  position: absolute;
+  top: calc(50% + 320px);
+  left: 50%;
+  transform: translateX(-50%);
+  color: $p;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 22px;
+  text-align: center;
+  transition: color 0.2s;
+  white-space: nowrap;
+
+  &:hover {
+    color: $pd;
+  }
+}

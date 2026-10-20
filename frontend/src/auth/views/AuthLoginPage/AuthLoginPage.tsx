@@ -21,6 +21,10 @@ export function AuthLoginPage() {
             <Link to="/auth/register" className={styles.navRegister}>
                 Регистрация
             </Link>
+
+            <Link to="/auth/forgot-password" className={styles.navForgot}>
+                Забыли пароль?
+            </Link>
         </div>
     );
 }

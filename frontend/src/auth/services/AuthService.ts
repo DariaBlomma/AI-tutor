@@ -1,5 +1,5 @@
 import { api } from '@/core/api/AxiosInstance';
-import type {AuthError, AuthResponse, JwtTokenMin, LoginModel, SignUpModel} from "@/auth/types";
+import type {AuthError, AuthResponse, JwtTokenMin, LoginModel, SignUpModel, ForgotPasswordModel} from "@/auth/types";
 
 const ACCESS_KEY = 'token:access';
 const REFRESH_KEY = 'token:refresh';
@@ -74,6 +74,12 @@ export class AuthService {
         }
 
         return false;
+    }
+
+    // POST /api/auth/forgot-password -> 204 No Content.
+    // Бэк всегда отвечает нейтрально: существование аккаунта не раскрывается.
+    static async forgotPassword(data: ForgotPasswordModel): Promise<void> {
+        await api.post<void>('/auth/forgot-password', data);
     }
 
     static async signOut() {
