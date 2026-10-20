@@ -20,7 +20,18 @@ const registerRoute = createRoute({
     component: loadRegisterRoute,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, registerRoute]);
+async function loadLoginRoute() {
+    const { AuthLoginPage } = await import('@/auth/views/AuthLoginPage/AuthLoginPage.tsx');
+    return { default: AuthLoginPage };
+}
+
+const loginRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/auth/login',
+    component: loadLoginRoute,
+});
+
+const routeTree = rootRoute.addChildren([indexRoute, registerRoute, loginRoute]);
 
 export const router = createRouter({ routeTree });
 

@@ -25,7 +25,7 @@ export function AuthRegisterPage() {
                 onSubmit={handleSubmit}
             />
 
-            <Link to="/auth/register" className={styles.navLogin}>
+            <Link to="/auth/login" className={styles.navLogin}>
                 Войти
             </Link>
         </div>

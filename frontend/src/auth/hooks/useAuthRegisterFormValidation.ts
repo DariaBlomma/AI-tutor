@@ -1,7 +1,7 @@
 import { useFormWithValidation } from "@/shared/hooks/useFormWithValidation.ts";
-import type {RegisterFormData} from "@/auth/types";
+import type { RegisterFormData } from "@/auth/types";
 
-export function useRegisterForm() {
+export function useAuthRegisterFormValidation() {
     const { getFields, isFormInvalid, isFormValidAndTouched, validateForm, form, handleSubmit, watch } =
         useFormWithValidation<RegisterFormData>({
             initialValues: {
@@ -46,24 +46,20 @@ export function useRegisterForm() {
                     },
                 },
                 teacherCode: {
-                    // Обязателен только для STUDENT — на бэке поле опционально (undefined нет в контракте).
-                    validate: (value, values) => {
-                        if (values.role !== 'STUDENT') return true;
-                        if (!value.trim()) return 'Укажите код учителя';
-                        return /^T-[A-Za-z0-9]{6}$/.test(value.trim())
-                            || 'Формат кода: T-XXXXXX';
-                    },
+                    validate: (value, values) =>
+                        values.role !== 'STUDENT' || value.trim().length > 0
+                            ? true
+                            : 'Ученик обязан указать код учителя',
                 },
             },
         });
 
     const fields = getFields();
-    const role = watch('role');
 
     return {
         form,
         fields,
-        role,
+        watch,
         isFormInvalid,
         isFormValidAndTouched,
         validateForm,

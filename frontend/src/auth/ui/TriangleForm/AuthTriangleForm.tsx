@@ -1,9 +1,9 @@
 import { useState, type FormEvent } from 'react';
 import { useController } from 'react-hook-form';
 
-import { TrapezoidButton } from '@/shared/ui/TrapezoidButton/TrapezoidButton.tsx';
+import { BaseButtonTrapezoid } from '@/shared/ui-kit/BaseButtonTrapezoid/BaseButtonTrapezoid.tsx';
 import { AuthRoleSwitch } from '@/auth/ui/RoleSwitch/AuthRoleSwitch.tsx';
-import { useRegisterForm } from '@/auth/hooks/useRegisterForm.ts';
+import { useAuthRegisterFormValidation } from '@/auth/hooks/useAuthRegisterFormValidation.ts';
 import type { SignUpModel } from '@/auth/types/models';
 import type { RegisterFormData } from '@/auth/types/ui';
 
@@ -17,7 +17,7 @@ interface AuthTriangleFormProps {
 
 // Каркас страницы регистрации: два треугольника, поля формы, переключатель ролей.
 export function AuthTriangleForm({ serverError, isPending, onSubmit }: AuthTriangleFormProps) {
-    const { fields, form, handleSubmit } = useRegisterForm();
+    const { fields, form, handleSubmit } = useAuthRegisterFormValidation();
     const [showPass, setShowPass] = useState(false);
 
     // Роль живёт в форме через useController — единый источник состояния.
@@ -48,7 +48,7 @@ export function AuthTriangleForm({ serverError, isPending, onSubmit }: AuthTrian
 
             <div className={styles.btnRegister}>
                 {/* type="submit" через form attribute — кнопка вне <form> не нужна */}
-                <TrapezoidButton
+                <BaseButtonTrapezoid
                     label={isPending ? 'Отправка…' : 'Регистрация'}
                     variant="filled"
                     disabled={isPending}

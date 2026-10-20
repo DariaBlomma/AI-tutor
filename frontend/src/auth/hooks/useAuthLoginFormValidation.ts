@@ -1,7 +1,7 @@
 import { useFormWithValidation } from "@/shared/hooks/useFormWithValidation.ts";
-import type {LoginFormData} from "@/auth/types";
+import type { LoginFormData } from "@/auth/types";
 
-export function useLoginForm() {
+export function useAuthLoginFormValidation() {
     const { getFields, isFormInvalid, isFormValidAndTouched, validateForm, form, handleSubmit } =
         useFormWithValidation<LoginFormData>({
             initialValues: {

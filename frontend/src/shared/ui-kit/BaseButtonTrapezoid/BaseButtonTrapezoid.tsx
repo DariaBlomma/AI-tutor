@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 
-import styles from './TrapezoidButton.module.scss';
+import styles from './BaseButtonTrapezoid.module.scss';
 
-interface TrapezoidButtonProps {
+interface BaseButtonTrapezoidProps {
     label: string;
     variant: 'filled' | 'outline';
     disabled?: boolean;
@@ -14,7 +14,7 @@ interface TrapezoidButtonProps {
 // Трапеция из макета: скос слева, основание шире вершины.
 const PATH = 'M 23 0 L 257 0 L 280 36 L 0 36 Z';
 
-export function TrapezoidButton({ label, variant, disabled, type = 'button', onClick, children }: TrapezoidButtonProps) {
+export function BaseButtonTrapezoid({ label, variant, disabled, type = 'button', onClick, children }: BaseButtonTrapezoidProps) {
     return (
         <button
             type={type}
