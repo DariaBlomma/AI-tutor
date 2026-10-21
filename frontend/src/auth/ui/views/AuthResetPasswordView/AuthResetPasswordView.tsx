@@ -1,16 +1,14 @@
-import { Link } from '@tanstack/react-router';
+import {Link, useSearch} from '@tanstack/react-router';
 
-import { AuthResetPasswordForm } from '@/auth/ui/ResetPasswordForm/AuthResetPasswordForm.tsx';
-import { useAuthResetPassword } from '@/auth/hooks/useAuthResetPassword.ts';
+import { AuthResetPasswordForm } from 'src/auth/ui/ResetPasswordForm/AuthResetPasswordForm.tsx';
+import { useAuthResetPassword } from 'src/auth/hooks/useAuthResetPassword.ts';
 
-import styles from './AuthResetPasswordPage.module.scss';
+import styles from './AuthResetPasswordView.module.scss';
 
-interface AuthResetPasswordPageProps {
+export function AuthResetPasswordView() {
+    const search = useSearch({ from: '/auth/reset-password' }) as { token?: string };
     // token из query-параметра URL письма; при его отсутствии показываем ошибку
-    token: string | undefined;
-}
-
-export function AuthResetPasswordPage({ token }: AuthResetPasswordPageProps) {
+    const token = search?.token || "";
     const { resetPassword, isPending, serverError } = useAuthResetPassword(token ?? '');
 
     if (!token) {

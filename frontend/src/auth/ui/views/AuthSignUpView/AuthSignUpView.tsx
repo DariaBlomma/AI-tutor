@@ -4,9 +4,9 @@ import { AuthTriangleForm } from '@/auth/ui/TriangleForm/AuthTriangleForm.tsx';
 import { useAuthRegister } from '@/auth/hooks/useAuthRegister.ts';
 import type { SignUpModel } from '@/auth/types/models';
 
-import styles from './AuthRegisterPage.module.scss';
+import styles from './AuthSignUpView.module.scss';
 
-export function AuthRegisterPage() {
+export function AuthSignUpView() {
     const { register, isPending, serverError, isSuccess } = useAuthRegister();
 
     const handleSubmit = (payload: SignUpModel) => register(payload);

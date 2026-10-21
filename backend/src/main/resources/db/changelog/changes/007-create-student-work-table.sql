@@ -10,6 +10,7 @@ CREATE TABLE student_work (
                                   CHECK (status IN ('ASSIGNED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'EXPIRED')),
                               deadline TIMESTAMP WITH TIME ZONE,
                               started_at TIMESTAMP WITH TIME ZONE,
+                              created_at TIMESTAMP WITH TIME ZONE,
                               completed_at TIMESTAMP WITH TIME ZONE,
 
     -- Статистика для отчета

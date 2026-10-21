@@ -24,18 +24,11 @@ public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificat
      * Смешанным считается задание с 2+ АКТИВНЫМИ типами (неактивные/soft-deleted не считаются):
      * иначе деактивация одного из двух типов навсегда «ломает» строгий поиск по заданию.
      */
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("""
-            UPDATE Task t SET t.isMixed = (
-                SELECT COUNT(tt) FROM Task t2 JOIN t2.taskTypes tt
-                WHERE t2 = t AND tt.isActive = TRUE AND tt.deletedAt IS NULL
-            ) >= 2
-            WHERE t.deletedAt IS NULL
-              AND t.isMixed <> (
-                SELECT COUNT(tt2) FROM Task t3 JOIN t3.taskTypes tt2
-                WHERE t3 = t AND tt2.isActive = TRUE AND tt2.deletedAt IS NULL
-            ) >= 2
-            """)
+    @Modifying
+    @Query("UPDATE Task t SET t.isMixed = CASE " +
+            "WHEN (SELECT COUNT(tt) FROM Task t2 JOIN t2.taskTypes tt WHERE t2 = t AND tt.isActive = TRUE AND tt.deletedAt IS NULL) > 1 THEN true " +
+            "ELSE false END " +
+            "WHERE t.deletedAt IS NULL")
     void recalculateMixedFlags();
 
     /** Точечный пересчёт is_mixed для одного задания — вызывается при привязке/отвязке типов в TaskService. */

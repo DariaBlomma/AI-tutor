@@ -1,11 +1,14 @@
 import path from 'node:path';
-
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
+import tanstackRouter from '@tanstack/router-plugin/vite'; // <-- 1. ДОБАВИТЬ ИМПОРТ
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    tanstackRouter({ target: 'react', autoCodeSplitting: true }),
+    react(),
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -15,7 +18,6 @@ export default defineConfig({
     preprocessorOptions: {
       scss: {
         api: 'modern-compiler',
-        // @use '@/app/styles/variables' в *.module.scss
         importers: [
           {
             findFileUrl(url: string) {
@@ -29,6 +31,5 @@ export default defineConfig({
   },
   server: {
     port: 5173,
-    // Прокси не используем: API берётся напрямую из VITE_API_URL (см. core/api/AxiosInstance.ts).
   },
 });

@@ -200,7 +200,7 @@ public class TaskService {
         if (ids == null || ids.isEmpty()) {
             return new LinkedHashSet<>(); // темы опциональны
         }
-        List<Topic> found = topicRepository.findAllByIdAndDeletedAtIsNull(new ArrayList<>(ids));
+        List<Topic> found = topicRepository.findAllByIdInAndDeletedAtIsNull(new ArrayList<>(ids));
         if (found.size() != ids.size()) {
             throw new InvalidRequestException("Некоторые темы не найдены или удалены");
         }
@@ -211,7 +211,7 @@ public class TaskService {
         if (ids == null || ids.isEmpty()) {
             throw new InvalidRequestException("Задание должно иметь хотя бы один тип");
         }
-        List<TaskType> found = taskTypeRepository.findAllByIdAndDeletedAtIsNull(new ArrayList<>(ids));
+        List<TaskType> found = taskTypeRepository.findAllByIdInAndDeletedAtIsNull(new ArrayList<>(ids));
         if (found.size() != ids.size()) {
             throw new InvalidRequestException("Некоторые типы заданий не найдены или удалены");
         }

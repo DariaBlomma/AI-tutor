@@ -1,4 +1,4 @@
-@use '@/app/styles/variables' as *;
+@use '@/shared/styles/variables' as *;
 
 .page {
   display: flex;
@@ -21,19 +21,28 @@
   color: $c1;
 }
 
-.success {
+.navRegister {
   position: absolute;
-  top: 70px;
+  top: calc(50% + 295px);
   left: 50%;
   transform: translateX(-50%);
+  color: $p;
+  text-decoration: none;
   font-size: 14px;
-  color: $ok;
-  z-index: 30;
+  font-weight: 600;
+  line-height: 22px;
+  text-align: center;
+  transition: color 0.2s;
+  white-space: nowrap;
+
+  &:hover {
+    color: $pd;
+  }
 }
 
-.navLogin {
+.navForgot {
   position: absolute;
-  bottom: calc(50vh - 320px);
+  top: calc(50% + 320px);
   left: 50%;
   transform: translateX(-50%);
   color: $p;
