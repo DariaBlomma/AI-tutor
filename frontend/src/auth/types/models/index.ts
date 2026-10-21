@@ -35,6 +35,12 @@ export interface ForgotPasswordModel {
     email: string;
 }
 
+// POST /api/auth/reset-password -> 200 OK (см. ResetPasswordRequest)
+export interface ResetPasswordModel {
+    token: string;
+    newPassword: string;
+}
+
 export interface AuthResponse {
     accessToken: string;
     refreshToken: string;

@@ -23,3 +23,9 @@ export interface LoginFormData {
 export interface ForgotPasswordFormData {
     email: string;
 }
+
+// token приходит из query-параметра URL письма, не из полей формы
+export interface ResetPasswordFormData {
+    pass: string;
+    confirm: string;
+}

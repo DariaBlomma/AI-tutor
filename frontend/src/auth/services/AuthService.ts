@@ -1,5 +1,5 @@
 import { api } from '@/core/api/AxiosInstance';
-import type {AuthError, AuthResponse, JwtTokenMin, LoginModel, SignUpModel, ForgotPasswordModel} from "@/auth/types";
+import type {AuthError, AuthResponse, JwtTokenMin, LoginModel, SignUpModel, ForgotPasswordModel, ResetPasswordModel} from "@/auth/types";
 
 const ACCESS_KEY = 'token:access';
 const REFRESH_KEY = 'token:refresh';
@@ -80,6 +80,12 @@ export class AuthService {
     // Бэк всегда отвечает нейтрально: существование аккаунта не раскрывается.
     static async forgotPassword(data: ForgotPasswordModel): Promise<void> {
         await api.post<void>('/auth/forgot-password', data);
+    }
+
+    // POST /api/auth/reset-password -> 200 OK (см. ResetPasswordRequest).
+    // Бросает InvalidTokenException-ошибку бэка при недействительном/просроченном токене.
+    static async resetPassword(data: ResetPasswordModel): Promise<void> {
+        await api.post<void>('/auth/reset-password', data);
     }
 
     static async signOut() {

@@ -42,7 +42,22 @@ const forgotPasswordRoute = createRoute({
     component: loadForgotPasswordRoute,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, registerRoute, loginRoute, forgotPasswordRoute]);
+async function loadResetPasswordRoute() {
+    const { AuthResetPasswordPage } = await import('@/auth/views/AuthResetPasswordPage/AuthResetPasswordPage.tsx');
+    return { default: AuthResetPasswordPage };
+}
+
+// URL из письма: /auth/reset-password?token=... (см. EmailService на бэке)
+const resetPasswordRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/auth/reset-password',
+    component: loadResetPasswordRoute,
+    validateSearch: (search: Record<string, unknown>): { token?: string } => ({
+        token: typeof search.token === 'string' && search.token.length > 0 ? search.token : undefined,
+    }),
+});
+
+const routeTree = rootRoute.addChildren([indexRoute, registerRoute, loginRoute, forgotPasswordRoute, resetPasswordRoute]);
 
 export const router = createRouter({ routeTree });
 
