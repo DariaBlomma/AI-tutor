@@ -20,5 +20,7 @@ public class StudentItemProgressDto {
     private ItemProgressStatus status;
     private Integer answerAttempts;
     private Integer hintsGiven;
+    /** Сколько подсказок ещё можно запросить по пункту (0 — лимит исчерпан). */
+    private Integer hintsRemaining;
     private String lastAnswer;
 }

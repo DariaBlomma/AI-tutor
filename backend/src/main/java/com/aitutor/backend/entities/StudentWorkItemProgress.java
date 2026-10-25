@@ -50,6 +50,11 @@ public class StudentWorkItemProgress {
     @Builder.Default
     private Integer hintsGiven = 0;
 
+    /** Верно с первой попытки — честная метрика, агрегируется в student_work при complete. */
+    @Column(name = "first_try_correct", nullable = false)
+    @Builder.Default
+    private Boolean firstTryCorrect = false;
+
     /** Последний введённый учеником ответ (эталон НЕ храним — берём из TaskItem.correctAnswer). */
     @Column(name = "student_answer", length = 100)
     private String studentAnswer;
