@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from 'react';
 
-import { BaseButtonTrapezoid } from '@/shared/ui-kit/BaseButtonTrapezoid/BaseButtonTrapezoid.tsx';
-import { useAuthResetPasswordFormValidation } from '@/auth/hooks/useAuthResetPasswordFormValidation.ts';
-import type { ResetPasswordFormData } from '@/auth/types/ui';
+import { BaseButtonTrapezoid } from 'src/shared/ui-kit/BaseButtonTrapezoid/BaseButtonTrapezoid.tsx';
+import { useAuthResetPasswordFormValidation } from 'src/auth/hooks/useAuthResetPasswordFormValidation.ts';
+import type { ResetPasswordFormData } from 'src/auth/types/ui';
 
 import styles from './AuthResetPasswordForm.module.scss';
 

@@ -1,8 +1,8 @@
 import type { FormEvent } from 'react';
 
-import { BaseButtonTrapezoid } from '@/shared/ui-kit/BaseButtonTrapezoid/BaseButtonTrapezoid.tsx';
-import { useAuthForgotPasswordFormValidation } from '@/auth/hooks/useAuthForgotPasswordFormValidation.ts';
-import type { ForgotPasswordFormData } from '@/auth/types/ui';
+import { BaseButtonTrapezoid } from 'src/shared/ui-kit/BaseButtonTrapezoid/BaseButtonTrapezoid.tsx';
+import { useAuthForgotPasswordFormValidation } from 'src/auth/hooks/useAuthForgotPasswordFormValidation.ts';
+import type { ForgotPasswordFormData } from 'src/auth/types/ui';
 
 import styles from './AuthForgotPasswordForm.module.scss';
 

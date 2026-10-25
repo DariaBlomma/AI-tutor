@@ -1,4 +1,4 @@
-import type { UserRole } from '@/auth/types';
+import type { UserRole } from 'src/auth/types';
 
 import styles from './AuthRoleSwitch.module.scss';
 

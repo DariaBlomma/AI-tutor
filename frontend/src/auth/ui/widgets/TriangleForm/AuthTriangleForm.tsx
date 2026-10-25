@@ -1,11 +1,11 @@
 import { useState, type FormEvent } from 'react';
 import { useController } from 'react-hook-form';
 
-import { BaseButtonTrapezoid } from '@/shared/ui-kit/BaseButtonTrapezoid/BaseButtonTrapezoid.tsx';
-import { AuthRoleSwitch } from '@/auth/ui/RoleSwitch/AuthRoleSwitch.tsx';
-import { useAuthRegisterFormValidation } from '@/auth/hooks/useAuthRegisterFormValidation.ts';
-import type { SignUpModel } from '@/auth/types/models';
-import type { RegisterFormData } from '@/auth/types/ui';
+import { BaseButtonTrapezoid } from 'src/shared/ui-kit/BaseButtonTrapezoid/BaseButtonTrapezoid.tsx';
+import { AuthRoleSwitch } from 'src/auth/ui/widgets/RoleSwitch/AuthRoleSwitch.tsx';
+import { useAuthRegisterFormValidation } from 'src/auth/hooks/useAuthRegisterFormValidation.ts';
+import type { SignUpModel } from 'src/auth/types/models';
+import type { RegisterFormData } from 'src/auth/types/ui';
 
 import styles from './AuthTriangleForm.module.scss';
 

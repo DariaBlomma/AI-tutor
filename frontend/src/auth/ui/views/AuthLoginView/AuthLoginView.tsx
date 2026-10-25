@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 
-import { AuthLoginForm } from '@/auth/ui/LoginForm/AuthLoginForm.tsx';
+import { AuthLoginForm } from '../../widgets/LoginForm/AuthLoginForm.tsx';
 import { useAuthLogin } from '@/auth/hooks/useAuthLogin.ts';
 
 import styles from './AuthLoginView.module.scss';
@@ -18,13 +18,15 @@ export function AuthLoginView() {
                 onSubmit={(data) => login(data)}
             />
 
-            <Link to="/auth/sign-up" className={styles.navRegister}>
-                Регистрация
-            </Link>
+            <div className={styles.footerLinks}>
+                <Link to="/auth/sign-up" className={styles.navRegister}>
+                    Регистрация
+                </Link>
 
-            <Link to="/auth/forgot-password" className={styles.navForgot}>
-                Забыли пароль?
-            </Link>
+                <Link to="/auth/forgot-password" className={styles.navForgot}>
+                    Забыли пароль?
+                </Link>
+            </div>
         </div>
     );
 }

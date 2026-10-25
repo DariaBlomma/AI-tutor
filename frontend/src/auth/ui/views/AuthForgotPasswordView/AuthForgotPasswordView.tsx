@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 
-import { AuthForgotPasswordForm } from 'src/auth/ui/ForgotPasswordForm/AuthForgotPasswordForm.tsx';
+import { AuthForgotPasswordForm } from '../../widgets/ForgotPasswordForm/AuthForgotPasswordForm.tsx';
 import { useAuthForgotPassword } from 'src/auth/hooks/useAuthForgotPassword.ts';
 
 import styles from './AuthForgotPasswordView.module.scss';

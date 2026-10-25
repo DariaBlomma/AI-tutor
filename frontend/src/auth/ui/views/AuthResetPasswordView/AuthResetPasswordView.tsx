@@ -1,6 +1,6 @@
 import {Link, useSearch} from '@tanstack/react-router';
 
-import { AuthResetPasswordForm } from 'src/auth/ui/ResetPasswordForm/AuthResetPasswordForm.tsx';
+import { AuthResetPasswordForm } from '../../widgets/ResetPasswordForm/AuthResetPasswordForm.tsx';
 import { useAuthResetPassword } from 'src/auth/hooks/useAuthResetPassword.ts';
 
 import styles from './AuthResetPasswordView.module.scss';
