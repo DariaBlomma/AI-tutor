@@ -1,0 +1,77 @@
+.wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.input {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  outline: none;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--c1, #F5F5F5);
+  text-align: center;
+  width: 200px;
+  caret-color: var(--p, #9D7CF2);
+  padding: 8px 0;
+  // Добавляем transition для background-color, чтобы предотвратить мерцание при автозаполнении
+  transition: border-color 0.2s ease, background-color 5000s ease-in-out 0s;
+
+  &::placeholder {
+    color: var(--c3, #9B9B9B);
+    font-weight: 400;
+    text-align: center;
+  }
+
+  &:hover {
+    border-bottom-color: var(--pl, #B8A4F7);
+  }
+
+  &:focus {
+    border-bottom-color: var(--p, #9D7CF2);
+  }
+
+  // ==========================================
+  // 🛡️ МАГИЯ ПРОТИВ АВТОЗАПОЛНЕНИЯ БРАУЗЕРА 🛡️
+  // ==========================================
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus,
+  &:-webkit-autofill:active {
+    // 1. Огромная внутренняя тень цвета фона страницы перекрывает белый/желтый фон браузера
+    -webkit-box-shadow: 0 0 0 1000px var(--bg, #0F0F0F) inset !important;
+    box-shadow: 0 0 0 1000px var(--bg, #0F0F0F) inset !important;
+
+    // 2. Принудительно задаем цвет текста (иначе браузер сделает его черным)
+    -webkit-text-fill-color: var(--c1, #F5F5F5) !important;
+
+    // 3. Бесконечная задержка перехода фона "ломает" попытку браузера отрисовать свой цвет
+    transition: background-color 5000s ease-in-out 0s !important;
+  }
+}
+
+.hasError .input {
+  border-bottom-color: #ff4d4f !important;
+
+  // Если есть ошибка, автозаполнение тоже должно иметь прозрачный/темный фон
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus,
+  &:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px var(--bg, #0F0F0F) inset !important;
+    box-shadow: 0 0 0 1000px var(--bg, #0F0F0F) inset !important;
+    -webkit-text-fill-color: #ff4d4f !important; // Текст ошибки красный
+  }
+}
+
+.errorMessage {
+  color: #ff4d4f;
+  font-size: 12px;
+  margin-top: 4px;
+  text-align: center;
+  min-height: 16px;
+}
