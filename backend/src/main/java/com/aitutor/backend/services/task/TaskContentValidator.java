@@ -1,7 +1,7 @@
 package com.aitutor.backend.services.task;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import com.aitutor.backend.exceptions.InvalidRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -180,7 +180,8 @@ public class TaskContentValidator {
 
     private void checkKnownFields(JsonNode node, String format, String... allowed) {
         java.util.Set<String> allowedSet = java.util.Set.of(allowed);
-        node.fieldNames().forEachRemaining(name -> {
+        node.properties().forEach(entry -> {
+            String name = entry.getKey();
             if (!allowedSet.contains(name)) {
                 throw new InvalidRequestException(
                         format + ": неизвестное поле content \"" + name + "\". Допустимо: " + String.join(", ", allowed));
