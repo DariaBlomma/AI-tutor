@@ -1,13 +1,12 @@
 import { useState, type FormEvent } from 'react';
 import { useController } from 'react-hook-form';
 
-import { BaseButtonTrapezoid } from 'src/shared/ui-kit/BaseButtonTrapezoid/BaseButtonTrapezoid.tsx';
-import { AuthRoleSwitch } from 'src/auth/ui/widgets/RoleSwitch/AuthRoleSwitch.tsx';
-import { useAuthRegisterFormValidation } from 'src/auth/hooks/useAuthRegisterFormValidation.ts';
-import type { SignUpModel } from 'src/auth/types/models';
-import type { RegisterFormData } from 'src/auth/types/ui';
-
-import styles from './AuthTriangleForm.module.scss';
+import { BaseButtonTrapezoid } from '@/shared/ui-kit/BaseButtonTrapezoid/BaseButtonTrapezoid.tsx';
+import { AuthRoleSwitch } from '@/auth/ui/widgets/RoleSwitch/AuthRoleSwitch.tsx';
+import type { SignUpModel } from '@/auth/types/models';
+import type { RegisterFormData } from '@/auth/types/ui';
+import {useAuthRegisterFormValidation} from "@/auth/hooks/useAuthRegisterFormValidation.ts";
+import styles from './AuthSignUpForm.module.scss';
 
 interface AuthTriangleFormProps {
     serverError: string | null;
@@ -16,7 +15,7 @@ interface AuthTriangleFormProps {
 }
 
 // Каркас страницы регистрации: два треугольника, поля формы, переключатель ролей.
-export function AuthTriangleForm({ serverError, isPending, onSubmit }: AuthTriangleFormProps) {
+export function AuthSignUpForm({ serverError, isPending, onSubmit }: AuthTriangleFormProps) {
     const { fields, form, handleSubmit } = useAuthRegisterFormValidation();
     const [showPass, setShowPass] = useState(false);
 
@@ -41,7 +40,7 @@ export function AuthTriangleForm({ serverError, isPending, onSubmit }: AuthTrian
 
     return (
         <form className={styles.wrap} onSubmit={(e: FormEvent) => void onFormSubmit(e)}>
-            <svg className={styles.triSvg} viewBox="0 0 320 520">
+            <svg className={styles.triSvg} viewBox="0 0 320 480">
                 <polygon className={styles.triPath} points="160,260 20,40 300,40" />
                 <polygon className={styles.triPath} points="160,260 300,480 20,480" />
             </svg>

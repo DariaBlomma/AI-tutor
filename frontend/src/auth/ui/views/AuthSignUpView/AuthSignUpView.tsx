@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 
-import { AuthTriangleForm } from '../../widgets/TriangleForm/AuthTriangleForm.tsx';
+import { AuthSignUpForm } from '../../widgets/SignUpForm/AuthSignUpForm.tsx';
 import { useAuthRegister } from '@/auth/hooks/useAuthRegister.ts';
 import type { SignUpModel } from '@/auth/types/models';
 
@@ -19,7 +19,7 @@ export function AuthSignUpView() {
                 <p className={styles.success}>Регистрация завершена. Перенаправление…</p>
             )}
 
-            <AuthTriangleForm
+            <AuthSignUpForm
                 serverError={serverError}
                 isPending={isPending}
                 onSubmit={handleSubmit}

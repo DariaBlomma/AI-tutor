@@ -21,7 +21,7 @@ export function AuthLoginForm({ serverError, isPending, onSubmit }: AuthLoginFor
 
     return (
         <form className={styles.wrap} onSubmit={(e: FormEvent) => void onFormSubmit(e)}>
-            <svg className={styles.triSvg} viewBox="0 0 320 520">
+            <svg className={styles.triSvg} viewBox="0 0 320 480">
                 <polygon className={styles.triPath} points="160,260 20,40 300,40" />
                 <polygon className={styles.triPath} points="160,260 300,480 20,480" />
             </svg>
