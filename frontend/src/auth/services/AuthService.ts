@@ -88,6 +88,20 @@ export class AuthService {
         await api.post<void>('/auth/reset-password', data);
     }
 
+    // Проверяет сессию при входе на сайт: если access-токен просрочен, пытается обновить его.
+    // Возвращает true, если сессия активна; false — если нет (токены очищены).
+    static async checkSession(): Promise<boolean> {
+        if (!this.token?.access) return false;
+
+        if (this.isAuthenticated) return true;
+
+        const refreshed = await this.refreshToken();
+        if (!refreshed) {
+            this.removeToken();
+        }
+        return refreshed;
+    }
+
     static async signOut() {
         try {
             await api.delete('/auth/token');
