@@ -5,14 +5,17 @@ import type { AppBottomNavActive } from '@/shared/widgets/AppBottomNav/types';
 // Активный пункт нижнего меню по текущему маршруту.
 const NAV_ACTIVE_BY_PATH: Record<string, AppBottomNavActive> = {
     '/': 'home',
-    '/reports': 'reports',
+    '/teacher/reports': 'reports',
     '/bank': 'bank',
     '/profile': 'profile',
 };
 
 export function LayoutRoot() {
     const pathname = useLocation({ select: (location) => location.pathname });
-    const navActive = NAV_ACTIVE_BY_PATH[pathname];
+    // Дочерние маршруты наследуют активный пункт родителя (уровень 2/3 отчётов -> «Отчёты»).
+    const navActive =
+        NAV_ACTIVE_BY_PATH[pathname] ??
+        Object.entries(NAV_ACTIVE_BY_PATH).find(([path]) => path !== '/' && pathname.startsWith(`${path}/`))?.[1];
 
     return (
         <main className="main">

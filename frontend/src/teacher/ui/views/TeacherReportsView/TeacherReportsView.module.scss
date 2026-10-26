@@ -1,0 +1,119 @@
+.page {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 20px;
+  padding-bottom: 80px; // безопасная зона под фиксированным нижним меню
+  min-height: 100vh;
+  position: relative;
+  color: var(--c1);
+}
+
+.header {
+  margin-bottom: 32px;
+
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+}
+
+.section {
+  margin-bottom: 32px;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.studentList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.studentItem {
+  background: rgba(157, 124, 242, 0.05);
+  border: 1px solid rgba(157, 124, 242, 0.2);
+  border-radius: 6px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:active {
+    transform: scale(0.98);
+    background: rgba(157, 124, 242, 0.1);
+  }
+}
+
+.studentAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  background: var(--p);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  flex-shrink: 0;
+  color: var(--c1);
+}
+
+.studentInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.studentName {
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.studentEmail {
+  color: var(--c3);
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.studentMetrics {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.metric {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.metricLabel {
+  color: var(--c3);
+}
+
+.metricValue {
+  color: var(--c1);
+  font-weight: 600;
+
+  &.highlight {
+    color: var(--p);
+  }
+}
+
+.notice {
+  color: var(--c3);
+  font-size: 14px;
+}

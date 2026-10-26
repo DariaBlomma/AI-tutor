@@ -42,6 +42,8 @@ export function TeacherHomeView() {
                         </div>
                     </div>
 
+                    {/* Треугольники статистики должны быть гораздо ближе друг к другу.
+                        Наружние углы по границе верхних элементов. */}
                     <div className={styles.statsGrid}>
                         {/* Первый треугольник: △ (вершиной вверх) — Уроков */}
                         <div className={styles.statCard}>

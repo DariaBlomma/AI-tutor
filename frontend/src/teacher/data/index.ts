@@ -1,4 +1,4 @@
-import type { TeacherLesson } from '../types';
+import type { TeacherLesson } from '@/teacher/types/home';
 
 // Мок-данные главной учителя: заглушки до будущих релизов (см. SHOW_TMP_DATA).
 export const MOCK_TEACHER_LESSONS: TeacherLesson[] = [

@@ -1,5 +1,4 @@
 // Контракты бэкенда (см. com.aitutor.backend.dto.auth).
-
 import type { UserRole } from '@/user/types';
 
 export type { UserRole };
