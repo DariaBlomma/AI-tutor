@@ -1,6 +1,7 @@
 // Контракты бэкенда (см. com.aitutor.backend.dto.auth).
+import type { UserRole } from '@/user/types';
 
-export type UserRole = 'TEACHER' | 'STUDENT';
+export type { UserRole };
 
 export interface JwtTokenMin {
     access: string;

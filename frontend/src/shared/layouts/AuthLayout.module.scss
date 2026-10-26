@@ -4,38 +4,38 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   min-height: 100vh;
   max-width: 480px;
   margin: 0 auto;
-  padding: 20px;
-  position: relative;
+  padding: 40px 20px;
 }
 
 .title {
   font-size: 32px;
   font-weight: 700;
-  margin-bottom: 24px;
+  margin: 0 0 24px;
   letter-spacing: -0.5px;
   text-align: center;
   color: $c1;
 }
 
-.success {
-  position: absolute;
-  top: 70px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 14px;
-  color: $ok;
-  z-index: 30;
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
 }
 
-.navLogin {
-  position: absolute;
-  bottom: calc(50vh - 320px);
-  left: 50%;
-  transform: translateX(-50%);
+.footerLinks {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 300px;
+  margin-top: 24px;
+}
+
+.navLink {
   color: $p;
   text-decoration: none;
   font-size: 14px;
@@ -48,4 +48,15 @@
   &:hover {
     color: $pd;
   }
+}
+
+.notice {
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+  color: $pl;
+}
+
+.noticeError {
+  color: $err;
 }

@@ -1,4 +1,4 @@
-import type { UserRole } from '@/auth/types';
+import type { UserRole } from '@/user/types';
 
 // Типы форм: состав полей может отличаться от контракта бэкенда
 // (например, подтверждение пароля живёт только на фронте).

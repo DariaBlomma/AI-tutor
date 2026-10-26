@@ -1,9 +1,10 @@
 import { api } from '@/core/api/AxiosInstance';
-import type {AuthError, AuthResponse, JwtTokenMin, LoginModel, SignUpModel, ForgotPasswordModel, ResetPasswordModel} from "@/auth/types";
+import type {AuthError, AuthResponse, JwtTokenMin, LoginModel, SignUpModel, ForgotPasswordModel, ResetPasswordModel, UserRole} from "@/auth/types";
 
 const ACCESS_KEY = 'token:access';
 const REFRESH_KEY = 'token:refresh';
 const EXPIRES_KEY = 'token:expires';
+const ROLE_KEY = 'token:role';
 const ERROR_KEY = 'auth:error';
 
 export class AuthService {
@@ -29,6 +30,11 @@ export class AuthService {
         localStorage.setItem(ACCESS_KEY, this.token.access);
         localStorage.setItem(REFRESH_KEY, this.token.refresh);
         localStorage.setItem(EXPIRES_KEY, this.token.expires);
+
+        // Роль из AuthResponse сохраняем для редиректа по роли (учитель/ученик).
+        if (authResponse.role) {
+            localStorage.setItem(ROLE_KEY, authResponse.role);
+        }
     }
 
     static removeToken() {
@@ -36,6 +42,7 @@ export class AuthService {
         localStorage.removeItem(ACCESS_KEY);
         localStorage.removeItem(REFRESH_KEY);
         localStorage.removeItem(EXPIRES_KEY);
+        localStorage.removeItem(ROLE_KEY);
     }
 
     static setError(error: AuthError) {
@@ -56,6 +63,44 @@ export class AuthService {
     static get isAuthenticated(): boolean {
         if (!this.token?.access || !this.token.expires) return false;
         return Date.parse(this.token.expires) > Date.now();
+    }
+
+    // Роль пользователя: из AuthResponse (localStorage) либо из access-токена (JWT claim "role").
+    static getUserRole(): UserRole | undefined {
+        const stored = localStorage.getItem(ROLE_KEY);
+        if (stored === 'TEACHER' || stored === 'STUDENT') {
+            return stored;
+        }
+
+        const payload = this.decodeJwtPayload(this.token?.access);
+        if (!payload) return undefined;
+
+        const role = (payload.role ?? payload.authorities) as string | string[] | undefined;
+        const value = Array.isArray(role) ? role[0] : role;
+        if (!value) return undefined;
+
+        const normalized = value.replace(/^ROLE_/, '').toUpperCase();
+        return normalized === 'TEACHER' || normalized === 'STUDENT'
+            ? normalized
+            : undefined;
+    }
+
+    private static decodeJwtPayload(token?: string): Record<string, unknown> | undefined {
+        try {
+            const payload = token?.split('.')[1];
+            if (!payload) return undefined;
+
+            const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+            const json = decodeURIComponent(
+                atob(base64)
+                    .split('')
+                    .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                    .join(''),
+            );
+            return JSON.parse(json) as Record<string, unknown>;
+        } catch {
+            return undefined;
+        }
     }
 
     static async signUp(data: SignUpModel) {
@@ -88,9 +133,24 @@ export class AuthService {
         await api.post<void>('/auth/reset-password', data);
     }
 
+    // Проверяет сессию при входе на сайт: если access-токен просрочен, пытается обновить его.
+    // Возвращает true, если сессия активна; false — если нет (токены очищены).
+    static async checkSession(): Promise<boolean> {
+        if (!this.token?.access) return false;
+
+        if (this.isAuthenticated) return true;
+
+        const refreshed = await this.refreshToken();
+        if (!refreshed) {
+            this.removeToken();
+        }
+        return refreshed;
+    }
+
     static async signOut() {
         try {
-            await api.delete('/auth/token');
+            // POST /api/auth/logout с refresh-токеном в теле (см. AuthController.logout).
+            await api.post('/auth/logout', { refreshToken: this.token?.refresh });
         } catch {
             // ignore
         }
@@ -102,7 +162,7 @@ export class AuthService {
 
         try {
             const response = await api.post<AuthResponse>('/auth/refresh', {
-                refresh: this.token.refresh,
+                refreshToken: this.token.refresh,
             });
 
             if (response.data) {

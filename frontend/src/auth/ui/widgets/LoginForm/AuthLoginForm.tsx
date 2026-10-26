@@ -3,6 +3,8 @@ import { type FormEvent } from 'react';
 import { BaseButtonTrapezoid } from '@/shared/ui-kit/BaseButtonTrapezoid/BaseButtonTrapezoid.tsx';
 import { BaseInputText } from '@/shared/ui-kit/BaseInputText/BaseInputText.tsx';
 import { BaseInputPassword } from '@/shared/ui-kit/BaseInputPassword/BaseInputPassword.tsx';
+import { AuthTriangleFormLayout } from '@/auth/layouts/AuthTriangleFormLayout/AuthTriangleFormLayout.tsx';
+import { layoutFieldClass } from '@/auth/layouts/AuthTriangleFormLayout/layoutFieldClass';
 import { useAuthLoginFormValidation } from '@/auth/hooks/useAuthLoginFormValidation.ts';
 import type { LoginFormData } from '@/auth/types/ui';
 
@@ -20,24 +22,20 @@ export function AuthLoginForm({ serverError, isPending, onSubmit }: AuthLoginFor
     const onFormSubmit = handleSubmit((data) => onSubmit(data));
 
     return (
-        <form className={styles.wrap} onSubmit={(e: FormEvent) => void onFormSubmit(e)}>
-            <svg className={styles.triSvg} viewBox="0 0 320 480">
-                <polygon className={styles.triPath} points="160,260 20,40 300,40" />
-                <polygon className={styles.triPath} points="160,260 300,480 20,480" />
-            </svg>
-
-            <div className={styles.btnLogin}>
+        <AuthTriangleFormLayout
+            onSubmit={(e: FormEvent) => void onFormSubmit(e)}
+            button={
                 <BaseButtonTrapezoid
                     label={isPending ? 'Отправка…' : 'Войти'}
                     variant="filled"
                     disabled={isPending}
                     type="submit"
                 />
-            </div>
-
+            }
+        >
             {/* Поле логина */}
             <BaseInputText
-                className={styles.inputUser}
+                className={`${layoutFieldClass} ${styles.inputUser}`}
                 placeholder="Логин"
                 autoComplete="username"
                 {...fields.userName.props}
@@ -45,7 +43,7 @@ export function AuthLoginForm({ serverError, isPending, onSubmit }: AuthLoginFor
 
             {/* Поле пароля с встроенной иконкой глаза */}
             <BaseInputPassword
-                className={styles.inputPass}
+                className={`${layoutFieldClass} ${styles.inputPass}`}
                 placeholder="Пароль"
                 autoComplete="current-password"
                 {...fields.password.props}
@@ -57,6 +55,6 @@ export function AuthLoginForm({ serverError, isPending, onSubmit }: AuthLoginFor
                     <p className={styles.serverError}>{serverError}</p>
                 </div>
             )}
-        </form>
+        </AuthTriangleFormLayout>
     );
 }
