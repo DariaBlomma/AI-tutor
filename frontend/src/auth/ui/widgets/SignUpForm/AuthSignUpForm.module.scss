@@ -1,56 +1,5 @@
 @use '@/shared/styles/variables' as *;
 
-.wrap {
-  position: relative;
-  width: 320px;
-  height: 520px;
-}
-
-.triSvg {
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 1;
-}
-
-.triPath {
-  fill: none;
-  stroke: $p;
-  stroke-width: 4;
-  stroke-linejoin: round;
-  stroke-linecap: round;
-  filter: drop-shadow(0 4px 12px rgba(157, 124, 242, 0.15));
-}
-
-.field {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  background: transparent;
-  border: none;
-  outline: none;
-  font-size: 16px;
-  font-weight: 500;
-  color: $c1;
-  text-align: center;
-  width: 200px;
-  caret-color: $p;
-  z-index: 5;
-
-  &::placeholder {
-    color: $c3;
-    font-weight: 400;
-    text-align: center;
-  }
-
-  &[aria-invalid='true'] {
-    color: $err;
-  }
-}
-
 /* Порядок полей в верхнем треугольнике (как в макете) */
 .inputPass { top: 56px; }
 .inputConfirm { top: 82px; }
@@ -58,13 +7,6 @@
 .inputFirst { top: 134px; }
 .inputLast { top: 160px; }
 .inputEmail { top: 186px; }
-
-.btnRegister {
-  position: absolute;
-  top: 0;
-  left: 20px;
-  z-index: 10;
-}
 
 .btnCodeWrap {
   position: absolute;
@@ -111,24 +53,4 @@
       color: $err;
     }
   }
-}
-
-.errors {
-  position: absolute;
-  top: 530px;
-  left: 0;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  z-index: 20;
-}
-
-.serverError,
-.fieldError {
-  font-size: 13px;
-  line-height: 18px;
-  color: $err;
-  text-align: center;
 }

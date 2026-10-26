@@ -1,28 +1,40 @@
 import { Link } from '@tanstack/react-router';
 
+import { AuthLayout } from '@/shared/layouts/AuthLayout.tsx';
 import { AuthForgotPasswordForm } from '../../widgets/ForgotPasswordForm/AuthForgotPasswordForm.tsx';
-import { useAuthForgotPassword } from 'src/auth/hooks/useAuthForgotPassword.ts';
+import { useAuthForgotPassword } from '@/auth/hooks/useAuthForgotPassword.ts';
 
-import styles from './AuthForgotPasswordView.module.scss';
+import layoutStyles from '@/shared/layouts/AuthLayout.module.scss';
 
 export function AuthForgotPasswordView() {
     const { forgotPassword, isPending, serverError, isSent } = useAuthForgotPassword();
 
     return (
-        <div className={styles.page}>
-            <h1 className={styles.title}>Восстановление пароля</h1>
-
+        <AuthLayout
+            title="Восстановление пароля"
+            notice={
+                <>
+                    {/* Сообщение об успехе: существование аккаунта не раскрываем */}
+                    {isSent && (
+                        <p className={layoutStyles.notice}>
+                            Если пользователь с таким email существует,<br />инструкция отправлена на почту
+                        </p>
+                    )}
+                    {serverError && (
+                        <p className={`${layoutStyles.notice} ${layoutStyles.noticeError}`}>{serverError}</p>
+                    )}
+                </>
+            }
+            footer={
+                <Link to="/auth/login" className={layoutStyles.navLink}>
+                    Вернуться ко входу
+                </Link>
+            }
+        >
             <AuthForgotPasswordForm
                 isPending={isPending}
-                isSent={isSent}
                 onSubmit={(data) => forgotPassword(data)}
             />
-
-            {serverError && <p className={styles.serverError}>{serverError}</p>}
-
-            <Link to="/auth/login" className={styles.navLogin}>
-                Вернуться ко входу
-            </Link>
-        </div>
+        </AuthLayout>
     );
 }

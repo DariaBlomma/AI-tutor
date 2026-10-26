@@ -1,32 +1,34 @@
 import { Link } from '@tanstack/react-router';
 
+import { AuthLayout } from '@/shared/layouts/AuthLayout.tsx';
 import { AuthLoginForm } from '../../widgets/LoginForm/AuthLoginForm.tsx';
 import { useAuthLogin } from '@/auth/hooks/useAuthLogin.ts';
 
-import styles from './AuthLoginView.module.scss';
+import layoutStyles from '@/shared/layouts/AuthLayout.module.scss';
 
 export function AuthLoginView() {
     const { login, isPending, serverError } = useAuthLogin();
 
     return (
-        <div className={styles.page}>
-            <h1 className={styles.title}>TutorAI</h1>
+        <AuthLayout
+            title="TutorAI"
+            footer={
+                <>
+                    <Link to="/auth/sign-up" className={layoutStyles.navLink}>
+                        Регистрация
+                    </Link>
 
+                    <Link to="/auth/forgot-password" className={layoutStyles.navLink}>
+                        Забыли пароль?
+                    </Link>
+                </>
+            }
+        >
             <AuthLoginForm
                 serverError={serverError}
                 isPending={isPending}
                 onSubmit={(data) => login(data)}
             />
-
-            <div className={styles.footerLinks}>
-                <Link to="/auth/sign-up" className={styles.navRegister}>
-                    Регистрация
-                </Link>
-
-                <Link to="/auth/forgot-password" className={styles.navForgot}>
-                    Забыли пароль?
-                </Link>
-            </div>
-        </div>
+        </AuthLayout>
     );
 }

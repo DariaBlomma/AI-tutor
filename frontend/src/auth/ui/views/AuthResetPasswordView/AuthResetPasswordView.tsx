@@ -1,46 +1,56 @@
-import {Link, useSearch} from '@tanstack/react-router';
+import { Link, useSearch } from '@tanstack/react-router';
 
+import { AuthLayout } from '@/shared/layouts/AuthLayout.tsx';
 import { AuthResetPasswordForm } from '../../widgets/ResetPasswordForm/AuthResetPasswordForm.tsx';
-import { useAuthResetPassword } from 'src/auth/hooks/useAuthResetPassword.ts';
+import { useAuthResetPassword } from '@/auth/hooks/useAuthResetPassword.ts';
 
-import styles from './AuthResetPasswordView.module.scss';
+import layoutStyles from '@/shared/layouts/AuthLayout.module.scss';
 
 export function AuthResetPasswordView() {
     const search = useSearch({ from: '/auth/reset-password' }) as { token?: string };
     // token из query-параметра URL письма; при его отсутствии показываем ошибку
-    const token = search?.token || "";
-    const { resetPassword, isPending, serverError } = useAuthResetPassword(token ?? '');
+    const token = search?.token || '';
+    const { resetPassword, isPending, serverError } = useAuthResetPassword(token);
 
     if (!token) {
         return (
-            <div className={styles.page}>
-                <h1 className={styles.title}>Сброс пароля</h1>
-
-                <p className={styles.tokenError}>
-                    Ссылка недействительна: отсутствует токен восстановления.<br />
-                    Запросите восстановление пароля заново.
-                </p>
-
-                <Link to="/auth/forgot-password" className={styles.navLink}>
-                    Восстановить пароль
-                </Link>
-            </div>
+            <AuthLayout
+                title="Сброс пароля"
+                notice={
+                    <p className={`${layoutStyles.notice} ${layoutStyles.noticeError}`}>
+                        Ссылка недействительна: отсутствует токен восстановления.<br />
+                        Запросите восстановление пароля заново.
+                    </p>
+                }
+                footer={
+                    <Link to="/auth/forgot-password" className={layoutStyles.navLink}>
+                        Восстановить пароль
+                    </Link>
+                }
+            >
+                {null}
+            </AuthLayout>
         );
     }
 
     return (
-        <div className={styles.page}>
-            <h1 className={styles.title}>Сброс пароля</h1>
-
+        <AuthLayout
+            title="Сброс пароля"
+            notice={
+                serverError ? (
+                    <p className={`${layoutStyles.notice} ${layoutStyles.noticeError}`}>{serverError}</p>
+                ) : undefined
+            }
+            footer={
+                <Link to="/auth/login" className={layoutStyles.navLink}>
+                    Вернуться ко входу
+                </Link>
+            }
+        >
             <AuthResetPasswordForm
-                serverError={serverError}
                 isPending={isPending}
                 onSubmit={(data) => resetPassword(data)}
             />
-
-            <Link to="/auth/login" className={styles.navLink}>
-                Вернуться ко входу
-            </Link>
-        </div>
+        </AuthLayout>
     );
 }
