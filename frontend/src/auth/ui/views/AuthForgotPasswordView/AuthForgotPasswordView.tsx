@@ -1,10 +1,10 @@
 import { Link } from '@tanstack/react-router';
 
-import { AuthLayout } from '@/shared/layouts/AuthLayout.tsx';
+import { AuthLayout } from '../../layouts/AuthLayout/AuthLayout.tsx';
 import { AuthForgotPasswordForm } from '../../widgets/ForgotPasswordForm/AuthForgotPasswordForm.tsx';
 import { useAuthForgotPassword } from '@/auth/hooks/useAuthForgotPassword.ts';
 
-import layoutStyles from '@/shared/layouts/AuthLayout.module.scss';
+import layoutStyles from '../../layouts/AuthLayout/AuthLayout.module.scss';
 
 export function AuthForgotPasswordView() {
     const { forgotPassword, isPending, serverError, isSent } = useAuthForgotPassword();

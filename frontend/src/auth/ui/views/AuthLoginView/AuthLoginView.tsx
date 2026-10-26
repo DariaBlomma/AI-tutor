@@ -1,10 +1,10 @@
 import { Link } from '@tanstack/react-router';
 
-import { AuthLayout } from '@/shared/layouts/AuthLayout.tsx';
+import { AuthLayout } from '../../layouts/AuthLayout/AuthLayout.tsx';
 import { AuthLoginForm } from '../../widgets/LoginForm/AuthLoginForm.tsx';
 import { useAuthLogin } from '@/auth/hooks/useAuthLogin.ts';
 
-import layoutStyles from '@/shared/layouts/AuthLayout.module.scss';
+import layoutStyles from '../../layouts/AuthLayout/AuthLayout.module.scss';
 
 export function AuthLoginView() {
     const { login, isPending, serverError } = useAuthLogin();

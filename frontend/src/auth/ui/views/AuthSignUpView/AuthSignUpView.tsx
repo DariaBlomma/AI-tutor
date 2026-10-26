@@ -1,11 +1,11 @@
 import { Link } from '@tanstack/react-router';
 
-import { AuthLayout } from '@/shared/layouts/AuthLayout.tsx';
+import { AuthLayout } from '../../layouts/AuthLayout/AuthLayout.tsx';
 import { AuthSignUpForm } from '../../widgets/SignUpForm/AuthSignUpForm.tsx';
 import { useAuthRegister } from '@/auth/hooks/useAuthRegister.ts';
 import type { SignUpModel } from '@/auth/types/models';
 
-import layoutStyles from '@/shared/layouts/AuthLayout.module.scss';
+import layoutStyles from '../../layouts/AuthLayout/AuthLayout.module.scss';
 
 export function AuthSignUpView() {
     const { register, isPending, serverError, isSuccess } = useAuthRegister();

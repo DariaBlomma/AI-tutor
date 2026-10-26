@@ -3,8 +3,8 @@ import { type FormEvent } from 'react';
 import { BaseButtonTrapezoid } from '@/shared/ui-kit/BaseButtonTrapezoid/BaseButtonTrapezoid.tsx';
 import { BaseInputText } from '@/shared/ui-kit/BaseInputText/BaseInputText.tsx';
 import { BaseInputPassword } from '@/shared/ui-kit/BaseInputPassword/BaseInputPassword.tsx';
-import { AuthTriangleFormLayout } from '@/auth/layouts/AuthTriangleFormLayout/AuthTriangleFormLayout.tsx';
-import { layoutFieldClass } from '@/auth/layouts/AuthTriangleFormLayout/layoutFieldClass';
+import { AuthTriangleFormLayout } from '../../layouts/AuthTriangleFormLayout/AuthTriangleFormLayout.tsx';
+import { layoutFieldClass } from '../../layouts/AuthTriangleFormLayout/layoutFieldClass';
 import { useAuthLoginFormValidation } from '@/auth/hooks/useAuthLoginFormValidation.ts';
 import type { LoginFormData } from '@/auth/types/ui';
 

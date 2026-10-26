@@ -3,6 +3,7 @@
 .page {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
   min-height: 100vh;
   max-width: 480px;
@@ -32,7 +33,7 @@
   justify-content: space-between;
   align-items: center;
   width: 300px;
-  margin-top: 24px;
+  margin-top: 11px;
 }
 
 .navLink {

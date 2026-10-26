@@ -1,10 +1,10 @@
 import { Link, useSearch } from '@tanstack/react-router';
 
-import { AuthLayout } from '@/shared/layouts/AuthLayout.tsx';
+import { AuthLayout } from '../../layouts/AuthLayout/AuthLayout.tsx';
 import { AuthResetPasswordForm } from '../../widgets/ResetPasswordForm/AuthResetPasswordForm.tsx';
 import { useAuthResetPassword } from '@/auth/hooks/useAuthResetPassword.ts';
 
-import layoutStyles from '@/shared/layouts/AuthLayout.module.scss';
+import layoutStyles from '../../layouts/AuthLayout/AuthLayout.module.scss';
 
 export function AuthResetPasswordView() {
     const search = useSearch({ from: '/auth/reset-password' }) as { token?: string };
