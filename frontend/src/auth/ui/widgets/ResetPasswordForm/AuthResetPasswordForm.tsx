@@ -2,7 +2,8 @@ import { type FormEvent } from 'react';
 
 import { BaseButtonTrapezoid } from '@/shared/ui-kit/BaseButtonTrapezoid/BaseButtonTrapezoid.tsx';
 import { BaseInputPassword } from '@/shared/ui-kit/BaseInputPassword/BaseInputPassword.tsx';
-import { AuthTriangleFormLayout, layoutFieldClass } from '@/auth/layouts/AuthTriangleFormLayout/AuthTriangleFormLayout.tsx';
+import { AuthTriangleFormLayout } from '@/auth/layouts/AuthTriangleFormLayout/AuthTriangleFormLayout.tsx';
+import { layoutFieldClass } from '@/auth/layouts/AuthTriangleFormLayout/layoutFieldClass';
 import { useAuthResetPasswordFormValidation } from '@/auth/hooks/useAuthResetPasswordFormValidation.ts';
 import type { ResetPasswordFormData } from '@/auth/types/ui';
 

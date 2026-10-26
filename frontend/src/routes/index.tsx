@@ -1,6 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router';
-import {HomePage} from "@/shared/widgets/HomePage.tsx";
+import {TeacherHomeView} from "@/teacher/ui/views/TeacherHomeView/TeacherHomeView";
+import {StudentHomeView} from "@/student/ui/views/StudentHomeView/StudentHomeView";
+import {AuthService} from "@/auth/services/AuthService.ts";
 
 export const Route = createFileRoute('/')({
-    component: HomePage,
+    loader: () => ({isTeacher: AuthService.getUserRole() === 'TEACHER'}),
+    component: Home,
 });
+
+// Главная по роли: учитель -> страница учителя, остальные -> страница ученика.
+function Home() {
+    const {isTeacher} = Route.useLoaderData();
+    return isTeacher ? <TeacherHomeView/> : <StudentHomeView/>;
+}

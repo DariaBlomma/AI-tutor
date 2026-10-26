@@ -26,6 +26,3 @@ export function AuthTriangleFormLayout({ onSubmit, button, children }: AuthTrian
         </form>
     );
 }
-
-// Общий класс для абсолютного позиционирования инпутов ui-kit внутри лэйаута
-export const layoutFieldClass = styles.field;
