@@ -5,6 +5,7 @@ import { AuthForgotPasswordForm } from '../../widgets/ForgotPasswordForm/AuthFor
 import { useAuthForgotPassword } from '@/auth/hooks/useAuthForgotPassword.ts';
 
 import layoutStyles from '../../layouts/AuthLayout/AuthLayout.module.scss';
+import styles from './AuthForgotPassword.module.scss';
 
 export function AuthForgotPasswordView() {
     const { forgotPassword, isPending, serverError, isSent } = useAuthForgotPassword();
@@ -26,7 +27,7 @@ export function AuthForgotPasswordView() {
                 </>
             }
             footer={
-                <Link to="/auth/login" className={layoutStyles.navLink}>
+                <Link to="/auth/login" className={`${layoutStyles.navLink} ${styles.loginBtn}`}>
                     Вернуться ко входу
                 </Link>
             }

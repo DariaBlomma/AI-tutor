@@ -5,7 +5,6 @@ import { BaseButtonTrapezoid } from '@/shared/ui-kit/BaseButtonTrapezoid/BaseBut
 import { BaseInputText } from '@/shared/ui-kit/BaseInputText/BaseInputText.tsx';
 import { BaseInputPassword } from '@/shared/ui-kit/BaseInputPassword/BaseInputPassword.tsx';
 import { AuthTriangleFormLayout } from '../../layouts/AuthTriangleFormLayout/AuthTriangleFormLayout.tsx';
-import { layoutFieldClass } from '../../layouts/AuthTriangleFormLayout/layoutFieldClass';
 import { AuthRoleSwitch } from '../RoleSwitch/AuthRoleSwitch.tsx';
 import { useAuthRegisterFormValidation } from '@/auth/hooks/useAuthRegisterFormValidation.ts';
 import type { SignUpModel } from '@/auth/types/models';
@@ -55,44 +54,41 @@ export function AuthSignUpForm({ isPending, onSubmit }: AuthSignUpFormProps) {
                 />
             }
         >
-            {/* Поля верхнего треугольника */}
-            <BaseInputPassword
-                className={`${layoutFieldClass} ${styles.inputPass}`}
-                placeholder="Пароль"
-                autoComplete="new-password"
-                {...fields.pass.props}
-            />
-            <BaseInputPassword
-                className={`${layoutFieldClass} ${styles.inputConfirm}`}
-                placeholder="Подтверждение пароля"
-                autoComplete="new-password"
-                {...fields.confirm.props}
-            />
-            <BaseInputText
-                className={`${layoutFieldClass} ${styles.inputUser}`}
-                placeholder="Логин"
-                autoComplete="username"
-                {...fields.user.props}
-            />
-            <BaseInputText
-                className={`${layoutFieldClass} ${styles.inputFirst}`}
-                placeholder="Имя"
-                autoComplete="given-name"
-                {...fields.first.props}
-            />
-            <BaseInputText
-                className={`${layoutFieldClass} ${styles.inputLast}`}
-                placeholder="Фамилия"
-                autoComplete="family-name"
-                {...fields.last.props}
-            />
-            <BaseInputText
-                className={`${layoutFieldClass} ${styles.inputEmail}`}
-                inputMode="email"
-                placeholder="Электронная почта"
-                autoComplete="email"
-                {...fields.email.props}
-            />
+            <div className={styles.topFields}>
+                {/* Поля верхнего треугольника */}
+                <BaseInputPassword
+                    placeholder="Пароль"
+                    autoComplete="new-password"
+                    {...fields.pass.props}
+                />
+                <BaseInputPassword
+                    placeholder="Подтверждение пароля"
+                    autoComplete="new-password"
+                    {...fields.confirm.props}
+                />
+                <BaseInputText
+                    placeholder="Логин"
+                    autoComplete="username"
+                    {...fields.user.props}
+                />
+                <BaseInputText
+                    placeholder="Имя"
+                    autoComplete="given-name"
+                    {...fields.first.props}
+                />
+                <BaseInputText
+                    placeholder="Фамилия"
+                    autoComplete="family-name"
+                    {...fields.last.props}
+                />
+                <BaseInputText
+                    inputMode="email"
+                    placeholder="Email"
+                    autoComplete="email"
+                    {...fields.email.props}
+                />
+            </div>
+
 
             {/* Треугольник-переключатель Учитель/Ученик */}
             <AuthRoleSwitch role={roleField.value} onChange={(r) => roleField.onChange(r)} />

@@ -6,6 +6,7 @@ import { useAuthRegister } from '@/auth/hooks/useAuthRegister.ts';
 import type { SignUpModel } from '@/auth/types/models';
 
 import layoutStyles from '../../layouts/AuthLayout/AuthLayout.module.scss';
+import styles from "./AuthSignUp.module.scss"
 
 export function AuthSignUpView() {
     const { register, isPending, serverError, isSuccess } = useAuthRegister();
@@ -26,7 +27,7 @@ export function AuthSignUpView() {
                 </>
             }
             footer={
-                <Link to="/auth/login" className={layoutStyles.navLink}>
+                <Link to="/auth/login" className={`${layoutStyles.navLink} ${styles.loginBtn}`}>
                     Войти
                 </Link>
             }

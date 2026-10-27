@@ -12,12 +12,12 @@
   border: none;
   border-bottom: 2px solid transparent;
   outline: none;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--c1, #F5F5F5);
   text-align: center;
   caret-color: var(--p, #9D7CF2);
-  padding: 8px 0;
+  padding: 2px 0;
   // Добавляем transition для background-color, чтобы предотвратить мерцание при автозаполнении
   transition: border-color 0.5s ease, background-color 5000s ease-in-out 0s;
 
@@ -36,42 +36,62 @@
   }
 
   // ==========================================
-  // 🛡️ МАГИЯ ПРОТИВ АВТОЗАПОЛНЕНИЯ БРАУЗЕРА 🛡️
+  // 🛡️ МАГИЯ ПРОЗРАЧНОСТИ ПРИ АВТОЗАПОЛНЕНИИ 🛡️
   // ==========================================
   &:-webkit-autofill,
   &:-webkit-autofill:hover,
   &:-webkit-autofill:focus,
   &:-webkit-autofill:active {
-    // 1. Огромная внутренняя тень цвета фона страницы перекрывает белый/желтый фон браузера
-    -webkit-box-shadow: 0 0 0 1000px var(--bg, #0F0F0F) inset !important;
-    box-shadow: 0 0 0 1000px var(--bg, #0F0F0F) inset !important;
+    // 1. Принудительно прозрачный фон (браузеры часто игнорируют, но это база)
+    background-color: transparent !important;
+    background-image: none !important;
 
-    // 2. Принудительно задаем цвет текста (иначе браузер сделает его черным)
+    // 2. ГЛАВНЫЙ ХАК: задержка применения цвета автозаполнения на 5000 секунд.
+    // Пока идет "переход", фон остается таким, каким был до этого (прозрачным).
+    transition: background-color 5000s ease-in-out 0s, color 5000s ease-in-out 0s !important;
+
+    // 3. Убираем темную тень, которая делала его непрозрачным блоком
+    -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+    box-shadow: 0 0 0 1000px transparent inset !important;
+
+    // 4. Сохраняем светлый цвет текста (иначе браузер сделает его черным)
     -webkit-text-fill-color: var(--c1, #F5F5F5) !important;
+    color: var(--c1, #F5F5F5) !important;
 
-    // 3. Бесконечная задержка перехода фона "ломает" попытку браузера отрисовать свой цвет
-    transition: border-color 0.3s ease, background-color 5000s ease-in-out 0s !important;
+    // 5. Сохраняем цвет нижней границы при фокусе/автозаполнении, если нужно
+    border-bottom-color: var(--p, #9D7CF2) !important;
   }
 }
 
 .hasError .input {
   border-bottom-color: #ff4d4f !important;
 
-  // Если есть ошибка, автозаполнение тоже должно иметь прозрачный/темный фон
   &:-webkit-autofill,
   &:-webkit-autofill:hover,
   &:-webkit-autofill:focus,
   &:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 1000px var(--bg, #0F0F0F) inset !important;
-    box-shadow: 0 0 0 1000px var(--bg, #0F0F0F) inset !important;
-    -webkit-text-fill-color: #ff4d4f !important; // Текст ошибки красный
+    background-color: transparent !important;
+    background-image: none !important;
+    transition: background-color 5000s ease-in-out 0s, color 5000s ease-in-out 0s !important;
+    -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+    box-shadow: 0 0 0 1000px transparent inset !important;
+    -webkit-text-fill-color: #ff4d4f !important;
+    color: #ff4d4f !important;
   }
 }
 
 .errorMessage {
   color: #ff4d4f;
-  font-size: 12px;
-  margin-top: 4px;
+  font-size: 10px;
+  margin-top: 2px;
   text-align: center;
-  min-height: 16px;
+  min-height: 14px;
+
+  /* Плавное размытие через box-shadow */
+
+  box-shadow:
+           0 0 8px 4px rgba(15, 15, 15, 0.5);
+  background-color: rgba(15, 15, 15, 0.5);
+
+  border-radius: 4px;
 }

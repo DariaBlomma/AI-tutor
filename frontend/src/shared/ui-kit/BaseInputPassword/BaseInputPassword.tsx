@@ -17,7 +17,7 @@ export const BaseInputPassword = forwardRef<HTMLInputElement, BaseInputPasswordP
                     <BaseInput
                         ref={ref}
                         type={showPass ? 'text' : 'password'}
-                        error={undefined} // Ошибка отображается ниже
+                        error={error}
                         className={styles.inputWithIcon}
                         {...props}
                     />
@@ -41,7 +41,6 @@ export const BaseInputPassword = forwardRef<HTMLInputElement, BaseInputPasswordP
                         )}
                     </button>
                 </div>
-                {error && <span className={styles.errorMessage}>{error}</span>}
             </div>
         );
     }

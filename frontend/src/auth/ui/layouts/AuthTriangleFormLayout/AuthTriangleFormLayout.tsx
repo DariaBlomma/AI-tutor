@@ -15,9 +15,11 @@ interface AuthTriangleFormLayoutProps {
 export function AuthTriangleFormLayout({ onSubmit, button, children }: AuthTriangleFormLayoutProps) {
     return (
         <form className={styles.wrap} onSubmit={onSubmit}>
-            <svg className={styles.triSvg} viewBox="0 0 320 480" aria-hidden="true">
-                <polygon className={styles.triPath} points="160,260 20,40 300,40" />
-                <polygon className={styles.triPath} points="160,260 300,480 20,480" />
+            <svg className={styles.triSvg} viewBox="0 0 400 650">
+                {/* Верхний треугольник */}
+                <polygon className={styles.triPath} points="200,350 3,40 397,40" />
+                {/* Нижний треугольник */}
+                <polygon className={styles.triPath} points="200,350 397,660 3,660" />
             </svg>
 
             <div className={styles.btnTop}>{button}</div>

@@ -2,10 +2,10 @@
 
 .switch {
   position: absolute;
-  top: 300px;
+  top: 320px;
   left: 90px;
   width: 140px;
-  height: 110px;
+  height: 114px;
   z-index: 10;
   cursor: pointer;
 }
@@ -41,7 +41,7 @@
 .text {
   position: absolute;
   top: 90px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   pointer-events: none;
   text-align: center;

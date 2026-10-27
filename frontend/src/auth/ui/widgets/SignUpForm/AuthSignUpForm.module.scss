@@ -1,16 +1,14 @@
 @use '@/shared/styles/variables' as *;
 
-/* Порядок полей в верхнем треугольнике (как в макете) */
-.inputPass { top: 56px; }
-.inputConfirm { top: 82px; }
-.inputUser { top: 108px; }
-.inputFirst { top: 134px; }
-.inputLast { top: 160px; }
-.inputEmail { top: 186px; }
+.topFields {
+  position: absolute;
+  top: 37px;
+  right: 55px;
+}
 
 .btnCodeWrap {
   position: absolute;
-  top: 420px;
+  top: 450px;
   left: 61px;
   width: 199px;
   height: 36px;

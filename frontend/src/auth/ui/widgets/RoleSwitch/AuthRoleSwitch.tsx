@@ -13,19 +13,19 @@ export function AuthRoleSwitch({ role, onChange }: AuthRoleSwitchProps) {
 
     return (
         <div className={styles.switch}>
-            <svg viewBox="0 0 140 110" className={styles.svg}>
-                <polygon className={styles.tri} points="70,0 0,110 140,110" />
+            <svg viewBox="0 0 150 118" className={styles.svg}>
+                <polygon className={styles.tri} points="75,0 0,118 150,118" />
                 <path
                     className={isTeacher ? `${styles.half} ${styles.halfActive}` : styles.half}
-                    d="M 70 0 L 0 110 L 70 110 Z"
+                    d="M 75 0 L 0 118 L 75 118 Z"
                     onClick={() => onChange('TEACHER')}
                 />
                 <path
                     className={!isTeacher ? `${styles.half} ${styles.halfActive}` : styles.half}
-                    d="M 70 0 L 140 110 L 70 110 Z"
+                    d="M 75 0 L 150 118 L 75 118 Z"
                     onClick={() => onChange('STUDENT')}
                 />
-                <line className={styles.divider} x1="70" y1="0" x2="70" y2="110" />
+                <line className={styles.divider} x1="75" y1="0" x2="75" y2="118" />
             </svg>
             <span className={isTeacher ? `${styles.text} ${styles.textTeacher} ${styles.textActive}` : `${styles.text} ${styles.textTeacher}`}>
                 Учитель
