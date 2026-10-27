@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 
 import { AuthService } from '@/auth/services/AuthService';
+import { buildStudentStatCells } from '@/student/lib/formatStudentStats';
 import { IconCopy, IconTrapezoidShape, IconTrianglesFrame } from '@/shared/icons';
 import { useUserProfile } from '@/user/hooks/useUserProfile';
 
@@ -31,15 +32,15 @@ export function UserProfileView() {
         void navigate({ to: '/auth/login' });
     };
 
-    // Копирование кода учителя в буфер обмена по клику на иконку.
-    const handleCopyCode = async () => {
-        if (!profile?.teacherCode) return;
+    // Копирование произвольного текста в буфер обмена по клику на иконку.
+    const copyToClipboard = async (text: string | null | undefined) => {
+        if (!text) return;
         try {
-            await navigator.clipboard.writeText(profile.teacherCode);
+            await navigator.clipboard.writeText(text);
         } catch {
             // clipboard API недоступен (не https) — используем fallback
             const textarea = document.createElement('textarea');
-            textarea.value = profile.teacherCode;
+            textarea.value = text;
             document.body.appendChild(textarea);
             textarea.select();
             document.execCommand('copy');
@@ -49,6 +50,9 @@ export function UserProfileView() {
         window.setTimeout(() => setCopied(false), 1500);
     };
 
+    const handleCopyCode = () => void copyToClipboard(profile?.teacherCode);
+    const handleCopyTeacherCode = () => void copyToClipboard(profile?.teacher?.teacherCode);
+
     return (
         <div className={styles.page}>
             <h1 className={styles.title}>TutorAI</h1>
@@ -57,13 +61,26 @@ export function UserProfileView() {
             {isError && <p className={styles.status}>Не удалось загрузить профиль</p>}
 
             {profile && (
-                <div className={styles.trianglesWrap}>
+                <div className={styles.trianglesWrap} data-role={profile.role}>
                     <IconTrianglesFrame className={styles.triFrame}/>
 
                     <button type="button" className={styles.btnLogout} onClick={handleLogout}>
                         <IconTrapezoidShape className={styles.btnLogoutBorder} variant="filled"/>
                         <span className={styles.btnLogoutText}>Выйти</span>
                     </button>
+
+                    {/* Верхний треугольник: у ученика — статистика, ниже email и имя;
+                        у учителя — только имя/email (макет профиля учителя). */}
+                    {profile.role === 'STUDENT' && (
+                        <div className={styles.statsRow}>
+                            {buildStudentStatCells(profile.stats).map((cell) => (
+                                <div key={cell.label} className={styles.statItem}>
+                                    <div className={styles.statValue}>{cell.value}</div>
+                                    <div className={styles.statLabel}>{cell.label}</div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
 
                     <div className={`${styles.field} ${styles.fieldName}`}>{displayName}</div>
                     <div className={`${styles.field} ${styles.fieldEmail}`}>{profile.email}</div>
@@ -88,9 +105,25 @@ export function UserProfileView() {
                             </p>
                         </>
                     ) : (
-                        <div className={`${styles.field} ${styles.fieldTeacher}`}>
-                            Учитель: {profile.teacher?.fullName ?? '—'}
-                        </div>
+                        /* Нижний треугольник ученика: код учителя, подпись и имя учителя */
+                        <>
+                            <div className={`${styles.field} ${styles.fieldCode}`}>
+                                <span className={styles.codeValue}>{profile.teacher?.teacherCode ?? '—'}</span>
+                                <button
+                                    type="button"
+                                    className={styles.copyButton}
+                                    onClick={handleCopyTeacherCode}
+                                    aria-label="Скопировать код учителя"
+                                    title="Скопировать код учителя"
+                                >
+                                    <IconCopy className={styles.copyIcon}/>
+                                </button>
+                            </div>
+                            <p className={styles.hint}>Код вашего учителя</p>
+                            <div className={styles.textTeacher}>
+                                Учитель: {profile.teacher?.fullName ?? '—'}
+                            </div>
+                        </>
                     )}
                 </div>
             )}

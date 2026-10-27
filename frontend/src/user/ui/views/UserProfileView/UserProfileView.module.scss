@@ -97,6 +97,36 @@
   text-align: center;
 }
 
+// Строка статистики ученика в верхнем треугольнике (макет профиля ученика)
+.statsRow {
+  position: absolute;
+  top: 75px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 16px;
+  width: 240px;
+}
+
+.statItem {
+  flex: 1;
+  text-align: center;
+}
+
+.statValue {
+  font-size: 20px;
+  font-weight: 700;
+  color: $p;
+  margin-bottom: 2px;
+}
+
+.statLabel {
+  font-size: 10px;
+  color: $c3;
+  line-height: 1.2;
+}
+
+// Учитель: имя сверху, email под ним. Ученик: email и имя под статистикой.
 .fieldName {
   top: 80px;
   font-size: 16px;
@@ -110,8 +140,21 @@
   width: 180px;
 }
 
+.trianglesWrap[data-role='STUDENT'] {
+  .fieldName {
+    top: 200px;
+    font-size: 18px;
+    width: 180px;
+  }
+
+  .fieldEmail {
+    top: 160px;
+    width: 220px;
+  }
+}
+
 .fieldCode {
-  top: 430px;
+  top: 400px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -152,17 +195,9 @@
   height: 18px;
 }
 
-.fieldTeacher {
-  top: 430px;
-  width: 240px;
-  font-size: 16px;
-  color: $c1;
-  font-weight: 600;
-}
-
 .hint {
   position: absolute;
-  top: 470px;
+  top: 432px;
   left: 50%;
   transform: translateX(-50%);
   color: $c3;
@@ -170,6 +205,20 @@
   text-align: center;
   width: 260px;
   line-height: 1.4;
+  z-index: 5;
+}
+
+// Строка "Учитель: Имя" в нижнем треугольнике профиля ученика
+.textTeacher {
+  position: absolute;
+  top: 458px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: $c3;
+  font-size: 13px;
+  text-align: center;
+  width: 280px;
+  font-weight: 500;
   z-index: 5;
 }
 
