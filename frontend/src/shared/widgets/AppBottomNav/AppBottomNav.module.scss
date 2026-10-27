@@ -1,9 +1,10 @@
+@use "@/shared/styles/variables" as *;
+
 .bottomNav {
   position: fixed;
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  max-width: 480px;
   width: 100%;
   background: var(--bg);
   border-top: 1px solid rgba(157, 124, 242, 0.2);
@@ -23,16 +24,20 @@
   cursor: pointer;
   padding: 8px 16px;
   transition: all 0.15s;
+  color: var(--c3);
+
+  &:hover {
+    color: $pl;
+  }
 
   &:active {
-    transform: scale(0.95);
+    color: $pd;
   }
 }
 
 .navIcon {
   width: 24px;
   height: 24px;
-  color: var(--c3);
 }
 
 .active {
@@ -47,6 +52,5 @@
 
 .navLabel {
   font-size: 11px;
-  color: var(--c3);
   font-weight: 500;
 }

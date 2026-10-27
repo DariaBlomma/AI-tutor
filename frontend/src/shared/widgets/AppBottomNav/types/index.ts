@@ -8,6 +8,7 @@ export interface AppBottomNavItem {
     id: AppBottomNavActive;
     label: string;
     Icon: (props: IconProps) => React.JSX.Element;
+    to: string
 }
 
 export interface AppBottomNavProps {

@@ -4,7 +4,7 @@ import { MOCK_TEACHER_LESSONS, MOCK_TEACHER_STATS } from '@/teacher/data';
 
 // Флаг временной верстки: true — показывать моковые блоки (уроки/действия/статистика),
 // false — скрыть всё, что оживёт только в будущих релизах.
-const SHOW_TMP_DATA = true;
+const SHOW_TMP_DATA = false;
 
 export function TeacherHomeView() {
     // Имя учителя — с бэкенда (логика вынесена в хук teacher/hooks/useTeacherName).
@@ -35,6 +35,7 @@ export function TeacherHomeView() {
                         </div>
                     </div>
 
+                    {/*todo: кнопка должны быть показана всегда, без флага*/}
                     <div className={styles.section}>
                         <div className={styles.sectionTitle}>Быстрые действия</div>
                         <div className={styles.btnRow}>

@@ -3,8 +3,8 @@ import type { AppBottomNavItem } from '../types';
 
 // Статичные данные нижней навигации приложения.
 export const APP_BOTTOM_NAV_ITEMS: AppBottomNavItem[] = [
-    { id: 'home', label: 'Главная', Icon: IconHome },
-    { id: 'reports', label: 'Отчёты', Icon: IconReports },
-    { id: 'bank', label: 'Банк заданий', Icon: IconBank },
-    { id: 'profile', label: 'Профиль', Icon: IconProfile },
+    { id: 'home', label: 'Главная', Icon: IconHome, to: "/" },
+    { id: 'reports', label: 'Отчёты', Icon: IconReports, to: "/teacher/reports" },
+    { id: 'bank', label: 'Банк заданий', Icon: IconBank, to: "/tasks-bank" },
+    { id: 'profile', label: 'Профиль', Icon: IconProfile, to: "/profile" },
 ];
