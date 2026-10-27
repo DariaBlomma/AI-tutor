@@ -62,4 +62,32 @@ public interface StudentWorkItemProgressRepository extends JpaRepository<Student
         Long getAttemptedCount();
         Integer getHintsUsed();
     }
+
+    /**
+     * Агрегаты прогресса по всем работам ученика одним запросом — статистика профиля
+     * (ошибки по финальным ответам + число выполненных работ). В удалённые задания не заходят.
+     */
+    @Query("""
+            SELECT sw.id AS workId,
+                   COUNT(p) AS progressRows,
+                   SUM(CASE WHEN ti.correctAnswer IS NOT NULL AND TRIM(ti.correctAnswer) <> ''
+                             AND (p.studentAnswer IS NULL
+                                  OR LOWER(TRIM(ti.correctAnswer)) <> LOWER(TRIM(p.studentAnswer)))
+                        THEN 1 ELSE 0 END) AS errorCount
+            FROM StudentWorkItemProgress p
+            JOIN p.studentWork sw
+            JOIN p.taskItem ti
+            JOIN ti.task t
+            WHERE sw.student.id = :studentId
+              AND t.deletedAt IS NULL
+            GROUP BY sw.id
+            """)
+    List<StudentStatsAggregate> aggregateByStudent(@Param("studentId") Long studentId);
+
+    /** Projection для aggregateByStudent. */
+    interface StudentStatsAggregate {
+        Long getWorkId();
+        Long getProgressRows();
+        Long getErrorCount();
+    }
 }

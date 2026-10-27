@@ -1,5 +1,6 @@
 // Контракты бэкенда (см. com.aitutor.backend.dto.user).
 
+import type { StudentStats } from '@/student/types/models';
 import type { TeacherBrief } from '@/teacher/types/models';
 
 export type UserRole = 'TEACHER' | 'STUDENT';
@@ -16,4 +17,6 @@ export interface UserProfile {
     teacherCode?: string | null;
     // Привязанный учитель — только для роли STUDENT; для TEACHER всегда null.
     teacher?: TeacherBrief | null;
+    // Статистика ученика — только для роли STUDENT; для TEACHER всегда null.
+    stats?: StudentStats | null;
 }

@@ -1,5 +1,6 @@
 package com.aitutor.backend.dto.user;
 
+import com.aitutor.backend.dto.student.StudentStatsDto;
 import com.aitutor.backend.enums.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,4 +27,9 @@ public class UserResponse {
      * за каким учителем числится ученик ("Вы привязаны к учителю: Иван Петров").
      */
     private TeacherBriefDto teacher;
+    /**
+     * Статистика ученика для профиля — только для роли STUDENT (заполняет UserService);
+     * для TEACHER всегда null.
+     */
+    private StudentStatsDto stats;
 }
