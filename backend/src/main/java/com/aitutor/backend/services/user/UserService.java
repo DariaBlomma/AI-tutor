@@ -1,18 +1,24 @@
 package com.aitutor.backend.services.user;
 
 import com.aitutor.backend.dto.auth.SignUpRequest;
+import com.aitutor.backend.dto.student.StudentStatsDto;
 import com.aitutor.backend.dto.user.UserResponse;
 import com.aitutor.backend.dto.user.UserResponseWithPassword;
 import com.aitutor.backend.entities.StudentProfile;
+import com.aitutor.backend.entities.StudentWork;
 import com.aitutor.backend.entities.User;
 import com.aitutor.backend.enums.UserRole;
+import com.aitutor.backend.enums.WorkStatus;
 import com.aitutor.backend.exceptions.ConflictException;
 import com.aitutor.backend.exceptions.InvalidRequestException;
 import com.aitutor.backend.exceptions.ResourceNotFoundException;
 import com.aitutor.backend.helpers.TeacherCodeGenerator;
 import com.aitutor.backend.mappers.UserMapper;
 import com.aitutor.backend.repositories.StudentProfileRepository;
+import com.aitutor.backend.repositories.StudentWorkItemProgressRepository;
+import com.aitutor.backend.repositories.StudentWorkRepository;
 import com.aitutor.backend.repositories.UserRepository;
+import com.aitutor.backend.repositories.StudentWorkItemProgressRepository.StudentStatsAggregate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -20,12 +26,20 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
     private final StudentProfileRepository studentProfileRepository;
+    private final StudentWorkRepository studentWorkRepository;
+    private final StudentWorkItemProgressRepository progressRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
@@ -91,14 +105,6 @@ public class UserService {
         return enrichWithTeacher(userMapper.toResponse(savedUser), savedUser);
     }
 
-    @Transactional(readOnly = true)
-    public UserResponse getMe(Long userId) {
-        User user = userRepository.findActiveById(userId).orElseThrow(
-                () -> new ResourceNotFoundException("User does not exist or deleted with such id " + userId)
-        );
-        return enrichWithTeacher(userMapper.toResponse(user), user);
-    }
-
     /**
      * Для STUDENT подтягивает привязанного учителя из student_profiles в поле teacher ответа,
      * чтобы фронтенд мог показать ученику имя его учителя (после регистрации/во входа в профиль).
@@ -110,6 +116,59 @@ public class UserService {
                     .ifPresent(profile -> response.setTeacher(userMapper.toTeacherBrief(profile.getTeacher())));
         }
         return response;
+    }
+
+    @Transactional(readOnly = true)
+    public UserResponse getMe(Long userId) {
+        User user = userRepository.findActiveById(userId).orElseThrow(
+                () -> new ResourceNotFoundException("User does not exist or deleted with such id " + userId)
+        );
+        UserResponse response = enrichWithTeacher(userMapper.toResponse(user), user);
+        // Статистика нужна только профилю-ученику (экран «Профиль»); учителю — null.
+        if (user.getRole() == UserRole.STUDENT) {
+            response.setStats(buildStudentStats(userId));
+        }
+        return response;
+    }
+
+    /**
+     * Статистика ученика для профиля: выполнено работ, среднее время решения и ошибки.
+     * Ошибки считаются по финальным ответам пунктов через агрегатный запрос (без N+1),
+     * логика совпадает с countFinalErrors в отчётах учителя.
+     */
+    private StudentStatsDto buildStudentStats(Long studentId) {
+        List<StudentWork> works = studentWorkRepository
+                .findByStudentIdAndDeletedAtIsNullOrderByCreatedAtDesc(studentId);
+        int completedCount = (int) works.stream()
+                .filter(w -> w.getStatus() == WorkStatus.COMPLETED)
+                .count();
+        Long avgTimeSeconds = works.stream()
+                .filter(w -> w.getStatus() == WorkStatus.COMPLETED
+                        && w.getStartedAt() != null && w.getCompletedAt() != null)
+                .mapToLong(w -> Duration.between(w.getStartedAt(), w.getCompletedAt()).getSeconds())
+                .average()
+                .stream()
+                .mapToLong(Math::round)
+                .boxed()
+                .findFirst()
+                .orElse(null);
+
+        Set<Long> completedIds = works.stream()
+                .filter(w -> w.getStatus() == WorkStatus.COMPLETED)
+                .map(StudentWork::getId)
+                .collect(Collectors.toSet());
+        // В счётчик ошибок попадают только реально выполненные работы: у назначений,
+        // закрытых по лимиту подсказок (EXPIRED/CANCELLED), финальные ответы не показываем.
+        int errorsCount = progressRepository.aggregateByStudent(studentId).stream()
+                .filter(row -> completedIds.contains(row.getWorkId()))
+                .mapToInt(StudentStatsAggregate::getErrorCount)
+                .sum();
+
+        return StudentStatsDto.builder()
+                .completedCount(completedCount)
+                .avgTimeSeconds(avgTimeSeconds)
+                .errorsCount(errorsCount)
+                .build();
     }
 
     @Transactional(readOnly = true)
