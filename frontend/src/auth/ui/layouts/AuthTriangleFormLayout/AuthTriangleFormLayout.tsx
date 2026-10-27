@@ -1,5 +1,7 @@
 import type { FormEvent, ReactNode } from 'react';
 
+import { IconTrianglesFrame } from '@/shared/icons';
+
 import styles from './AuthTriangleFormLayout.module.scss';
 
 interface AuthTriangleFormLayoutProps {
@@ -12,15 +14,11 @@ interface AuthTriangleFormLayoutProps {
 // Каркас форм авторизации по мотивам страницы логина:
 // SVG с двумя треугольниками (вершины смотрят друг на друга),
 // кнопка-трапеция над верхним треугольником, поля — внутри треугольников.
+// Треугольный каркас вынесен в shared/icons/IconTrianglesFrame (переиспользуется в профиле).
 export function AuthTriangleFormLayout({ onSubmit, button, children }: AuthTriangleFormLayoutProps) {
     return (
         <form className={styles.wrap} onSubmit={onSubmit}>
-            <svg className={styles.triSvg} viewBox="0 0 400 650">
-                {/* Верхний треугольник */}
-                <polygon className={styles.triPath} points="200,350 3,40 397,40" />
-                {/* Нижний треугольник */}
-                <polygon className={styles.triPath} points="200,350 397,660 3,660" />
-            </svg>
+            <IconTrianglesFrame className={styles.triSvg}/>
 
             <div className={styles.btnTop}>{button}</div>
 
