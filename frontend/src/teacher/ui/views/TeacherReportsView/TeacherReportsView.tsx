@@ -3,17 +3,7 @@ import { useCallback } from 'react';
 import { TeacherReportsService } from '@/teacher/services/TeacherReportsService';
 import { useTeacherReports } from '@/teacher/hooks/useTeacherReports';
 import type { StudentReportSummary } from '@/teacher/types';
-
-// todo: move to shared/utils
-// Инициалы для аватара: первые буквы имени и фамилии (Иван Петров -> ИП).
-function getInitials(studentName: string): string {
-    return studentName
-        .split(' ')
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((word) => word[0]?.toUpperCase() ?? '')
-        .join('');
-}
+import { getInitials } from '@/shared/utils/getInitials';
 
 export function TeacherReportsView() {
     const fetchReports = useCallback(

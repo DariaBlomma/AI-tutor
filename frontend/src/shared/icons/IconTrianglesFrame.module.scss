@@ -1,0 +1,15 @@
+@use '@/shared/styles/variables' as *;
+
+.frame {
+  overflow: visible;
+  pointer-events: none;
+}
+
+.path {
+  fill: none;
+  stroke: $p;
+  stroke-width: 4;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  filter: drop-shadow(0 4px 12px rgba(157, 124, 242, 0.15));
+}
