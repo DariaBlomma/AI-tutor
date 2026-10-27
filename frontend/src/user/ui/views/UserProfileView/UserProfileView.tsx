@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 
 import { AuthService } from '@/auth/services/AuthService';
-import { IconCopy, IconTrapezoidGradient, IconTrapezoidShape, IconTrianglesFrame } from '@/shared/icons';
+import { IconCopy, IconTrapezoidShape, IconTrianglesFrame } from '@/shared/icons';
 import { useUserProfile } from '@/user/hooks/useUserProfile';
 
 import styles from './UserProfileView.module.scss';
@@ -51,9 +51,6 @@ export function UserProfileView() {
 
     return (
         <div className={styles.page}>
-            {/* Градиент трапеции объявляется один раз на страницу (url(#...) глобален в DOM) */}
-            <IconTrapezoidGradient/>
-
             <h1 className={styles.title}>TutorAI</h1>
 
             {isPending && <p className={styles.status}>Загрузка…</p>}

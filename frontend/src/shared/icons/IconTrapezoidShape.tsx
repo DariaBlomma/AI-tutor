@@ -1,3 +1,5 @@
+import { useId } from 'react';
+
 import type { IconProps } from './types';
 
 // Трапеция из макета: скос слева, основание шире вершины.
@@ -8,22 +10,12 @@ interface IconTrapezoidShapeProps extends IconProps {
     variant?: 'filled' | 'outline';
 }
 
-// Одиночный экземпляр градиента на страницу — ссылка url(#...) глобальна в DOM,
-// поэтому градиент объявляется один раз здесь, а не в каждой кнопке.
-export function IconTrapezoidGradient() {
-    return (
-        <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true">
-            <defs>
-                <linearGradient id="trapezoid-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#9D7CF2"/>
-                    <stop offset="100%" stopColor="#7B5FD4"/>
-                </linearGradient>
-            </defs>
-        </svg>
-    );
-}
-
+// Градиент объявляется внутри каждого экземпляра с уникальным id (useId):
+// раньше он выносился отдельным компонентом на страницу, и на экранах
+// авторизации ссылка url(#...) не разрешалась — кнопки оставались без заливки.
 export function IconTrapezoidShape({ className, width, height, variant = 'outline' }: IconTrapezoidShapeProps) {
+    const gradientId = `trapezoid-gradient-${useId()}`;
+
     return (
         <svg
             className={className}
@@ -33,9 +25,17 @@ export function IconTrapezoidShape({ className, width, height, variant = 'outlin
             preserveAspectRatio="none"
             aria-hidden="true"
         >
+            {variant === 'filled' && (
+                <defs>
+                    <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#9D7CF2"/>
+                        <stop offset="100%" stopColor="#7B5FD4"/>
+                    </linearGradient>
+                </defs>
+            )}
             <path
                 d={TRAPEZOID_PATH}
-                fill={variant === 'filled' ? 'url(#trapezoid-gradient)' : 'none'}
+                fill={variant === 'filled' ? `url(#${gradientId})` : 'none'}
                 stroke="var(--p)"
                 strokeWidth="2"
                 strokeLinejoin="round"
