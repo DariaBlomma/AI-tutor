@@ -4,8 +4,12 @@
 /** com.aitutor.backend.enums.ItemType — механика пункта задания. */
 export type ItemType = 'WORD_FORMATION' | 'GAP_FILL' | 'TFNS' | 'MATCHING';
 
-/** Формат материала задания (tasks.context.type). AUDIO пока недоступен на фронте. */
-export type MaterialFormat = 'TEXT' | 'AUDIO';
+/**
+ * Формат материала задания (tasks.context.type).
+ * БЭК формально допускает AUDIO (TaskContentValidator: type=AUDIO требует url), но загрузка
+ * аудио не реализована ни на бэке, ни на фронте — на UI поддерживается только TEXT.
+ */
+export type MaterialFormat = 'TEXT';
 
 /** GET /api/topics -> TopicResponse. */
 export interface Topic {
