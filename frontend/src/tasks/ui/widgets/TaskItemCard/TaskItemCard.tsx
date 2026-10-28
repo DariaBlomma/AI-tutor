@@ -114,6 +114,39 @@ export function TaskItemCard({ item, index, isFirst, isLast, error, onChange, on
                     </>
                 )}
 
+                {item.itemType === 'TFNS' && (
+                    <>
+                        <div className={styles.field}>
+                            <label className={styles.label}>
+                                Утверждение <span className={styles.req}>*</span>
+                            </label>
+                            <textarea
+                                className={styles.textarea}
+                                value={item.prompt}
+                                placeholder="Введите утверждение для проверки"
+                                onChange={(e) => patch({ prompt: e.target.value })}
+                            />
+                        </div>
+                        <div className={styles.field}>
+                            <label className={styles.label}>
+                                Правильный ответ <span className={styles.req}>*</span>
+                            </label>
+                            <div className={styles.chips}>
+                                {TFNS_ANSWERS.map((answer) => (
+                                    <button
+                                        key={answer}
+                                        type="button"
+                                        className={`${styles.chip} ${item.tfnsAnswer === answer ? styles.chipSelected : ''}`}
+                                        onClick={() => patch({ tfnsAnswer: answer })}
+                                    >
+                                        {answer}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </>
+                )}
+
                 {item.itemType === 'MATCHING' && (
                     <>
                         <div className={styles.field}>

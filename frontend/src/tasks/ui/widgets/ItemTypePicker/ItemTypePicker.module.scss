@@ -1,0 +1,33 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.option {
+  padding: 10px 12px;
+  background: rgba(157, 124, 242, 0.05);
+  border: 1px solid rgba(157, 124, 242, 0.3);
+  border-radius: var(--r, 6px);
+  color: var(--c1);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+
+  &:hover {
+    border-color: var(--pl);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.selected {
+  background: var(--p);
+  border-color: var(--p);
+  color: var(--c1);
+}
