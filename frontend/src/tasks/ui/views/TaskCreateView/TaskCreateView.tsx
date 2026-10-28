@@ -2,43 +2,45 @@ import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { BaseInputText } from '@/shared/ui-kit/BaseInputText/BaseInputText';
 import { ChipsMultiselect } from '@/tasks/ui/widgets/ChipsMultiselect/ChipsMultiselect';
-import { MaterialSection } from '@/tasks/ui/widgets/MaterialSection/MaterialSection';
+import { ItemTypeSelect } from '@/tasks/ui/widgets/ItemTypeSelect/ItemTypeSelect';
+import { TextSection } from '@/tasks/ui/widgets/TextSection/TextSection';
 import { TaskItemCard } from '@/tasks/ui/widgets/TaskItemCard/TaskItemCard';
 import { useCreateTask } from '@/tasks/hooks/useCreateTask';
 import { useTaskRefs } from '@/tasks/hooks/useTaskRefs';
-import { validateTaskForm } from '@/tasks/lib/validateTaskForm';
+import { needsText, validateTaskForm } from '@/tasks/lib/validateTaskForm';
 import { TASK_NAME_MAX_LENGTH } from '@/tasks/data';
-import type { MaterialFormat, TaskItemDraft } from '@/tasks/types';
+import type { ItemType, TaskItemDraft } from '@/tasks/types';
 import styles from './TaskCreateView.module.scss';
 
 let nextItemId = 1;
 
-function createEmptyItem(): TaskItemDraft {
+// Пустой пункт под выбранную механику: поля чужих типов не заводим.
+function createEmptyItem(itemType: ItemType): TaskItemDraft {
     return {
         id: nextItemId++,
-        itemType: 'WORD_FORMATION',
+        itemType,
         prompt: '',
         answer: '',
         base: '',
         options: '',
-        hint: '',
         leftLabel: '',
         rightLabel: '',
         explanation: '',
     };
 }
 
-// Экран «Создание задания»: форма собирает TaskCreateRequest и отправляет POST /api/tasks.
+// Экран «Создание задания»: сначала выбирается механика (itemType) — она определяет,
+// какие поля показывать; форма собирает TaskCreateRequest и отправляет POST /api/tasks.
 export function TaskCreateView() {
     const navigate = useNavigate();
 
     const [name, setName] = useState('');
     const [topicIds, setTopicIds] = useState<number[]>([]);
     const [grammarTypeIds, setGrammarTypeIds] = useState<number[]>([]);
-    const [materialFormat, setMaterialFormat] = useState<MaterialFormat>('TEXT');
+    const [itemType, setItemType] = useState<ItemType>('WORD_FORMATION');
     const [materialTitle, setMaterialTitle] = useState('');
     const [materialText, setMaterialText] = useState('');
-    const [items, setItems] = useState<TaskItemDraft[]>([createEmptyItem()]);
+    const [items, setItems] = useState<TaskItemDraft[]>([createEmptyItem('WORD_FORMATION')]);
     const [showErrors, setShowErrors] = useState(false);
 
     const refs = useTaskRefs();
@@ -50,13 +52,20 @@ export function TaskCreateView() {
     const { submit, isSubmitting, error } = useCreateTask(goBackToBank);
 
     const form = useMemo(
-        () => ({ name, topicIds, grammarTypeIds, materialFormat, materialTitle, materialText, items }),
-        [name, topicIds, grammarTypeIds, materialFormat, materialTitle, materialText, items],
+        () => ({ name, topicIds, grammarTypeIds, itemType, materialTitle, materialText, items }),
+        [name, topicIds, grammarTypeIds, itemType, materialTitle, materialText, items],
     );
 
     const errors = validateTaskForm(form);
-    const needsMaterial = items.some((item) => item.itemType === 'TFNS' || item.itemType === 'MATCHING');
+    const textRequired = needsText(itemType);
     const selectedTypesCount = grammarTypeIds.length;
+
+    // Смена механики пересобирает пункты под новый тип (смешивание механик в одном задании нет);
+    // поля чужого типа при этом очищаются — на форме не остаётся ничего лишнего.
+    const handleItemTypeChange = (next: ItemType) => {
+        setItemType(next);
+        setItems((prev) => (prev.length ? prev.map((item) => ({ ...createEmptyItem(next), id: item.id })) : prev));
+    };
 
     const handleItemChange = (id: number, patch: Partial<TaskItemDraft>) => {
         setItems((prev) => prev.map((item) => (item.id === id ? { ...item, ...patch } : item)));
@@ -84,7 +93,13 @@ export function TaskCreateView() {
 
             <div className={styles.header}>
                 <h1>Новое задание</h1>
-                <p>Заполните название, выберите темы и типы заданий, добавьте пункты.</p>
+                <p>Выберите тип задания — от него зависит набор полей формы.</p>
+            </div>
+
+            {/* ТИП ЗАДАНИЯ */}
+            <div className={styles.section}>
+                <div className={styles.sectionTitle}>Тип задания</div>
+                <ItemTypeSelect value={itemType} onChange={handleItemTypeChange} />
             </div>
 
             {/* ОСНОВНОЕ */}
@@ -129,23 +144,23 @@ export function TaskCreateView() {
                     )}
                     {selectedTypesCount > 1 && (
                         <div className={styles.warning}>
-                            ⚠ Выбрано несколько грамматических типов — задание будет смешанным (Mixed). Смешивайте форматы только если это нужно.
+                            ⚠ Выбрано несколько грамматических типов — задание будет смешанным (Mixed). Смешивайте типы только если это нужно.
                         </div>
                     )}
                 </div>
             </div>
 
-            {/* МАТЕРИАЛ */}
-            <MaterialSection
-                format={materialFormat}
-                onFormatChange={setMaterialFormat}
-                title={materialTitle}
-                text={materialText}
-                onTitleChange={setMaterialTitle}
-                onTextChange={setMaterialText}
-                required={needsMaterial}
-                error={showErrors ? errors.material : undefined}
-            />
+            {/* ТЕКСТ — показываем только когда механика его требует (TFNS / MATCHING) */}
+            {textRequired && (
+                <TextSection
+                    title={materialTitle}
+                    text={materialText}
+                    onTitleChange={setMaterialTitle}
+                    onTextChange={setMaterialText}
+                    required
+                    error={showErrors ? errors.text : undefined}
+                />
+            )}
 
             {/* ПУНКТЫ ЗАДАНИЯ */}
             <div className={styles.section}>
@@ -168,7 +183,7 @@ export function TaskCreateView() {
 
                 {showErrors && !items.length && <div className={styles.fieldError}>Добавьте хотя бы один пункт задания</div>}
 
-                <button type="button" className={styles.addBtn} onClick={() => setItems((prev) => [...prev, createEmptyItem()])}>
+                <button type="button" className={styles.addBtn} onClick={() => setItems((prev) => [...prev, createEmptyItem(itemType)])}>
                     + Добавить пункт
                 </button>
             </div>

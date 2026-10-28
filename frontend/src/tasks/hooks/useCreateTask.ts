@@ -3,13 +3,14 @@ import { extractErrorMessage } from '@/core/api/utils/errors';
 import { TasksBankService } from '@/tasks/services/TasksBankService';
 import { buildTaskPayload } from '@/tasks/lib/buildTaskPayload';
 import { isFormValid, validateTaskForm } from '@/tasks/lib/validateTaskForm';
-import type { MaterialFormat, TaskItemDraft } from '@/tasks/types';
+import type { ItemType, TaskItemDraft } from '@/tasks/types';
 
 export interface CreateTaskFormState {
     name: string;
     topicIds: number[];
     grammarTypeIds: number[];
-    materialFormat: MaterialFormat;
+    /** Механика всего задания (выбирается до конструктора пунктов). */
+    itemType: ItemType;
     materialTitle: string;
     materialText: string;
     items: TaskItemDraft[];

@@ -1,5 +1,6 @@
 import type {
     GapFillContentDto,
+    ItemType,
     MatchingContentDto,
     TaskContextDto,
     TaskCreateRequestDto,
@@ -8,6 +9,8 @@ import type {
     TfnsContentDto,
     WordFormationContentDto,
 } from '@/tasks/types';
+import { needsText } from './validateTaskForm';
+
 const blank = (value: string): boolean => value.trim().length === 0;
 const orNull = (value: string): string | null => (blank(value) ? null : value.trim());
 
@@ -56,45 +59,40 @@ function buildItemContent(item: TaskItemDraft): string | null {
 }
 
 function buildItemRequest(item: TaskItemDraft): TaskItemRequestDto {
-    // MATCHING: prompt — необязательная подсказка (hint), correctAnswer запрещён бэком.
+    // MATCHING: prompt не используется (подсказок в UI нет), correctAnswer запрещён бэком.
     if (item.itemType === 'MATCHING') {
         return {
             itemType: item.itemType,
-            prompt: orNull(item.hint),
+            prompt: null,
             correctAnswer: null,
             content: buildItemContent(item),
         };
     }
     return {
         itemType: item.itemType,
-        // GAP_MARK вырезан из проверки ниже — здесь просто нормализуем строку.
         prompt: orNull(item.prompt),
-        correctAnswer: orNull(item.answer),
+        // TFNS: канонический вид TRUE / FALSE / NOT STATED (валидатор бэка приводит к upper).
+        correctAnswer: item.itemType === 'TFNS' ? (item.answer.toUpperCase() || null) : orNull(item.answer),
         content: buildItemContent(item),
     };
 }
 
 /**
  * Сборка TaskCreateRequest из состояния конструктора.
- * Материал (context) сериализуется только если он нужен и заполнен;
- * при отсутствии ___ в prompt пункт не включается — это ловит локальная валидация
- * (см. validateTaskForm), сюда попадаем только после её успеха.
+ * Текст-материал (context) сериализуется только если он нужен для выбранной механики
+ * (TFNS/MATCHING); требования к пунктам ловит локальная валидация (см. validateTaskForm).
  */
 export function buildTaskPayload(form: {
     name: string;
     topicIds: number[];
     grammarTypeIds: number[];
-    materialFormat: 'TEXT' | 'AUDIO';
+    itemType: ItemType;
     materialTitle: string;
     materialText: string;
     items: TaskItemDraft[];
 }): TaskCreateRequestDto {
-    const needsMaterial = form.items.some(
-        (item) => item.itemType === 'TFNS' || item.itemType === 'MATCHING',
-    );
-
     let context: string | null = null;
-    if (needsMaterial) {
+    if (needsText(form.itemType)) {
         const dto: TaskContextDto = { type: 'TEXT', text: form.materialText.trim() };
         if (!blank(form.materialTitle)) dto.title = form.materialTitle.trim();
         context = JSON.stringify(dto);

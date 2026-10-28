@@ -1,14 +1,19 @@
-import type { TaskItemDraft } from '@/tasks/types';
-import { ANSWER_MAX_LENGTH, GAP_MARK, TASK_NAME_MAX_LENGTH } from '@/tasks/data';
+import type { ItemType, TaskItemDraft } from '@/tasks/types';
+import { ANSWER_MAX_LENGTH, GAP_MARK, TASK_NAME_MAX_LENGTH, TFNS_ANSWERS, isTextRequiredItem } from '@/tasks/data';
 
 export interface TaskFormErrors {
     name?: string;
-    material?: string;
+    text?: string;
     /** id пункта -> текст ошибки (подсветка карточки). */
     items: Record<number, string>;
 }
 
 const blank = (value: string): boolean => value.trim().length === 0;
+
+/** Нужен ли заданию текст-материал (tasks.context) — по механике всех пунктов. */
+export function needsText(itemType: ItemType): boolean {
+    return isTextRequiredItem(itemType);
+}
 
 function validateItem(item: TaskItemDraft): string | null {
     switch (item.itemType) {
@@ -22,7 +27,11 @@ function validateItem(item: TaskItemDraft): string | null {
             return null;
         case 'TFNS':
             if (blank(item.prompt)) return 'Введите утверждение';
-            if (blank(item.answer)) return 'Выберите правильный ответ';
+            // Бэк принимает только TRUE / FALSE / NOT STATED (TaskContentValidator.validateTfns),
+            // ответ выбирается чипами — пустой = не выбран.
+            if (!TFNS_ANSWERS.includes(item.answer.toUpperCase() as (typeof TFNS_ANSWERS)[number])) {
+                return 'Выберите правильный ответ: TRUE, FALSE или NOT STATED';
+            }
             return null;
         case 'MATCHING':
             if (blank(item.leftLabel)) return 'Заполните левую часть пары';
@@ -35,6 +44,7 @@ function validateItem(item: TaskItemDraft): string | null {
 export function validateTaskForm(form: {
     name: string;
     grammarTypeIds: number[];
+    itemType: ItemType;
     materialText: string;
     items: TaskItemDraft[];
 }): TaskFormErrors {
@@ -47,18 +57,15 @@ export function validateTaskForm(form: {
         if (message) errors.items[item.id] = message;
     });
 
-    const needsMaterial = form.items.some(
-        (item) => item.itemType === 'TFNS' || item.itemType === 'MATCHING',
-    );
-    if (needsMaterial && blank(form.materialText)) {
-        errors.material = 'Материал (текст) обязателен для TFNS / MATCHING';
+    if (!form.items.length) {
+        errors.text = 'Добавьте хотя бы один пункт задания';
+    } else if (needsText(form.itemType) && blank(form.materialText)) {
+        errors.text = 'Текст обязателен для TFNS / MATCHING';
     }
-
-    if (!form.items.length) errors.material = errors.material ?? 'Добавьте хотя бы один пункт задания';
 
     return errors;
 }
 
 export function isFormValid(errors: TaskFormErrors, grammarTypesSelected: boolean): boolean {
-    return !errors.name && !errors.material && Object.keys(errors.items).length === 0 && grammarTypesSelected;
+    return !errors.name && !errors.text && Object.keys(errors.items).length === 0 && grammarTypesSelected;
 }
