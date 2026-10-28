@@ -25,5 +25,5 @@ public class StudentStatsDto {
     /** Среднее время решения одной завершённой работы, секунды; null — нет завершённых работ. */
     private Long avgTimeSeconds;
 
-    private Integer errorsCount;
+    private Long errorsCount;
 }

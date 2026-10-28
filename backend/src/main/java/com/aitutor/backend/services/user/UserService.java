@@ -159,9 +159,9 @@ public class UserService {
                 .collect(Collectors.toSet());
         // В счётчик ошибок попадают только реально выполненные работы: у назначений,
         // закрытых по лимиту подсказок (EXPIRED/CANCELLED), финальные ответы не показываем.
-        int errorsCount = progressRepository.aggregateByStudent(studentId).stream()
+        long errorsCount = progressRepository.aggregateByStudent(studentId).stream()
                 .filter(row -> completedIds.contains(row.getWorkId()))
-                .mapToInt(StudentStatsAggregate::getErrorCount)
+                .mapToLong(StudentStatsAggregate::getErrorCount)
                 .sum();
 
         return StudentStatsDto.builder()

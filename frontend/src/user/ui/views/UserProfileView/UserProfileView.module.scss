@@ -44,9 +44,9 @@
 // Трапециевидная кнопка «Выйти» над верхним треугольником
 .btnLogout {
   position: absolute;
-  top: 0;
-  left: 20px;
-  width: 280px;
+  top: -4px;
+  left: 0;
+  width: 100%;
   height: 36px;
   padding: 0;
   background: transparent;
@@ -88,9 +88,6 @@
 
 // Поля внутри треугольников — абсолютное позиционирование (как в макете)
 .field {
-  position: absolute;
-  left: 50%;
-  transform: translate(-50%, -50%);
   font-size: 14px;
   font-weight: 500;
   color: $c3;
@@ -99,10 +96,6 @@
 
 // Строка статистики ученика в верхнем треугольнике (макет профиля ученика)
 .statsRow {
-  position: absolute;
-  top: 75px;
-  left: 50%;
-  transform: translateX(-50%);
   display: flex;
   gap: 16px;
   width: 240px;
@@ -128,33 +121,55 @@
 
 // Учитель: имя сверху, email под ним. Ученик: email и имя под статистикой.
 .fieldName {
-  top: 80px;
   font-size: 16px;
   color: $c1;
   font-weight: 600;
-  width: 200px;
 }
 
-.fieldEmail {
-  top: 110px;
-  width: 180px;
+.topPersonalContent {
+  position: absolute;
+  top: 80px;
+  margin: 0 auto;
+  right: 70px;
+}
+
+.bottomTriangleContent {
+  position: absolute;
+  top: 440px;
+  right: 33px;
+  max-width: 250px;
 }
 
 .trianglesWrap[data-role='STUDENT'] {
-  .fieldName {
-    top: 200px;
-    font-size: 18px;
-    width: 180px;
+  .topTriangleContent {
+    position: absolute;
+    top: 40px;
+    right: 40px;
+  }
+
+  .topPersonalContent {
+    position: static;
+    max-width: 150px;
+    margin: 0 auto;
+    margin-top: 30px;
+    text-align: center;
+    word-break: break-word;
+    overflow-wrap: break-word;
   }
 
   .fieldEmail {
-    top: 160px;
-    width: 220px;
+    max-width: 105px;
+    margin: 0 auto;
   }
 }
 
+.bottomTriangleText {
+  position: absolute;
+  top: 450px;
+  right: 40px;
+}
+
 .fieldCode {
-  top: 400px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -196,30 +211,19 @@
 }
 
 .hint {
-  position: absolute;
-  top: 432px;
-  left: 50%;
-  transform: translateX(-50%);
   color: $c3;
   font-size: 12px;
   text-align: center;
-  width: 260px;
   line-height: 1.4;
-  z-index: 5;
 }
 
 // Строка "Учитель: Имя" в нижнем треугольнике профиля ученика
 .textTeacher {
-  position: absolute;
-  top: 458px;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  margin-top: 10px;
   color: $c3;
   font-size: 13px;
   text-align: center;
-  width: 280px;
   font-weight: 500;
-  z-index: 5;
 }
 
 .copiedBadge {

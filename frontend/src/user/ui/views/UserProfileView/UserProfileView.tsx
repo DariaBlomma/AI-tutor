@@ -71,22 +71,26 @@ export function UserProfileView() {
 
                     {/* Верхний треугольник: у ученика — статистика, ниже email и имя;
                         у учителя — только имя/email (макет профиля учителя). */}
-                    {profile.role === 'STUDENT' && (
-                        <div className={styles.statsRow}>
-                            {buildStudentStatCells(profile.stats).map((cell) => (
-                                <div key={cell.label} className={styles.statItem}>
-                                    <div className={styles.statValue}>{cell.value}</div>
-                                    <div className={styles.statLabel}>{cell.label}</div>
-                                </div>
-                            ))}
+                    <div className={styles.topTriangleContent}>
+                        {profile.role === 'STUDENT' && (
+                            <div className={styles.statsRow}>
+                                {buildStudentStatCells(profile.stats).map((cell) => (
+                                    <div key={cell.label} className={styles.statItem}>
+                                        <div className={styles.statValue}>{cell.value}</div>
+                                        <div className={styles.statLabel}>{cell.label}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        <div className={styles.topPersonalContent}>
+                            <div className={`${styles.field} ${styles.fieldName}`}>{displayName}</div>
+                            <div className={`${styles.field} ${styles.fieldEmail}`}>{profile.email}</div>
                         </div>
-                    )}
 
-                    <div className={`${styles.field} ${styles.fieldName}`}>{displayName}</div>
-                    <div className={`${styles.field} ${styles.fieldEmail}`}>{profile.email}</div>
-
+                    </div>
                     {profile.role === 'TEACHER' ? (
-                        <>
+                        <div className={styles.bottomTriangleContent}>
                             <div className={`${styles.field} ${styles.fieldCode}`}>
                                 <span className={styles.codeValue}>{profile.teacherCode}</span>
                                 <button
@@ -103,10 +107,10 @@ export function UserProfileView() {
                                 Отправьте этот код ученику;<br/>
                                 по нему он сможет зарегистрироваться к вам
                             </p>
-                        </>
+                        </div>
                     ) : (
                         /* Нижний треугольник ученика: код учителя, подпись и имя учителя */
-                        <>
+                        <div className={styles.bottomTriangleText}>
                             <div className={`${styles.field} ${styles.fieldCode}`}>
                                 <span className={styles.codeValue}>{profile.teacher?.teacherCode ?? '—'}</span>
                                 <button
@@ -123,7 +127,7 @@ export function UserProfileView() {
                             <div className={styles.textTeacher}>
                                 Учитель: {profile.teacher?.fullName ?? '—'}
                             </div>
-                        </>
+                        </div>
                     )}
                 </div>
             )}
