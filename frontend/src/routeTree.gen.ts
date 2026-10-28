@@ -16,6 +16,10 @@ import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-pas
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
 import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
+import { Route as TasksBankIndexRouteImport } from './routes/tasks-bank/index'
+import { Route as TasksBankCreateRouteImport } from './routes/tasks-bank/create'
+import { Route as TasksBankTaskTypesRouteImport } from './routes/tasks-bank/task-types'
+import { Route as TasksBankTopicsRouteImport } from './routes/tasks-bank/topics'
 import { Route as TeacherReportsRouteImport } from './routes/teacher/reports'
 
 const IndexRoute = IndexRouteImport.update({
@@ -53,6 +57,26 @@ const AuthSignUpRoute = AuthSignUpRouteImport.update({
   path: '/sign-up',
   getParentRoute: () => AuthRouteRoute,
 } as any)
+const TasksBankIndexRoute = TasksBankIndexRouteImport.update({
+  id: '/tasks-bank/',
+  path: '/tasks-bank/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksBankCreateRoute = TasksBankCreateRouteImport.update({
+  id: '/tasks-bank/create',
+  path: '/tasks-bank/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksBankTaskTypesRoute = TasksBankTaskTypesRouteImport.update({
+  id: '/tasks-bank/task-types',
+  path: '/tasks-bank/task-types',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksBankTopicsRoute = TasksBankTopicsRouteImport.update({
+  id: '/tasks-bank/topics',
+  path: '/tasks-bank/topics',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TeacherReportsRoute = TeacherReportsRouteImport.update({
   id: '/teacher/reports',
   path: '/teacher/reports',
@@ -67,7 +91,11 @@ export interface FileRoutesByFullPath {
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/tasks-bank/create': typeof TasksBankCreateRoute
+  '/tasks-bank/task-types': typeof TasksBankTaskTypesRoute
+  '/tasks-bank/topics': typeof TasksBankTopicsRoute
   '/teacher/reports': typeof TeacherReportsRoute
+  '/tasks-bank/': typeof TasksBankIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -77,7 +105,11 @@ export interface FileRoutesByTo {
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/tasks-bank/create': typeof TasksBankCreateRoute
+  '/tasks-bank/task-types': typeof TasksBankTaskTypesRoute
+  '/tasks-bank/topics': typeof TasksBankTopicsRoute
   '/teacher/reports': typeof TeacherReportsRoute
+  '/tasks-bank': typeof TasksBankIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -88,7 +120,11 @@ export interface FileRoutesById {
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/tasks-bank/create': typeof TasksBankCreateRoute
+  '/tasks-bank/task-types': typeof TasksBankTaskTypesRoute
+  '/tasks-bank/topics': typeof TasksBankTopicsRoute
   '/teacher/reports': typeof TeacherReportsRoute
+  '/tasks-bank/': typeof TasksBankIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -100,7 +136,11 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/sign-up'
+    | '/tasks-bank/create'
+    | '/tasks-bank/task-types'
+    | '/tasks-bank/topics'
     | '/teacher/reports'
+    | '/tasks-bank/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -110,7 +150,11 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/sign-up'
+    | '/tasks-bank/create'
+    | '/tasks-bank/task-types'
+    | '/tasks-bank/topics'
     | '/teacher/reports'
+    | '/tasks-bank'
   id:
     | '__root__'
     | '/'
@@ -120,14 +164,22 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/sign-up'
+    | '/tasks-bank/create'
+    | '/tasks-bank/task-types'
+    | '/tasks-bank/topics'
     | '/teacher/reports'
+    | '/tasks-bank/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRouteRoute: typeof AuthRouteRouteWithChildren
   ProfileRoute: typeof ProfileRoute
+  TasksBankCreateRoute: typeof TasksBankCreateRoute
+  TasksBankTaskTypesRoute: typeof TasksBankTaskTypesRoute
+  TasksBankTopicsRoute: typeof TasksBankTopicsRoute
   TeacherReportsRoute: typeof TeacherReportsRoute
+  TasksBankIndexRoute: typeof TasksBankIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -181,6 +233,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSignUpRouteImport
       parentRoute: typeof AuthRouteRoute
     }
+    '/tasks-bank/': {
+      id: '/tasks-bank/'
+      path: '/tasks-bank'
+      fullPath: '/tasks-bank/'
+      preLoaderRoute: typeof TasksBankIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks-bank/create': {
+      id: '/tasks-bank/create'
+      path: '/tasks-bank/create'
+      fullPath: '/tasks-bank/create'
+      preLoaderRoute: typeof TasksBankCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks-bank/task-types': {
+      id: '/tasks-bank/task-types'
+      path: '/tasks-bank/task-types'
+      fullPath: '/tasks-bank/task-types'
+      preLoaderRoute: typeof TasksBankTaskTypesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks-bank/topics': {
+      id: '/tasks-bank/topics'
+      path: '/tasks-bank/topics'
+      fullPath: '/tasks-bank/topics'
+      preLoaderRoute: typeof TasksBankTopicsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/teacher/reports': {
       id: '/teacher/reports'
       path: '/teacher/reports'
@@ -213,7 +293,11 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRouteRoute: AuthRouteRouteWithChildren,
   ProfileRoute: ProfileRoute,
+  TasksBankCreateRoute: TasksBankCreateRoute,
+  TasksBankTaskTypesRoute: TasksBankTaskTypesRoute,
+  TasksBankTopicsRoute: TasksBankTopicsRoute,
   TeacherReportsRoute: TeacherReportsRoute,
+  TasksBankIndexRoute: TasksBankIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

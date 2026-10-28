@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -45,4 +47,13 @@ public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificat
     /** Список с полным графом (topics, taskTypes, items) за фиксированное число запросов — против N+1 в банке заданий. */
     @EntityGraph(attributePaths = {"topics", "taskTypes", "items"})
     List<Task> findAllByIdIn(List<Long> ids);
+
+    /**
+     * Пагинированный вариант: тот же полный граф, но только для id текущей страницы.
+     * COUNT-запрос считает сами задания (distinct по task), без раздувания collection-join'ами.
+     */
+    @EntityGraph(attributePaths = {"topics", "taskTypes", "items"})
+    @Query(value = "SELECT t FROM Task t WHERE t.id IN :ids",
+           countQuery = "SELECT COUNT(t) FROM Task t WHERE t.id IN :ids")
+    Page<Task> findPageByIdIn(@Param("ids") List<Long> ids, Pageable pageable);
 }
