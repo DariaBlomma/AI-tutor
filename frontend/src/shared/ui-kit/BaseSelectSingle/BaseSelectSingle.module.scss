@@ -1,0 +1,112 @@
+// Все цвета берутся из CSS-переменных глобальной темы (:root в shared/styles/_variables.scss)
+
+// Стилизованный single-select в тёмной фиолетовой гамме проекта.
+.control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 7px 10px;
+  background: rgba(157, 124, 242, 0.05);
+  border: 1px solid rgba(157, 124, 242, 0.3);
+  border-radius: var(--r, 6px);
+  color: var(--c1);
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+
+  // Стандартный подход для кликабельных элементов: hover/active меняют цвет, не размер.
+  &:hover {
+    border-color: var(--pl);
+  }
+
+  &:active {
+    border-color: var(--pd);
+  }
+}
+
+.controlFocused {
+  border-color: var(--p);
+  background: rgba(157, 124, 242, 0.1);
+}
+
+.valueContainer {
+  padding: 0;
+  min-height: 0;
+}
+
+.singleValue {
+  color: var(--c1);
+  font-size: 13px;
+}
+
+.placeholder {
+  color: var(--c3);
+  font-size: 13px;
+}
+
+.indicatorsContainer {
+  display: flex;
+  align-items: center;
+}
+
+.dropdownIndicator {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  color: var(--c3);
+}
+
+.arrow {
+  font-size: 12px;
+  line-height: 1;
+}
+
+.clear {
+  font-size: 12px;
+  line-height: 1;
+}
+
+.menu {
+  margin-top: 4px;
+  background: #1a1a1a;
+  border: 1px solid rgba(157, 124, 242, 0.3);
+  border-radius: var(--r, 6px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.menuList {
+  padding: 4px;
+}
+
+.option {
+  padding: 8px 10px;
+  border-radius: 4px;
+  color: var(--c1);
+  font-size: 13px;
+  cursor: pointer;
+  transition: color 0.15s, background-color 0.15s;
+
+  &:hover {
+    color: var(--pl);
+  }
+
+  &:active {
+    color: var(--pd);
+  }
+}
+
+.optionFocused {
+  background: rgba(157, 124, 242, 0.12);
+}
+
+.optionSelected {
+  background: var(--p);
+  color: var(--c1);
+
+  &:hover,
+  &:active {
+    color: var(--c1);
+  }
+}

@@ -1,4 +1,4 @@
-import { PlusLinkButton } from '@/shared/ui-kit/PlusLinkButton/PlusLinkButton';
+import { BasePlusButtonLink } from '@/shared/ui-kit/BasePlusButtonLink/BasePlusButtonLink';
 import type { ChipsMultiselectProps } from './types';
 import styles from './ChipsMultiselect.module.scss';
 
@@ -49,7 +49,7 @@ export function ChipsMultiselect({ items, selectedIds, onChange, manageTo, singl
             </div>
 
             {manageTo && (
-                <PlusLinkButton to={manageTo} ariaLabel="Управление справочником" />
+                <BasePlusButtonLink to={manageTo} ariaLabel="Управление справочником" />
             )}
         </div>
     );
