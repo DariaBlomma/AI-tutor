@@ -21,6 +21,24 @@ export interface TaskType {
     isActive: boolean;
 }
 
+/** Spring Page<T> — ответ GET /api/tasks с пагинацией. */
+export interface PageDto<T> {
+    content: T[];
+    totalElements: number;
+    totalPages: number;
+    number: number; // текущая страница (0-based)
+    size: number;
+}
+
+/** Параметры GET /api/tasks. topicId — фильтр на фронте (на бэке эндпоинта нет). */
+export interface TasksQueryParams {
+    search?: string;
+    taskTypeId?: number;
+    includeMixed?: boolean;
+    page?: number;
+    size?: number;
+}
+
 /** GET /api/tasks -> TaskSummaryResponse (лёгкая карточка банка, без контента). */
 export interface TaskSummary {
     id: number;
@@ -33,6 +51,8 @@ export interface TaskSummary {
     itemCount: number;
     createdAt: string;
 }
+
+/** task_types — на бэке это сущность, а не enum. Механики пунктов (ItemType) фиксированы. */
 
 /**
  * tasks.context — JSON-материал задания (см. backend README «Формат контента заданий»):

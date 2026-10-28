@@ -9,8 +9,9 @@ export interface TaskRefsMutations {
     createTopic: (name: string) => Promise<Topic | null>;
     renameTopic: (id: number, name: string) => Promise<boolean>;
     removeTopic: (id: number) => Promise<boolean>;
-    createTaskType: (name: string) => Promise<TaskType | null>;
-    renameTaskType: (id: number, name: string) => Promise<boolean>;
+    createTaskType: (name: string, description?: string) => Promise<TaskType | null>;
+    /** name + description (для task-types описание обязательно передавать — бэк перезаписывает поле). */
+    renameTaskType: (id: number, name: string, description?: string | null) => Promise<boolean>;
     removeTaskType: (id: number) => Promise<boolean>;
 }
 
@@ -78,14 +79,17 @@ export function useTaskRefs(enabled: boolean = true): UseTaskRefsResult {
     );
 
     const createTaskType = useCallback(
-        (name: string) =>
-            runMutation(() => TaskTypesService.create(name), (t) => t && setTaskTypes((prev) => [...prev, t])),
+        (name: string, description?: string) =>
+            runMutation(
+                () => TaskTypesService.create(name, description),
+                (t) => t && setTaskTypes((prev) => [...prev, t]),
+            ),
         [runMutation],
     );
     const renameTaskType = useCallback(
-        (id: number, name: string) =>
+        (id: number, name: string, description?: string | null) =>
             runMutation(
-                () => TaskTypesService.update(id, name),
+                () => TaskTypesService.update(id, name, description ?? undefined),
                 (t) => t && setTaskTypes((prev) => prev.map((item) => (item.id === id ? t : item))),
             ).then((r) => r !== null),
         [runMutation],
@@ -114,7 +118,6 @@ export function useTaskRefs(enabled: boolean = true): UseTaskRefsResult {
 }
 
 // Первичная загрузка обоих справочников (ошибка сети не блокирует страницу — покажет error).
-import { useEffect } from 'react';
 
 function useEffectOnceLoad(
     reload: (() => Promise<void>) | undefined,

@@ -1,29 +1,54 @@
 import { useEffect, useState } from 'react';
-import type { TaskSummary } from '@/tasks/types';
+import { extractErrorMessage } from '@/core/api/utils/errors';
+import type { PageDto, TaskSummary } from '@/tasks/types';
 
-interface UseTasksBankResult {
-    tasks: TaskSummary[];
+export const TASKS_PAGE_SIZE = 10;
+
+export interface UseTasksBankResult {
+    /** Элементы текущей страницы (серверная пагинация: бэк режет сам). */
+    pageItems: TaskSummary[];
+    totalCount: number;
+    totalPages: number;
+    /** Текущая страница, 0-based. */
+    page: number;
+    setPage: (page: number) => void;
     isLoading: boolean;
     isError: boolean;
+    error: string | null;
 }
 
-// Список банка заданий (GET /api/tasks).
-// fetcher внедряется извне — хук не зависит от транспорта и легко тестируется.
-export function useTasksBank(fetcher: () => Promise<TaskSummary[]>): UseTasksBankResult {
-    const [tasks, setTasks] = useState<TaskSummary[]>([]);
+/**
+ * Список банка заданий + серверная постраничная навигация.
+ * fetcher(page, size) внедряется извне — хук не зависит от транспорта и легко тестируется.
+ * Смена fetcher (фильтры) возвращает на первую страницу; смена страницы — перезапрашивает данные.
+ */
+export function useTasksBank(fetcher: (page: number, size: number) => Promise<PageDto<TaskSummary>>): UseTasksBankResult {
+    const [pageData, setPageData] = useState<PageDto<TaskSummary> | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isError, setIsError] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [page, setPage] = useState(0);
+
+    // Смена фильтров перезагружает список — возвращаемся на первую страницу.
+    useEffect(() => {
+        setPage(0);
+    }, [fetcher]);
 
     useEffect(() => {
         let active = true;
 
-        fetcher()
+        setIsLoading(true);
+        fetcher(page, TASKS_PAGE_SIZE)
             .then((data) => {
                 if (!active) return;
-                setTasks(data);
+                setPageData(data);
+                setIsError(false);
+                setError(null);
             })
-            .catch(() => {
-                if (active) setIsError(true);
+            .catch((e) => {
+                if (!active) return;
+                setIsError(true);
+                setError(extractErrorMessage(e as Error));
             })
             .finally(() => {
                 if (active) setIsLoading(false);
@@ -32,7 +57,20 @@ export function useTasksBank(fetcher: () => Promise<TaskSummary[]>): UseTasksBan
         return () => {
             active = false;
         };
-    }, [fetcher]);
+    }, [fetcher, page]);
 
-    return { tasks, isLoading, isError };
+    const pageItems = pageData?.content ?? [];
+    const totalPages = Math.max(1, pageData?.totalPages ?? 1);
+    const safePage = Math.min(page, totalPages - 1);
+
+    return {
+        pageItems,
+        totalCount: pageData?.totalElements ?? 0,
+        totalPages,
+        page: safePage,
+        setPage,
+        isLoading,
+        isError,
+        error,
+    };
 }

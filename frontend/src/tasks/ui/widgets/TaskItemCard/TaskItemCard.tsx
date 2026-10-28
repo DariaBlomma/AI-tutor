@@ -1,6 +1,6 @@
 import { BaseInputText } from '@/shared/ui-kit/BaseInputText/BaseInputText';
 import { ITEM_TYPES, TFNS_ANSWERS } from '@/tasks/data';
-import type { ItemType } from '@/tasks/types';
+import type { ItemType, TaskItemDraft } from '@/tasks/types';
 import type { TaskItemCardProps } from './types';
 import styles from './TaskItemCard.module.scss';
 

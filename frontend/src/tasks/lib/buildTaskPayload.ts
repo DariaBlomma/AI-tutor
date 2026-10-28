@@ -14,7 +14,7 @@ const orNull = (value: string): string | null => (blank(value) ? null : value.tr
 // content отправляется только если хотя бы одно поле заполнено —
 // пустой объект бэк отвергает (неизвестных полей нет, но base обязателен).
 function buildItemContent(item: TaskItemDraft): string | null {
-    let content: Record<string, unknown> | null = null;
+    let content: Record<string, unknown> | WordFormationContentDto | GapFillContentDto | TfnsContentDto | MatchingContentDto | null = null;
 
     switch (item.itemType) {
         case 'WORD_FORMATION': {
@@ -51,7 +51,7 @@ function buildItemContent(item: TaskItemDraft): string | null {
         }
     }
 
-    const hasValue = content !== null && Object.values(content).some((v) => v !== undefined);
+    const hasValue = content !== null && Object.values(content as Record<string, unknown>).some((v) => v !== undefined);
     return hasValue ? JSON.stringify(content) : null;
 }
 

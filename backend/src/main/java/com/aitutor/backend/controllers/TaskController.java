@@ -8,11 +8,10 @@ import com.aitutor.backend.security.CustomUserDetails;
 import com.aitutor.backend.services.task.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/tasks")
@@ -21,14 +20,19 @@ public class TaskController {
 
     private final TaskService taskService;
 
-    /** Лёгкий список банка заданий: мета + превью, без контента. */
+    /**
+     * Лёгкий список банка заданий: мета + превью, без контента.
+     * Серверная пагинация: page/size; ответ — Spring Page (content/totalElements/totalPages/...).
+     */
     @GetMapping
-    public List<TaskSummaryResponse> getAll(
+    public Page<TaskSummaryResponse> getAll(
             @RequestParam(required = false) Long taskTypeId,
             // Строгий поиск по умолчанию: смешанные задания не попадают в выдачу
             @RequestParam(defaultValue = "false") boolean includeMixed,
-            @RequestParam(required = false) String search) {
-        return taskService.getAll(taskTypeId, includeMixed, search);
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return taskService.getAllPaged(taskTypeId, includeMixed, search, page, size);
     }
 
     /** Детальная карточка: полный контент (topics, taskTypes, items). */

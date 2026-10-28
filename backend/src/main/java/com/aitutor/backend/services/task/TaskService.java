@@ -19,6 +19,9 @@ import com.aitutor.backend.repositories.UserRepository;
 import com.aitutor.backend.repositories.task.TaskRepository;
 import com.aitutor.backend.repositories.task.TaskTypeRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
@@ -55,9 +58,7 @@ public class TaskService {
      */
     @Transactional(readOnly = true)
     public List<TaskSummaryResponse> getAll(Long taskTypeId, boolean includeMixed, String search) {
-        Specification<Task> spec = TaskSpecifications.notDeleted()
-                .and(TaskSpecifications.byTaskType(taskTypeId, includeMixed))
-                .and(TaskSpecifications.byNameOrPublicId(search));
+        Specification<Task> spec = buildSpec(taskTypeId, includeMixed, search);
 
         // Стабильный порядок для UI банка заданий: новые сверху
         List<Long> ids = taskRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "createdAt"))
@@ -74,6 +75,43 @@ public class TaskService {
                 .filter(Objects::nonNull)
                 .map(taskMapper::toSummary)
                 .toList();
+    }
+
+    /**
+     * Серверная пагинация банка заданий: та же спецификация фильтров, но полный граф
+     * (topics, taskTypes, items) дотягивается только для id текущей страницы — 2 запроса на страницу.
+     */
+    @Transactional(readOnly = true)
+    public Page<TaskSummaryResponse> getAllPaged(Long taskTypeId, boolean includeMixed, String search,
+                                                 int page, int size) {
+        Specification<Task> spec = buildSpec(taskTypeId, includeMixed, search);
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+
+        Page<Long> idPage = taskRepository.findAll(spec, PageRequest.of(page, size, sort))
+                .map(Task::getId);
+        if (idPage.isEmpty()) {
+            return idPage.map(t -> null); // пустая страница с корректным totalElements
+        }
+
+        // Грузим граф только для id страницы; порядок сортировки сохраняем вручную
+        List<Task> loaded = taskRepository.findPageByIdIn(idPage.getContent(),
+                        PageRequest.of(0, idPage.getContent().size(), sort))
+                .getContent();
+        Map<Long, Task> byId = loaded.stream().collect(Collectors.toMap(Task::getId, t -> t));
+
+        List<TaskSummaryResponse> content = idPage.getContent().stream()
+                .map(byId::get)
+                .filter(Objects::nonNull)
+                .map(taskMapper::toSummary)
+                .toList();
+
+        return new PageImpl<>(content, PageRequest.of(page, size, sort), idPage.getTotalElements());
+    }
+
+    private Specification<Task> buildSpec(Long taskTypeId, boolean includeMixed, String search) {
+        return TaskSpecifications.notDeleted()
+                .and(TaskSpecifications.byTaskType(taskTypeId, includeMixed))
+                .and(TaskSpecifications.byNameOrPublicId(search));
     }
 
     /** Детальная карточка: полный контент (topics, taskTypes, items). */

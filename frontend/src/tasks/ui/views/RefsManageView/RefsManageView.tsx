@@ -14,20 +14,25 @@ const COPY: Record<RefsManageViewProps['kind'], { title: string; panelTitle: str
 };
 
 // Страница управления справочником (темы / учебные типы): создание, редактирование, удаление.
-// Открывается по кнопке «+» рядом с чипами на форме создания задания. Только для учителя.
+// Открывается по кнопке «+» рядом с чипами на странице банка заданий и форме создания. Только для учителя.
 export function RefsManageView({ kind }: RefsManageViewProps) {
     const refs = useTaskRefs();
     const copy = COPY[kind];
+    const isTopics = kind === 'topics';
 
-    const items: Array<Topic | TaskType> = kind === 'topics' ? refs.topics : refs.taskTypes;
-    const onCreate = kind === 'topics' ? refs.createTopic : refs.createTaskType;
-    const onRename = kind === 'topics' ? refs.renameTopic : refs.renameTaskType;
-    const onRemove = kind === 'topics' ? refs.removeTopic : refs.removeTaskType;
+    const items: Array<Topic | TaskType> = isTopics ? refs.topics : refs.taskTypes;
+
+    // Для тем описание не используется — всегда null при обновлении.
+    const onCreate = isTopics ? refs.createTopic : refs.createTaskType;
+    const onRename = isTopics
+        ? (id: number, name: string) => refs.renameTopic(id, name)
+        : (id: number, name: string, description: string | null) => refs.renameTaskType(id, name, description);
+    const onRemove = isTopics ? refs.removeTopic : refs.removeTaskType;
 
     return (
         <div className={styles.page}>
-            <Link to="/tasks-bank/create" className={styles.backLink}>
-                ← К созданию задания
+            <Link to="/tasks-bank" className={styles.backLink}>
+                ← К банку заданий
             </Link>
 
             <div className={styles.header}>
@@ -41,6 +46,7 @@ export function RefsManageView({ kind }: RefsManageViewProps) {
                 <RefCrudPanel
                     title={copy.panelTitle}
                     items={items}
+                    hasDescription={!isTopics}
                     onCreate={onCreate}
                     onRename={onRename}
                     onRemove={onRemove}
