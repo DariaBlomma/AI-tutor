@@ -112,7 +112,6 @@ export function TaskCreateView() {
                         items={refs.topics}
                         selectedIds={topicIds}
                         onChange={setTopicIds}
-                        manageTo="/tasks-bank/topics"
                     />
                 </div>
 
@@ -124,7 +123,6 @@ export function TaskCreateView() {
                         items={refs.grammarTypes}
                         selectedIds={grammarTypeIds}
                         onChange={setGrammarTypeIds}
-                        manageTo="/tasks-bank/grammar-types"
                     />
                     {showErrors && selectedTypesCount === 0 && (
                         <div className={styles.fieldError}>Выберите хотя бы один грамматический тип</div>
