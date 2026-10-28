@@ -34,7 +34,7 @@ export function TaskCreateView() {
 
     const [name, setName] = useState('');
     const [topicIds, setTopicIds] = useState<number[]>([]);
-    const [taskTypeIds, setTaskTypeIds] = useState<number[]>([]);
+    const [grammarTypeIds, setGrammarTypeIds] = useState<number[]>([]);
     const [materialFormat, setMaterialFormat] = useState<MaterialFormat>('TEXT');
     const [materialTitle, setMaterialTitle] = useState('');
     const [materialText, setMaterialText] = useState('');
@@ -50,13 +50,13 @@ export function TaskCreateView() {
     const { submit, isSubmitting, error } = useCreateTask(goBackToBank);
 
     const form = useMemo(
-        () => ({ name, topicIds, taskTypeIds, materialFormat, materialTitle, materialText, items }),
-        [name, topicIds, taskTypeIds, materialFormat, materialTitle, materialText, items],
+        () => ({ name, topicIds, grammarTypeIds, materialFormat, materialTitle, materialText, items }),
+        [name, topicIds, grammarTypeIds, materialFormat, materialTitle, materialText, items],
     );
 
     const errors = validateTaskForm(form);
     const needsMaterial = items.some((item) => item.itemType === 'TFNS' || item.itemType === 'MATCHING');
-    const selectedTypesCount = taskTypeIds.length;
+    const selectedTypesCount = grammarTypeIds.length;
 
     const handleItemChange = (id: number, patch: Partial<TaskItemDraft>) => {
         setItems((prev) => prev.map((item) => (item.id === id ? { ...item, ...patch } : item)));
@@ -120,20 +120,20 @@ export function TaskCreateView() {
 
                 <div className={styles.field}>
                     <label className={styles.label}>
-                        Типы заданий <span className={styles.req}>*</span>
+                        Грамматические типы <span className={styles.req}>*</span>
                     </label>
                     <ChipsMultiselect
-                        items={refs.taskTypes}
-                        selectedIds={taskTypeIds}
-                        onChange={setTaskTypeIds}
-                        manageTo="/tasks-bank/task-types"
+                        items={refs.grammarTypes}
+                        selectedIds={grammarTypeIds}
+                        onChange={setGrammarTypeIds}
+                        manageTo="/tasks-bank/grammar-types"
                     />
                     {showErrors && selectedTypesCount === 0 && (
-                        <div className={styles.fieldError}>Выберите хотя бы один тип задания</div>
+                        <div className={styles.fieldError}>Выберите хотя бы один грамматический тип</div>
                     )}
                     {selectedTypesCount > 1 && (
                         <div className={styles.warning}>
-                            ⚠ Выбрано несколько типов — задание будет смешанным (Mixed). Смешивайте форматы только если это нужно.
+                            ⚠ Выбрано несколько грамматических типов — задание будет смешанным (Mixed). Смешивайте форматы только если это нужно.
                         </div>
                     )}
                 </div>

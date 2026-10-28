@@ -30,9 +30,11 @@ public class TaskController {
             // Строгий поиск по умолчанию: смешанные задания не попадают в выдачу
             @RequestParam(defaultValue = "false") boolean includeMixed,
             @RequestParam(required = false) String search,
+            // Механика пунктов (WORD_FORMATION / GAP_FILL / TFNS / MATCHING) — nullable
+            @RequestParam(required = false) com.aitutor.backend.enums.ItemType itemType,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return taskService.getAllPaged(taskTypeId, includeMixed, search, page, size);
+        return taskService.getAllPaged(taskTypeId, includeMixed, search, itemType, page, size);
     }
 
     /** Детальная карточка: полный контент (topics, taskTypes, items). */

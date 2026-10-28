@@ -1,8 +1,11 @@
 package com.aitutor.backend.services.task;
 
 import com.aitutor.backend.entities.Task;
+import com.aitutor.backend.entities.TaskItem;
+import com.aitutor.backend.enums.ItemType;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Subquery;
 import org.springframework.data.jpa.domain.Specification;
 
 /**
@@ -34,6 +37,27 @@ public final class TaskSpecifications {
                 return typeMatches;
             }
             return cb.and(typeMatches, cb.isFalse(root.get("isMixed")));
+        };
+    }
+
+    /**
+     * Фильтр по механике пунктов (enum ItemType: WORD_FORMATION / GAP_FILL / TFNS / MATCHING).
+     * Оставляем задания, у которых есть хотя бы один пункт выбранной механики.
+     * Подзапрос EXISTS вместо join — иначе дубли строк ломали бы count/пагинацию.
+     */
+    public static Specification<Task> byItemType(ItemType itemType) {
+        return (root, query, cb) -> {
+            if (itemType == null) {
+                return cb.conjunction();
+            }
+            Subquery<Long> sub = query.subquery(Long.class);
+            TaskItem item = sub.from(TaskItem.class);
+            sub.select(cb.literal(1L))
+                    .where(cb.and(
+                            cb.equal(item.get("task"), root),
+                            cb.equal(item.get("itemType"), itemType)
+                    ));
+            return cb.exists(sub);
         };
     }
 

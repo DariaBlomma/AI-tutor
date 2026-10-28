@@ -5,8 +5,8 @@ import { REF_NAME_MAX_LENGTH } from '@/tasks/data';
 import type { RefCrudPanelProps, RefItem } from './types';
 import styles from './RefCrudPanel.module.scss';
 
-// Виджет управления справочником (темы / учебные типы): создание, редактирование, удаление.
-// Используется на страницах /tasks-bank/topics и /tasks-bank/task-types. Только для учителя.
+// Виджет управления справочником (темы / грамматические типы): создание, редактирование, удаление.
+// Используется на страницах /tasks-bank/topics и /tasks-bank/grammar-types. Только для учителя.
 export function RefCrudPanel({ title, items, hasDescription, onCreate, onRename, onRemove }: RefCrudPanelProps) {
     const [newName, setNewName] = useState('');
     const [newDescription, setNewDescription] = useState('');

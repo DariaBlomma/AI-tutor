@@ -8,6 +8,7 @@ import com.aitutor.backend.dto.task.TaskUpdateRequest;
 import com.aitutor.backend.entities.Task;
 import com.aitutor.backend.entities.TaskItem;
 import com.aitutor.backend.entities.TaskType;
+import com.aitutor.backend.enums.ItemType;
 import com.aitutor.backend.entities.Topic;
 import com.aitutor.backend.entities.User;
 import com.aitutor.backend.exceptions.InvalidRequestException;
@@ -83,8 +84,8 @@ public class TaskService {
      */
     @Transactional(readOnly = true)
     public Page<TaskSummaryResponse> getAllPaged(Long taskTypeId, boolean includeMixed, String search,
-                                                 int page, int size) {
-        Specification<Task> spec = buildSpec(taskTypeId, includeMixed, search);
+                                                 ItemType itemType, int page, int size) {
+        Specification<Task> spec = buildSpec(taskTypeId, includeMixed, search).and(TaskSpecifications.byItemType(itemType));
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
 
         Page<Long> idPage = taskRepository.findAll(spec, PageRequest.of(page, size, sort))

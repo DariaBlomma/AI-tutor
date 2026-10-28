@@ -83,7 +83,7 @@ function buildItemRequest(item: TaskItemDraft): TaskItemRequestDto {
 export function buildTaskPayload(form: {
     name: string;
     topicIds: number[];
-    taskTypeIds: number[];
+    grammarTypeIds: number[];
     materialFormat: 'TEXT' | 'AUDIO';
     materialTitle: string;
     materialText: string;
@@ -105,6 +105,7 @@ export function buildTaskPayload(form: {
         context,
         items: form.items.map(buildItemRequest),
         topicIds: form.topicIds,
-        taskTypeIds: form.taskTypeIds,
+        // Имя поля DTO бэкенда (TaskCreateRequest.taskTypeIds) не меняем — только фронтенд-именование.
+        taskTypeIds: form.grammarTypeIds,
     };
 }

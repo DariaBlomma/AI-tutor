@@ -18,7 +18,7 @@ import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-passw
 import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
 import { Route as TasksBankIndexRouteImport } from './routes/tasks-bank/index'
 import { Route as TasksBankCreateRouteImport } from './routes/tasks-bank/create'
-import { Route as TasksBankTaskTypesRouteImport } from './routes/tasks-bank/task-types'
+import { Route as TasksBankGrammarTypesRouteImport } from './routes/tasks-bank/grammar-types'
 import { Route as TasksBankTopicsRouteImport } from './routes/tasks-bank/topics'
 import { Route as TeacherReportsRouteImport } from './routes/teacher/reports'
 
@@ -67,9 +67,9 @@ const TasksBankCreateRoute = TasksBankCreateRouteImport.update({
   path: '/tasks-bank/create',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TasksBankTaskTypesRoute = TasksBankTaskTypesRouteImport.update({
-  id: '/tasks-bank/task-types',
-  path: '/tasks-bank/task-types',
+const TasksBankGrammarTypesRoute = TasksBankGrammarTypesRouteImport.update({
+  id: '/tasks-bank/grammar-types',
+  path: '/tasks-bank/grammar-types',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TasksBankTopicsRoute = TasksBankTopicsRouteImport.update({
@@ -92,7 +92,7 @@ export interface FileRoutesByFullPath {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/tasks-bank/create': typeof TasksBankCreateRoute
-  '/tasks-bank/task-types': typeof TasksBankTaskTypesRoute
+  '/tasks-bank/grammar-types': typeof TasksBankGrammarTypesRoute
   '/tasks-bank/topics': typeof TasksBankTopicsRoute
   '/teacher/reports': typeof TeacherReportsRoute
   '/tasks-bank/': typeof TasksBankIndexRoute
@@ -106,7 +106,7 @@ export interface FileRoutesByTo {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/tasks-bank/create': typeof TasksBankCreateRoute
-  '/tasks-bank/task-types': typeof TasksBankTaskTypesRoute
+  '/tasks-bank/grammar-types': typeof TasksBankGrammarTypesRoute
   '/tasks-bank/topics': typeof TasksBankTopicsRoute
   '/teacher/reports': typeof TeacherReportsRoute
   '/tasks-bank': typeof TasksBankIndexRoute
@@ -121,7 +121,7 @@ export interface FileRoutesById {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/tasks-bank/create': typeof TasksBankCreateRoute
-  '/tasks-bank/task-types': typeof TasksBankTaskTypesRoute
+  '/tasks-bank/grammar-types': typeof TasksBankGrammarTypesRoute
   '/tasks-bank/topics': typeof TasksBankTopicsRoute
   '/teacher/reports': typeof TeacherReportsRoute
   '/tasks-bank/': typeof TasksBankIndexRoute
@@ -137,7 +137,7 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/auth/sign-up'
     | '/tasks-bank/create'
-    | '/tasks-bank/task-types'
+    | '/tasks-bank/grammar-types'
     | '/tasks-bank/topics'
     | '/teacher/reports'
     | '/tasks-bank/'
@@ -151,7 +151,7 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/auth/sign-up'
     | '/tasks-bank/create'
-    | '/tasks-bank/task-types'
+    | '/tasks-bank/grammar-types'
     | '/tasks-bank/topics'
     | '/teacher/reports'
     | '/tasks-bank'
@@ -165,7 +165,7 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/auth/sign-up'
     | '/tasks-bank/create'
-    | '/tasks-bank/task-types'
+    | '/tasks-bank/grammar-types'
     | '/tasks-bank/topics'
     | '/teacher/reports'
     | '/tasks-bank/'
@@ -176,7 +176,7 @@ export interface RootRouteChildren {
   AuthRouteRoute: typeof AuthRouteRouteWithChildren
   ProfileRoute: typeof ProfileRoute
   TasksBankCreateRoute: typeof TasksBankCreateRoute
-  TasksBankTaskTypesRoute: typeof TasksBankTaskTypesRoute
+  TasksBankGrammarTypesRoute: typeof TasksBankGrammarTypesRoute
   TasksBankTopicsRoute: typeof TasksBankTopicsRoute
   TeacherReportsRoute: typeof TeacherReportsRoute
   TasksBankIndexRoute: typeof TasksBankIndexRoute
@@ -247,11 +247,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TasksBankCreateRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/tasks-bank/task-types': {
-      id: '/tasks-bank/task-types'
-      path: '/tasks-bank/task-types'
-      fullPath: '/tasks-bank/task-types'
-      preLoaderRoute: typeof TasksBankTaskTypesRouteImport
+    '/tasks-bank/grammar-types': {
+      id: '/tasks-bank/grammar-types'
+      path: '/tasks-bank/grammar-types'
+      fullPath: '/tasks-bank/grammar-types'
+      preLoaderRoute: typeof TasksBankGrammarTypesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tasks-bank/topics': {
@@ -294,7 +294,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRouteRoute: AuthRouteRouteWithChildren,
   ProfileRoute: ProfileRoute,
   TasksBankCreateRoute: TasksBankCreateRoute,
-  TasksBankTaskTypesRoute: TasksBankTaskTypesRoute,
+  TasksBankGrammarTypesRoute: TasksBankGrammarTypesRoute,
   TasksBankTopicsRoute: TasksBankTopicsRoute,
   TeacherReportsRoute: TeacherReportsRoute,
   TasksBankIndexRoute: TasksBankIndexRoute,

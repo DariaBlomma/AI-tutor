@@ -5,24 +5,31 @@ import { TasksBankService } from '@/tasks/services/TasksBankService';
 import { useTasksBank } from '@/tasks/hooks/useTasksBank';
 import { useTaskRefs } from '@/tasks/hooks/useTaskRefs';
 import { ChipsMultiselect } from '@/tasks/ui/widgets/ChipsMultiselect/ChipsMultiselect';
-import type { TaskSummary } from '@/tasks/types';
+import { ITEM_TYPE_OPTIONS } from '@/tasks/types';
+import type { ChipItem } from '@/tasks/ui/widgets/ChipsMultiselect/types';
+import type { ItemType, TaskSummary } from '@/tasks/types';
 import styles from './TasksBankView.module.scss';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
+// Чипы механик (enum ItemType) — фиксированный список, id числовые для общего виджета чипов.
+const MECHANIC_ITEMS: ChipItem[] = ITEM_TYPE_OPTIONS.map((o, i) => ({ id: i + 1, name: o.label }));
+const MECHANIC_BY_ID = new Map(MECHANIC_ITEMS.map((c, i) => [c.id, ITEM_TYPE_OPTIONS[i].value]));
+
 // Страница «Банк заданий» — общая для учителя и ученика:
 // список и фильтры видят все авторизованные; кнопки создания — только учителю.
-// Фильтры: поиск (name/publicId), учебный тип и пагинация — серверные (GET /api/tasks);
+// Фильтры: поиск (name/publicId), грамматический тип и пагинация — серверные (GET /api/tasks);
 // темы — временный клиентский фильтр в пределах страницы (на бэке эндпоинта topicId пока нет).
 // Управление справочниками (создание/редактирование/удаление) — на отдельных страницах
-// /tasks-bank/topics и /tasks-bank/task-types (кнопка «+» у чипов, только учитель).
+// /tasks-bank/topics и /tasks-bank/grammar-types (кнопка «+» у чипов, только учитель).
 export function TasksBankView() {
     const isTeacher = AuthService.getUserRole() === 'TEACHER';
 
     // Поиск: input обновляется сразу, запрос — с дебаунсом.
     const [searchInput, setSearchInput] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
-    const [taskTypeId, setTaskTypeId] = useState<number | null>(null);
+    const [grammarTypeId, setGrammarTypeId] = useState<number | null>(null);
+    const [itemType, setItemType] = useState<ItemType | null>(null);
     const [topicId, setTopicId] = useState<number | null>(null);
     const [includeMixed, setIncludeMixed] = useState(true);
 
@@ -35,12 +42,13 @@ export function TasksBankView() {
         (page: number, size: number) =>
             TasksBankService.getTasks({
                 search: debouncedSearch.trim() || undefined,
-                taskTypeId: taskTypeId ?? undefined,
+                taskTypeId: grammarTypeId ?? undefined,
+                itemType: itemType ?? undefined,
                 includeMixed,
                 page,
                 size,
             }),
-        [debouncedSearch, taskTypeId, includeMixed],
+        [debouncedSearch, grammarTypeId, itemType, includeMixed],
     );
 
     const { pageItems, totalCount, totalPages, page, setPage, isLoading, isError, error } = useTasksBank(fetcher);
@@ -83,17 +91,17 @@ export function TasksBankView() {
                 onChange={(e) => applySearch(e.target.value)}
             />
 
-            {/* Фильтр по учебным типам (справочник /task-types) */}
+            {/* Фильтр по грамматическим типам (справочник /task-types) */}
             <div className={styles.filterBlock}>
-                <div className={styles.filterLabel}>Учебные типы</div>
+                <div className={styles.filterLabel}>Грамматические типы</div>
                 <ChipsMultiselect
-                    items={refs.taskTypes}
-                    selectedIds={taskTypeId == null ? [] : [taskTypeId]}
+                    items={refs.grammarTypes}
+                    selectedIds={grammarTypeId == null ? [] : [grammarTypeId]}
                     single
-                    onChange={(ids) => setTaskTypeId(ids[0] ?? null)}
-                    onClear={() => setTaskTypeId(null)}
+                    onChange={(ids) => setGrammarTypeId(ids[0] ?? null)}
+                    onClear={() => setGrammarTypeId(null)}
                     clearLabel="Все типы"
-                    manageTo={isTeacher ? '/tasks-bank/task-types' : undefined}
+                    manageTo={isTeacher ? '/tasks-bank/grammar-types' : undefined}
                 />
             </div>
 
@@ -108,6 +116,19 @@ export function TasksBankView() {
                     onClear={() => setTopicId(null)}
                     clearLabel="Все темы"
                     manageTo={isTeacher ? '/tasks-bank/topics' : undefined}
+                />
+            </div>
+
+            {/* Фильтр по механике пунктов (enum ItemType) — серверный */}
+            <div className={styles.filterBlock}>
+                <div className={styles.filterLabel}>Механика пунктов</div>
+                <ChipsMultiselect
+                    items={MECHANIC_ITEMS}
+                    selectedIds={itemType == null ? [] : [MECHANIC_ITEMS.findIndex((c) => MECHANIC_BY_ID.get(c.id) === itemType) + 1]}
+                    single
+                    onChange={(ids) => setItemType(ids.length ? (MECHANIC_BY_ID.get(ids[0]) ?? null) : null)}
+                    onClear={() => setItemType(null)}
+                    clearLabel="Все"
                 />
             </div>
 

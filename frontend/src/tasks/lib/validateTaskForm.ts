@@ -34,7 +34,7 @@ function validateItem(item: TaskItemDraft): string | null {
 /** Локальная валидация перед POST /api/tasks (зеркалит правила TaskContentValidator). */
 export function validateTaskForm(form: {
     name: string;
-    taskTypeIds: number[];
+    grammarTypeIds: number[];
     materialText: string;
     items: TaskItemDraft[];
 }): TaskFormErrors {
@@ -60,6 +60,6 @@ export function validateTaskForm(form: {
     return errors;
 }
 
-export function isFormValid(errors: TaskFormErrors, taskTypesSelected: boolean): boolean {
-    return !errors.name && !errors.material && Object.keys(errors.items).length === 0 && taskTypesSelected;
+export function isFormValid(errors: TaskFormErrors, grammarTypesSelected: boolean): boolean {
+    return !errors.name && !errors.material && Object.keys(errors.items).length === 0 && grammarTypesSelected;
 }
