@@ -8,7 +8,7 @@ import type { MaterialFormat, TaskItemDraft } from '@/tasks/types';
 export interface CreateTaskFormState {
     name: string;
     topicIds: number[];
-    taskTypeIds: number[];
+    grammarTypeIds: number[];
     materialFormat: MaterialFormat;
     materialTitle: string;
     materialText: string;
@@ -31,7 +31,7 @@ export function useCreateTask(onSuccess: () => void): UseCreateTaskResult {
     const submit = useCallback(
         async (form: CreateTaskFormState): Promise<boolean> => {
             const errors = validateTaskForm(form);
-            if (!isFormValid(errors, form.taskTypeIds.length > 0)) {
+            if (!isFormValid(errors, form.grammarTypeIds.length > 0)) {
                 setError('Проверьте выделенные поля — форма заполнена не полностью.');
                 return false;
             }

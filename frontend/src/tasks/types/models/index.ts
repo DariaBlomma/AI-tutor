@@ -14,7 +14,7 @@ export interface Topic {
 }
 
 /** GET /api/task-types -> TaskTypeResponse. */
-export interface TaskType {
+export interface GrammarType {
     id: number;
     name: string;
     description: string | null;
@@ -33,11 +33,21 @@ export interface PageDto<T> {
 /** Параметры GET /api/tasks. topicId — фильтр на фронте (на бэке эндпоинта нет). */
 export interface TasksQueryParams {
     search?: string;
+    /** Имя query-параметра бэкенда GET /api/tasks. */
     taskTypeId?: number;
+    itemType?: ItemType;
     includeMixed?: boolean;
     page?: number;
     size?: number;
 }
+
+/** Механики пунктов (enum ItemType) с подписями для фильтра банка заданий. */
+export const ITEM_TYPE_OPTIONS: Array<{ value: ItemType; label: string }> = [
+    { value: 'WORD_FORMATION', label: 'Словообразование' },
+    { value: 'GAP_FILL', label: 'Пропуск' },
+    { value: 'TFNS', label: 'True / False / Not stated' },
+    { value: 'MATCHING', label: 'Matching' },
+];
 
 /** GET /api/tasks -> TaskSummaryResponse (лёгкая карточка банка, без контента). */
 export interface TaskSummary {
@@ -47,7 +57,8 @@ export interface TaskSummary {
     previewText: string | null;
     isMixed: boolean;
     topics: Topic[];
-    taskTypes: TaskType[];
+    /** JSON-поле бэкенда TaskSummaryResponse.taskTypes (фронтенд-именование — grammarTypes). */
+    taskTypes: GrammarType[];
     itemCount: number;
     createdAt: string;
 }
@@ -103,6 +114,7 @@ export interface TaskCreateRequestDto {
     context?: string | null;
     items: TaskItemRequestDto[];
     topicIds?: number[];
+    /** Имя поля бэкенда TaskCreateRequest — не переименовывается. */
     taskTypeIds: number[];
 }
 
@@ -112,7 +124,7 @@ export interface RefNameRequestDto {
 }
 
 /** POST/PUT /api/task-types -> TaskTypeRequest (description до 1000 символов). */
-export interface TaskTypeRequestDto {
+export interface GrammarTypeRequestDto {
     name: string;
     description?: string | null;
 }
@@ -126,7 +138,8 @@ export interface TaskResponseDto {
     context: string | null;
     isMixed: boolean;
     topics: Topic[];
-    taskTypes: TaskType[];
+    /** JSON-поле бэкенда TaskResponse.taskTypes. */
+    taskTypes: GrammarType[];
     items: TaskItemResponseDto[];
     createdAt: string;
 }

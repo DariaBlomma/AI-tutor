@@ -1,23 +1,23 @@
 import { useCallback, useEffect, useState } from 'react';
 import { extractErrorMessage } from '@/core/api/utils/errors';
-import { TaskTypesService } from '@/tasks/services/TaskTypesService';
+import { GrammarTypesService } from '@/tasks/services/GrammarTypesService';
 import { TopicsService } from '@/tasks/services/TopicsService';
-import type { TaskType, Topic } from '@/tasks/types';
+import type { GrammarType, Topic } from '@/tasks/types';
 
-/** Справочники для страницы создания: темы + учебные типы с мутациями. */
+/** Справочники для страницы создания: темы + грамматические типы с мутациями. */
 export interface TaskRefsMutations {
     createTopic: (name: string) => Promise<Topic | null>;
     renameTopic: (id: number, name: string) => Promise<boolean>;
     removeTopic: (id: number) => Promise<boolean>;
-    createTaskType: (name: string, description?: string) => Promise<TaskType | null>;
-    /** name + description (для task-types описание обязательно передавать — бэк перезаписывает поле). */
-    renameTaskType: (id: number, name: string, description?: string | null) => Promise<boolean>;
-    removeTaskType: (id: number) => Promise<boolean>;
+    createGrammarType: (name: string, description?: string) => Promise<GrammarType | null>;
+    /** name + description (для справочника грамматических типы описание обязательно передавать — бэк перезаписывает поле). */
+    renameGrammarType: (id: number, name: string, description?: string | null) => Promise<boolean>;
+    removeGrammarType: (id: number) => Promise<boolean>;
 }
 
 export interface UseTaskRefsResult extends TaskRefsMutations {
     topics: Topic[];
-    taskTypes: TaskType[];
+    grammarTypes: GrammarType[];
     isLoading: boolean;
     /** Текст ошибки последней неудачной операции (или null). */
     error: string | null;
@@ -27,17 +27,17 @@ export interface UseTaskRefsResult extends TaskRefsMutations {
 // enabled=false (например, для ученика) — запросы не отправляются: бэк закрывает /topics/** от STUDENT.
 export function useTaskRefs(enabled: boolean = true): UseTaskRefsResult {
     const [topics, setTopics] = useState<Topic[]>([]);
-    const [taskTypes, setTaskTypes] = useState<TaskType[]>([]);
+    const [grammarTypes, setGrammarTypes] = useState<GrammarType[]>([]);
     const [isLoading, setIsLoading] = useState(enabled);
     const [error, setError] = useState<string | null>(null);
 
     const reload = useCallback(async () => {
         const [nextTopics, nextTypes] = await Promise.all([
             TopicsService.getAll(),
-            TaskTypesService.getAll(),
+            GrammarTypesService.getAll(),
         ]);
         setTopics(nextTopics);
-        setTaskTypes(nextTypes);
+        setGrammarTypes(nextTypes);
     }, []);
 
     useEffectOnceLoad(enabled ? reload : undefined, setIsLoading, setError);
@@ -78,42 +78,42 @@ export function useTaskRefs(enabled: boolean = true): UseTaskRefsResult {
         [runMutation],
     );
 
-    const createTaskType = useCallback(
+    const createGrammarType = useCallback(
         (name: string, description?: string) =>
             runMutation(
-                () => TaskTypesService.create(name, description),
-                (t) => t && setTaskTypes((prev) => [...prev, t]),
+                () => GrammarTypesService.create(name, description),
+                (t) => t && setGrammarTypes((prev) => [...prev, t]),
             ),
         [runMutation],
     );
-    const renameTaskType = useCallback(
+    const renameGrammarType = useCallback(
         (id: number, name: string, description?: string | null) =>
             runMutation(
-                () => TaskTypesService.update(id, name, description ?? undefined),
-                (t) => t && setTaskTypes((prev) => prev.map((item) => (item.id === id ? t : item))),
+                () => GrammarTypesService.update(id, name, description ?? undefined),
+                (t) => t && setGrammarTypes((prev) => prev.map((item) => (item.id === id ? t : item))),
             ).then((r) => r !== null),
         [runMutation],
     );
-    const removeTaskType = useCallback(
+    const removeGrammarType = useCallback(
         (id: number) =>
             runMutation(
-                () => TaskTypesService.remove(id),
-                () => setTaskTypes((prev) => prev.filter((item) => item.id !== id)),
+                () => GrammarTypesService.remove(id),
+                () => setGrammarTypes((prev) => prev.filter((item) => item.id !== id)),
             ).then((r) => r !== null),
         [runMutation],
     );
 
     return {
         topics,
-        taskTypes,
+        grammarTypes,
         isLoading,
         error,
         createTopic,
         renameTopic,
         removeTopic,
-        createTaskType,
-        renameTaskType,
-        removeTaskType,
+        createGrammarType,
+        renameGrammarType,
+        removeGrammarType,
     };
 }
 

@@ -1,12 +1,12 @@
-import type { Topic, TaskType } from '@/tasks/types';
+import type { Topic, GrammarType } from '@/tasks/types';
 
-/** Элемент справочника: тема (только name) или учебный тип (name + description). */
-export type RefItem = Topic | TaskType;
+/** Элемент справочника: тема (только name) или грамматический тип (name + description). */
+export type RefItem = Topic | GrammarType;
 
 export interface RefCrudPanelProps {
     title: string;
     items: RefItem[];
-    /** Показывать поле «Описание» (для учебных типов; у тем описания нет). */
+    /** Показывать поле «Описание» (для грамматических типов; у тем описания нет). */
     hasDescription?: boolean;
     /** Создание элемента (POST /topics или /task-types). Описание — только для типов. */
     onCreate: (name: string, description?: string) => Promise<unknown>;
