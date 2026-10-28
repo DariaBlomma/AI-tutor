@@ -11,3 +11,9 @@ body {
   background: $bg;
   color: $c1;
 }
+
+// Стандартный подход для кликабельных элементов: hover и active ОБЯЗАТЕЛЬНЫ.
+// На hover меняем цвет текста/рамки/фона (подсветка), на active — тоже цвет,
+// но НИКОГДА размер (transform: scale запрещён как состояние нажатия).
+// Пример: &:hover { color: var(--pl); border-color: var(--pl); }
+//         &:active { color: var(--pd); border-color: var(--pd); }

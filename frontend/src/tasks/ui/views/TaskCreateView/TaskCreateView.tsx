@@ -92,9 +92,7 @@ export function TaskCreateView() {
                 <div className={styles.sectionTitle}>Основное</div>
 
                 <div className={styles.field}>
-                    <label className={styles.label}>
-                        Название задания <span className={styles.req}>*</span>
-                    </label>
+                    <label className={styles.label}>Название задания</label>
                     <BaseInputText
                         id="task-name"
                         value={name}

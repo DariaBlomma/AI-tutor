@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router';
+import { BasePlusButtonLink } from '@/shared/ui-kit/BasePlusButtonLink/BasePlusButtonLink';
 import type { ChipsMultiselectProps } from './types';
 import styles from './ChipsMultiselect.module.scss';
 
@@ -49,9 +49,7 @@ export function ChipsMultiselect({ items, selectedIds, onChange, manageTo, singl
             </div>
 
             {manageTo && (
-                <Link to={manageTo} className={styles.addBtn} aria-label="Управление справочником">
-                    +
-                </Link>
+                <BasePlusButtonLink to={manageTo} ariaLabel="Управление справочником" />
             )}
         </div>
     );

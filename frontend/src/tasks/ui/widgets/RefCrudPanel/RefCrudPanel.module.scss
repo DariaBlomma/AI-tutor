@@ -106,9 +106,14 @@
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
+  transition: filter 0.15s, background-color 0.15s;
+
+  &:hover {
+    filter: brightness(1.15);
+  }
 
   &:active {
-    transform: scale(0.95);
+    filter: brightness(0.9);
   }
 }
 
@@ -126,9 +131,17 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+
+  &:hover {
+    color: var(--pl);
+    border-color: var(--pl);
+  }
 
   &:active {
-    transform: scale(0.9);
+    color: var(--pd);
+    border-color: var(--pd);
+    background: rgba(157, 124, 242, 0.25);
   }
 }
 
@@ -137,6 +150,17 @@
   color: #ff6b6b;
   border-color: rgba(255, 107, 107, 0.3);
   background: rgba(255, 107, 107, 0.08);
+
+  &:hover {
+    color: var(--pl);
+    border-color: var(--pl);
+  }
+
+  &:active {
+    color: #ffb3b3;
+    border-color: #ffb3b3;
+    background: rgba(255, 107, 107, 0.2);
+  }
 }
 
 .addRow {
@@ -161,9 +185,17 @@
   font-family: inherit;
   cursor: pointer;
   white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+
+  &:hover {
+    color: var(--pl);
+    border-color: var(--pl);
+  }
 
   &:active {
-    transform: scale(0.98);
+    color: var(--pd);
+    border-color: var(--pd);
+    background: rgba(157, 124, 242, 0.15);
   }
 
   &:disabled {

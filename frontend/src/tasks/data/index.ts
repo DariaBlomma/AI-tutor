@@ -11,7 +11,7 @@ export const GAP_MARK = '___';
 // Механики пунктов — enum ItemType бэка (TaskContentValidator).
 export const ITEM_TYPES: ItemTypeInfo[] = [
     { value: 'WORD_FORMATION', label: 'WORD_FORMATION — Словообразование' },
-    { value: 'GAP_FILL', label: 'GAP_FILL — Грамматический пропуск' },
+    { value: 'GAP_FILL', label: 'GAP_FILL — Gap fill' },
     { value: 'TFNS', label: 'TFNS — True / False / Not stated' },
     { value: 'MATCHING', label: 'MATCHING — Сопоставление пар' },
 ];

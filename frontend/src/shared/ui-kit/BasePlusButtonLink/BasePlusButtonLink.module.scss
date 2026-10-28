@@ -1,0 +1,28 @@
+.plus {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(157, 124, 242, 0.1);
+  border: 1px dashed var(--p);
+  border-radius: var(--r, 6px);
+  color: var(--p);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+
+  &:hover {
+    color: var(--pl);
+    border-color: var(--pl);
+  }
+
+  &:active {
+    color: var(--pd);
+    border-color: var(--pd);
+  }
+}

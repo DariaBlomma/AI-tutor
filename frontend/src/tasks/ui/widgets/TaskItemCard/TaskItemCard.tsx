@@ -1,4 +1,5 @@
 import { BaseInputText } from '@/shared/ui-kit/BaseInputText/BaseInputText';
+import { BaseSelectSingle } from '@/shared/ui-kit/BaseSelectSingle/BaseSelectSingle';
 import { ITEM_TYPES, TFNS_ANSWERS } from '@/tasks/data';
 import type { ItemType, TaskItemDraft } from '@/tasks/types';
 import type { TaskItemCardProps } from './types';
@@ -36,17 +37,13 @@ export function TaskItemCard({
                 </div>
             </div>
 
-            <select
+            <BaseSelectSingle<ItemType>
                 className={styles.typeSelect}
+                options={ITEM_TYPES}
                 value={item.itemType}
-                onChange={(e) => patch({ itemType: e.target.value as ItemType })}
-            >
-                {ITEM_TYPES.map(({ value, label }) => (
-                    <option key={value} value={value}>
-                        {label}
-                    </option>
-                ))}
-            </select>
+                onChange={(itemType) => patch({ itemType })}
+                ariaLabel="Механика пункта"
+            />
 
             <div className={styles.body}>
                 {(item.itemType === 'WORD_FORMATION' || item.itemType === 'GAP_FILL') && (
