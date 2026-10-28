@@ -1,4 +1,4 @@
-import type { ItemTypeInfo } from '@/tasks/types';
+import type { ItemTypeInfo, ItemType } from '@/tasks/types';
 
 // Максимумы, зеркалящие валидацию бэка (TaskCreateRequest / TaskContentValidator).
 export const TASK_NAME_MAX_LENGTH = 200;
@@ -10,11 +10,18 @@ export const GAP_MARK = '___';
 
 // Механики пунктов — enum ItemType бэка (TaskContentValidator).
 export const ITEM_TYPES: ItemTypeInfo[] = [
-    { value: 'WORD_FORMATION', label: 'WORD_FORMATION — Словообразование' },
-    { value: 'GAP_FILL', label: 'GAP_FILL — Gap fill' },
-    { value: 'TFNS', label: 'TFNS — True / False / Not stated' },
-    { value: 'MATCHING', label: 'MATCHING — Сопоставление пар' },
+    { value: 'WORD_FORMATION', label: 'Словообразование' },
+    { value: 'GAP_FILL', label: 'Gap fill (пропуск из вариантов)' },
+    { value: 'TFNS', label: 'True / False / Not stated' },
+    { value: 'MATCHING', label: 'Сопоставление пар' },
 ];
+
+/** Типы, для которых бэк требует tasks.context с текстом (validateContext). */
+export const TEXT_REQUIRED_ITEM_TYPES: ItemType[] = ['TFNS', 'MATCHING'];
+
+export function isTextRequiredItem(itemType: ItemType): boolean {
+    return TEXT_REQUIRED_ITEM_TYPES.includes(itemType);
+}
 
 // Варианты правильного ответа TFNS (бэк принимает только их в correctAnswer).
 export const TFNS_ANSWERS = ['TRUE', 'FALSE', 'NOT STATED'] as const;

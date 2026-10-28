@@ -9,6 +9,8 @@ export interface ItemTypeInfo {
 /** Локальное состояние одного пункта в конструкторе (до сборки payload). */
 export interface TaskItemDraft {
     id: number;
+    /** Механика задаётся выбором типа на уровне задания (ItemTypePicker), но хранится в пункте —
+     *  бэк принимает ItemType у каждого item (см. TaskItemRequest). */
     itemType: ItemType;
     /** Предложение с пропуском ___ (WORD_FORMATION/GAP_FILL) или утверждение (TFNS). */
     prompt: string;
@@ -18,8 +20,8 @@ export interface TaskItemDraft {
     base: string;
     /** GAP_FILL: варианты выбора через запятую. */
     options: string;
-    /** TFNS/MATCHING: подсказка/prompt. */
-    hint: string;
+    /** TFNS: правильный ответ (TRUE / FALSE / NOT STATED). */
+    tfnsAnswer: string;
     /** MATCHING: левая и правая части пары. */
     leftLabel: string;
     rightLabel: string;

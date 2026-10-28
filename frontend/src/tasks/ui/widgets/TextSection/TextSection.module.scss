@@ -19,34 +19,10 @@
   font-weight: 500;
 }
 
-.toggleRow {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 12px;
-}
-
-.toggleBtn {
-  flex: 1;
-  padding: 8px;
-  background: rgba(157, 124, 242, 0.05);
-  border: 1px solid rgba(157, 124, 242, 0.3);
-  border-radius: var(--r, 6px);
+.optional {
   color: var(--c3);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
-  font-family: inherit;
-  cursor: pointer;
-}
-
-.active {
-  background: var(--p);
-  border-color: var(--p);
-  color: var(--c1);
-}
-
-.disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
 }
 
 .field {
