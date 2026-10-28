@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { BaseInputText } from '@/shared/ui-kit/BaseInputText/BaseInputText';
 import { ChipsMultiselect } from '@/tasks/ui/widgets/ChipsMultiselect/ChipsMultiselect';
-import { ItemTypePicker } from '@/tasks/ui/widgets/ItemTypePicker/ItemTypePicker';
+import { ItemTypeSelect } from '@/tasks/ui/widgets/ItemTypeSelect/ItemTypeSelect';
 import { TextSection } from '@/tasks/ui/widgets/TextSection/TextSection';
 import { TaskItemCard } from '@/tasks/ui/widgets/TaskItemCard/TaskItemCard';
 import { useCreateTask } from '@/tasks/hooks/useCreateTask';
@@ -23,7 +23,6 @@ function createEmptyItem(itemType: ItemType): TaskItemDraft {
         answer: '',
         base: '',
         options: '',
-        tfnsAnswer: '',
         leftLabel: '',
         rightLabel: '',
         explanation: '',
@@ -61,10 +60,11 @@ export function TaskCreateView() {
     const textRequired = needsText(itemType);
     const selectedTypesCount = grammarTypeIds.length;
 
-    // Смена механики пересобирает пункты под новый тип (смешивание механик в одном задании нет).
+    // Смена механики пересобирает пункты под новый тип (смешивание механик в одном задании нет);
+    // поля чужого типа при этом очищаются — на форме не остаётся ничего лишнего.
     const handleItemTypeChange = (next: ItemType) => {
         setItemType(next);
-        setItems((prev) => (prev.length ? prev.map(({ id, itemType: _old, ...fields }) => ({ id, itemType: next, ...fields })) : prev));
+        setItems((prev) => (prev.length ? prev.map((item) => ({ ...createEmptyItem(next), id: item.id })) : prev));
     };
 
     const handleItemChange = (id: number, patch: Partial<TaskItemDraft>) => {
@@ -99,7 +99,7 @@ export function TaskCreateView() {
             {/* ТИП ЗАДАНИЯ */}
             <div className={styles.section}>
                 <div className={styles.sectionTitle}>Тип задания</div>
-                <ItemTypePicker value={itemType} onChange={handleItemTypeChange} />
+                <ItemTypeSelect value={itemType} onChange={handleItemTypeChange} />
             </div>
 
             {/* ОСНОВНОЕ */}

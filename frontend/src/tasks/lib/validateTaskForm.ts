@@ -29,7 +29,7 @@ function validateItem(item: TaskItemDraft): string | null {
             if (blank(item.prompt)) return 'Введите утверждение';
             // Бэк принимает только TRUE / FALSE / NOT STATED (TaskContentValidator.validateTfns),
             // ответ выбирается чипами — пустой = не выбран.
-            if (!TFNS_ANSWERS.includes(item.tfnsAnswer as (typeof TFNS_ANSWERS)[number])) {
+            if (!TFNS_ANSWERS.includes(item.answer.toUpperCase() as (typeof TFNS_ANSWERS)[number])) {
                 return 'Выберите правильный ответ: TRUE, FALSE или NOT STATED';
             }
             return null;

@@ -9,11 +9,12 @@ export const REF_NAME_MAX_LENGTH = 100; // topics/task-types name @Size(max=100)
 export const GAP_MARK = '___';
 
 // Механики пунктов — enum ItemType бэка (TaskContentValidator).
+// Названия — устоявшиеся термины преподавания, не переводим.
 export const ITEM_TYPES: ItemTypeInfo[] = [
-    { value: 'WORD_FORMATION', label: 'Словообразование' },
-    { value: 'GAP_FILL', label: 'Gap fill (пропуск из вариантов)' },
-    { value: 'TFNS', label: 'True / False / Not stated' },
-    { value: 'MATCHING', label: 'Сопоставление пар' },
+    { value: 'WORD_FORMATION', label: 'WORD_FORMATION — Словообразование' },
+    { value: 'GAP_FILL', label: 'GAP_FILL — Gap fill' },
+    { value: 'TFNS', label: 'TFNS — True / False / Not stated' },
+    { value: 'MATCHING', label: 'MATCHING — Matching' },
 ];
 
 /** Типы, для которых бэк требует tasks.context с текстом (validateContext). */

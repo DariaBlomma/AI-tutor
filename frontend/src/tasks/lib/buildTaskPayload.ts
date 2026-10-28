@@ -72,7 +72,7 @@ function buildItemRequest(item: TaskItemDraft): TaskItemRequestDto {
         itemType: item.itemType,
         prompt: orNull(item.prompt),
         // TFNS: канонический вид TRUE / FALSE / NOT STATED (валидатор бэка приводит к upper).
-        correctAnswer: item.itemType === 'TFNS' ? (item.tfnsAnswer.toUpperCase() || null) : orNull(item.answer),
+        correctAnswer: item.itemType === 'TFNS' ? (item.answer.toUpperCase() || null) : orNull(item.answer),
         content: buildItemContent(item),
     };
 }
