@@ -29,7 +29,8 @@ public class Task {
     @Column(name = "public_id", nullable = false, unique = true, updatable = false, length = 20)
     private String publicId;
 
-    @Column(nullable = false, length = 200)
+    /** Необязательное название (миграция 017): пустое = в UI показывается publicId. */
+    @Column(length = 200)
     private String name;
 
     @Column(name = "preview_text", columnDefinition = "TEXT")

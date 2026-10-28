@@ -44,7 +44,7 @@ export interface TasksQueryParams {
 /** Механики пунктов (enum ItemType) с подписями для фильтра банка заданий. */
 export const ITEM_TYPE_OPTIONS: Array<{ value: ItemType; label: string }> = [
     { value: 'WORD_FORMATION', label: 'Словообразование' },
-    { value: 'GAP_FILL', label: 'Пропуск' },
+    { value: 'GAP_FILL', label: 'Gap fill' },
     { value: 'TFNS', label: 'True / False / Not stated' },
     { value: 'MATCHING', label: 'Matching' },
 ];
@@ -53,7 +53,8 @@ export const ITEM_TYPE_OPTIONS: Array<{ value: ItemType; label: string }> = [
 export interface TaskSummary {
     id: number;
     publicId: string;
-    name: string;
+    /** Необязательное на бэке (миграция 017) — без названия показываем публичный id. */
+    name: string | null;
     previewText: string | null;
     isMixed: boolean;
     topics: Topic[];
@@ -110,7 +111,8 @@ export interface TaskItemRequestDto {
 
 /** POST /api/tasks -> TaskCreateRequest. */
 export interface TaskCreateRequestDto {
-    name: string;
+    /** Необязательное: бэк допускает null (миграция 017-tasks-name-nullable). */
+    name: string | null;
     context?: string | null;
     items: TaskItemRequestDto[];
     topicIds?: number[];

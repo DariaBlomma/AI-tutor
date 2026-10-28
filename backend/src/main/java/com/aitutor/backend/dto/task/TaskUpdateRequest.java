@@ -1,7 +1,6 @@
 package com.aitutor.backend.dto.task;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -15,7 +14,7 @@ import java.util.Set;
 @AllArgsConstructor
 public class TaskUpdateRequest {
 
-    @NotBlank(message = "Название задания обязательно")
+    /** Необязательное название: пустое = в UI показывается publicId. */
     @Size(max = 200)
     private String name;
 

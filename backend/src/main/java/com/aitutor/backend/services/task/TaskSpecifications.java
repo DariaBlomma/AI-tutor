@@ -5,6 +5,7 @@ import com.aitutor.backend.entities.TaskItem;
 import com.aitutor.backend.enums.ItemType;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -51,7 +52,7 @@ public final class TaskSpecifications {
                 return cb.conjunction();
             }
             Subquery<Long> sub = query.subquery(Long.class);
-            TaskItem item = sub.from(TaskItem.class);
+            Root<TaskItem> item = sub.from(TaskItem.class);
             sub.select(cb.literal(1L))
                     .where(cb.and(
                             cb.equal(item.get("task"), root),

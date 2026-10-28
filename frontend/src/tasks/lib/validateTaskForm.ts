@@ -40,8 +40,7 @@ export function validateTaskForm(form: {
 }): TaskFormErrors {
     const errors: TaskFormErrors = { items: {} };
 
-    if (blank(form.name)) errors.name = 'Название задания обязательно';
-    else if (form.name.trim().length > TASK_NAME_MAX_LENGTH) errors.name = `Название не длиннее ${TASK_NAME_MAX_LENGTH} символов`;
+    if (form.name.trim().length > TASK_NAME_MAX_LENGTH) errors.name = `Название не длиннее ${TASK_NAME_MAX_LENGTH} символов`;
 
     form.items.forEach((item) => {
         const message = validateItem(item);

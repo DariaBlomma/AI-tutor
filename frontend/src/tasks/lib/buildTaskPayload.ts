@@ -101,7 +101,8 @@ export function buildTaskPayload(form: {
     }
 
     return {
-        name: form.name.trim(),
+        // Название необязательное: пустая строка -> null (бэк допускает tasks.name = NULL).
+        name: orNull(form.name),
         context,
         items: form.items.map(buildItemRequest),
         topicIds: form.topicIds,

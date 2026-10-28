@@ -12,29 +12,6 @@
   min-width: 0;
 }
 
-.addBtn {
-  flex-shrink: 0;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(157, 124, 242, 0.1);
-  border: 1px dashed var(--p);
-  border-radius: var(--r, 6px);
-  color: var(--p);
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 1;
-  text-decoration: none;
-  cursor: pointer;
-  transition: all 0.15s;
-
-  &:active {
-    transform: scale(0.9);
-  }
-}
-
 .chip {
   padding: 6px 10px;
   background: rgba(157, 124, 242, 0.1);
@@ -45,11 +22,17 @@
   font-family: inherit;
   color: var(--c1);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: color 0.15s, border-color 0.15s, background-color 0.15s;
   user-select: none;
 
+  &:hover {
+    border-color: var(--pl);
+    color: var(--pl);
+  }
+
   &:active {
-    transform: scale(0.95);
+    background: rgba(157, 124, 242, 0.25);
+    color: var(--c1);
   }
 }
 
@@ -57,6 +40,18 @@
   background: var(--p);
   border-color: var(--p);
   color: var(--c1);
+
+  &:hover {
+    background: var(--pl);
+    border-color: var(--pl);
+    color: var(--bg);
+  }
+
+  &:active {
+    background: var(--pd);
+    border-color: var(--pd);
+    color: var(--c1);
+  }
 }
 
 .empty {

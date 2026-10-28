@@ -210,7 +210,7 @@ function TaskCard({ task }: { task: TaskSummary }) {
     return (
         <div className={styles.card}>
             <div className={styles.cardTop}>
-                <span className={styles.cardName}>{task.name}</span>
+                <span className={styles.cardName}>{task.name ?? task.publicId}</span>
                 {task.isMixed && <span className={styles.mixedBadge}>Mixed</span>}
             </div>
 
