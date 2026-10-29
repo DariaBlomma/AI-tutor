@@ -28,6 +28,10 @@ public class TaskType {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    /** Необязательная базовая инструкция для заданий этого типа (миграция 019). */
+    @Column(length = 1000)
+    private String instruction;
+
     @Column(nullable = false)
     private Boolean isActive = true;
 
