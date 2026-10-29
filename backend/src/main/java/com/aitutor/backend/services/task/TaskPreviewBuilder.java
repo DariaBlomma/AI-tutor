@@ -33,12 +33,22 @@ public class TaskPreviewBuilder {
         if (items == null || items.isEmpty()) {
             return null;
         }
-        return items.stream()
-                .map(this::lineFor)
-                .filter(line -> line != null && !line.isBlank())
-                .limit(MAX_LINES)
-                .reduce((a, b) -> a + "\n" + b)
-                .orElse(null);
+        // Нумерованный список: строки вида "1. ...", "2. ..." — нумерация по позиции пункта в задании
+        // (между строками могут быть пропущены пустые пункты, поэтому счётчик отдельный от индекса).
+        StringBuilder sb = new StringBuilder();
+        int shown = 0;
+        for (int i = 0; i < items.size() && shown < MAX_LINES; i++) {
+            String line = lineFor(items.get(i));
+            if (line == null || line.isBlank()) {
+                continue;
+            }
+            if (!sb.isEmpty()) {
+                sb.append('\n');
+            }
+            sb.append(i + 1).append(". ").append(line);
+            shown++;
+        }
+        return sb.isEmpty() ? null : sb.toString();
     }
 
     private String lineFor(TaskItem item) {

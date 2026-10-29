@@ -107,6 +107,7 @@
   color: var(--c1);
   font-size: 13px;
   font-family: inherit;
+  // Resize только по вертикали (браузерное значение по умолчанию — both).
   resize: vertical;
   min-height: 48px;
   line-height: 1.4;

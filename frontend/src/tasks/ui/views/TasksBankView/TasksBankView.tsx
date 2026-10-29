@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { AuthService } from '@/auth/services/AuthService.ts';
 import { TasksBankService } from '@/tasks/services/TasksBankService';
@@ -6,6 +6,7 @@ import { useTasksBank } from '@/tasks/hooks/useTasksBank';
 import { useTaskRefs } from '@/tasks/hooks/useTaskRefs';
 import { ChipsMultiselect } from '@/tasks/ui/widgets/ChipsMultiselect/ChipsMultiselect';
 import { BulkActionsBar } from '@/tasks/ui/widgets/BulkActionsBar/BulkActionsBar';
+import { TaskDeletePopup } from '@/tasks/ui/widgets/TaskDeletePopup/TaskDeletePopup';
 import { TasksBulkPopup } from '@/tasks/ui/widgets/TasksBulkPopup/TasksBulkPopup';
 import type { BulkAction } from '@/tasks/ui/widgets/TasksBulkPopup/types';
 import { ITEM_TYPE_OPTIONS } from '@/tasks/types';
@@ -44,6 +45,20 @@ export function TasksBankView() {
     const [bulkAction, setBulkAction] = useState<BulkAction | null>(null);
     const [deletingId, setDeletingId] = useState<number | null>(null);
     const [actionError, setActionError] = useState<string | null>(null);
+
+    // Подтверждение удаления — компактный попап рядом с кнопкой «Удалить» (вместо нативного confirm).
+    // Позиционирование по кнопке-якорю берёт на себя Radix Popover (virtual ref + flip/shift).
+    const [deleteTarget, setDeleteTarget] = useState<TaskSummary | null>(null);
+    const deleteBtnRef = useRef<HTMLButtonElement>(null);
+
+    const openDeletePopup = useCallback((task: TaskSummary) => {
+        // Ref общий для всех карточек, но клик идёт именно по кнопке открытой карточки —
+        // на момент клика ref указывает на нужную кнопку.
+        if (deleteBtnRef.current) setDeleteTarget(task);
+    }, []);
+
+    // Закрытие попапа удаления (клик вне / Esc / «Отмена»).
+    const closeDeletePopup = useCallback(() => setDeleteTarget(null), []);
 
     const toggleSelect = useCallback((id: number) => {
         setSelectedIds((prev) => {
@@ -90,29 +105,29 @@ export function TasksBankView() {
 
     const { pageItems, totalCount, totalPages, page, setPage, isLoading, isError, error, reload } = useTasksBank(fetcher);
 
-    // Удаление задания (только владелец): confirm -> DELETE /api/tasks/{id} -> перезагрузка страницы.
-    const handleDelete = useCallback(
-        async (task: TaskSummary) => {
-            if (!window.confirm(`Удалить задание «${task.name?.trim() || task.publicId}»?`)) return;
-            setDeletingId(task.id);
-            setActionError(null);
-            try {
-                await TasksBankService.deleteTask(task.id);
-                setSelectedIds((prev) => {
-                    const next = new Set(prev);
-                    next.delete(task.id);
-                    return next;
-                });
-                reload();
-            } catch (e) {
-                setActionError(e instanceof Error ? e.message : 'Не удалось удалить задание.');
-            } finally {
-                setDeletingId(null);
-            }
-        },
-        [reload],
-    );
+    // Удаление задания (только владелец): подтверждение в попапе у кнопки -> DELETE /api/tasks/{id} -> перезагрузка страницы.
+    const confirmDelete = useCallback(async () => {
+        if (!deleteTarget) return;
+        const task = deleteTarget;
+        setDeletingId(task.id);
+        setActionError(null);
+        try {
+            await TasksBankService.deleteTask(task.id);
+            setSelectedIds((prev) => {
+                const next = new Set(prev);
+                next.delete(task.id);
+                return next;
+            });
+            setDeleteTarget(null);
+            reload();
+        } catch (e) {
+            setActionError(e instanceof Error ? e.message : 'Не удалось удалить задание.');
+        } finally {
+            setDeletingId(null);
+        }
+    }, [deleteTarget, reload]);
 
+    // Позиционирование, flip при нехватке места и слежение за скроллом/ресайзом — на Radix Popover.
 
     // Справочники нужны для фильтров.
     // Бэк закрывает GET /topics от STUDENT (403) — ученику берём только типы,
@@ -217,7 +232,8 @@ export function TasksBankView() {
                             canManage={isTeacher && task.createdById != null && task.createdById === currentUserId}
                             deleting={deletingId === task.id}
                             onToggleSelect={toggleSelect}
-                            onDelete={handleDelete}
+                            onDelete={openDeletePopup}
+                            deleteBtnRef={deleteBtnRef}
                         />
                     ))}
                 </div>
@@ -234,6 +250,18 @@ export function TasksBankView() {
             )}
             {isTeacher && (
                 <TasksBulkPopup action={bulkAction} selectedCount={selectedIds.size} onClose={closeBulkPopup} />
+            )}
+
+            {/* Попап подтверждения удаления — рядом с кнопкой «Удалить» (без полноэкранного затемнения). */}
+            {deleteTarget && (
+                <TaskDeletePopup
+                    taskName={deleteTarget.name?.trim() || deleteTarget.publicId}
+                    busy={deletingId === deleteTarget.id}
+                    anchorRef={deleteBtnRef}
+                    open
+                    onOpenChange={closeDeletePopup}
+                    onConfirm={confirmDelete}
+                />
             )}
         </div>
     );
@@ -284,7 +312,7 @@ function collectTopics(tasks: TaskSummary[]) {
     return [...byId.values()];
 }
 
-// Карточка задания — отображение + действия владельца (удаление).
+// Карточка задания — отображение + действия владельца (удаление через попап-подтверждение).
 // Дизайн: чекбокс слева (только учителю — bulk-выбор); в шапке название (заглушка «Без названия», если пустое)
 // и справа сверху publicId как ссылка на детальную страницу; ниже — превью, затем общий ряд чипов
 // (грамматические типы → темы → механики → Mixed), в футере количество позиций жирным.
@@ -297,6 +325,7 @@ function TaskCard({
     deleting,
     onToggleSelect,
     onDelete,
+    deleteBtnRef,
 }: {
     task: TaskSummary;
     selectable: boolean;
@@ -305,6 +334,9 @@ function TaskCard({
     deleting: boolean;
     onToggleSelect: (id: number) => void;
     onDelete: (task: TaskSummary) => void;
+    // Общий ref кнопки «Удалить» — виджет использует его координаты как якорь для попапа
+    // (в момент клика ref указывает именно на кнопку этой карточки).
+    deleteBtnRef: React.RefObject<HTMLButtonElement>;
 }) {
     return (
         <div className={`${styles.card} ${selected ? styles.cardSelected : ''}`}>
@@ -325,7 +357,16 @@ function TaskCard({
                     <span className={styles.publicId}>{task.publicId}</span>
                 </div>
 
-                {task.previewText && <div className={styles.preview}>{task.previewText}</div>}
+                {task.previewText && (
+                    <ol className={styles.previewList}>
+                        {task.previewText.split('\n').map((line, i) => (
+                            // Индекс стабильный (строки превью не меняются на месте) — ключ по номеру строки.
+                            <li key={`pv-${i}`} className={styles.previewLine}>
+                                {line.replace(/^\d+\.\s*/, '')}
+                            </li>
+                        ))}
+                    </ol>
+                )}
 
                 <div className={styles.tags}>
                     {task.taskTypes.map((type) => (
@@ -361,6 +402,7 @@ function TaskCard({
                                 Редактировать
                             </button>
                             <button
+                                ref={deleteBtnRef}
                                 type="button"
                                 className={`${styles.actionBtn} ${styles.dangerBtn}`}
                                 disabled={deleting}
