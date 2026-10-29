@@ -1,0 +1,56 @@
+@use '@/shared/styles/variables' as *;
+
+// Фиксированная панель над нижним меню (меню ~62px + отступ 8px, как в дизайне bottom: 70px).
+.bar {
+  position: fixed;
+  bottom: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 480px;
+  width: calc(100% - 40px);
+  background: $bg;
+  border: 1px solid $p;
+  border-radius: var(--r, 6px);
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  z-index: 90;
+}
+
+.count {
+  font-size: 13px;
+  color: $c1;
+
+  strong {
+    color: $p;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  padding: 8px 14px;
+  background: $p;
+  border: 1px solid $p;
+  border-radius: var(--r, 6px);
+  color: $c1;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.btnSecondary {
+  background: transparent;
+  color: $p;
+}

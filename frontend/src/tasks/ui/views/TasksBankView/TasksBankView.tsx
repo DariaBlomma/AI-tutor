@@ -5,6 +5,9 @@ import { TasksBankService } from '@/tasks/services/TasksBankService';
 import { useTasksBank } from '@/tasks/hooks/useTasksBank';
 import { useTaskRefs } from '@/tasks/hooks/useTaskRefs';
 import { ChipsMultiselect } from '@/tasks/ui/widgets/ChipsMultiselect/ChipsMultiselect';
+import { BulkActionsBar } from '@/tasks/ui/widgets/BulkActionsBar/BulkActionsBar';
+import { TasksBulkPopup } from '@/tasks/ui/widgets/TasksBulkPopup/TasksBulkPopup';
+import type { BulkAction } from '@/tasks/ui/widgets/TasksBulkPopup/types';
 import { ITEM_TYPE_OPTIONS } from '@/tasks/types';
 import type { ChipItem } from '@/tasks/ui/widgets/ChipsMultiselect/types';
 import type { ItemType, TaskSummary } from '@/tasks/types';
@@ -35,8 +38,10 @@ export function TasksBankView() {
     // Действия с заданием (удаление) доступны только владельцу — бэк это же проверяет (403).
     const currentUserId = AuthService.getUserId();
 
-    // Множественный выбор карточек (чекбоксы) — для будущих bulk-действий.
+    // Множественный выбор карточек (чекбоксы — только учителю) для bulk-действий.
+    // Выбор сохраняется между страницами и фильтрами; очистка — при закрытии модалки или удалении задания.
     const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+    const [bulkAction, setBulkAction] = useState<BulkAction | null>(null);
     const [deletingId, setDeletingId] = useState<number | null>(null);
     const [actionError, setActionError] = useState<string | null>(null);
 
@@ -48,6 +53,14 @@ export function TasksBankView() {
             return next;
         });
     }, []);
+
+    const clearSelection = useCallback(() => setSelectedIds(new Set()), []);
+
+    // Закрытие модалки снимает выбор (панель исчезает вместе с ним).
+    const closeBulkPopup = useCallback(() => {
+        setBulkAction(null);
+        clearSelection();
+    }, [clearSelection]);
 
     // Поиск: input обновляется сразу, запрос — с дебаунсом.
     const [searchInput, setSearchInput] = useState('');
@@ -199,6 +212,7 @@ export function TasksBankView() {
                         <TaskCard
                             key={task.id}
                             task={task}
+                            selectable={isTeacher}
                             selected={selectedIds.has(task.id)}
                             canManage={isTeacher && task.createdById != null && task.createdById === currentUserId}
                             deleting={deletingId === task.id}
@@ -212,6 +226,14 @@ export function TasksBankView() {
             {/* Постраничная навигация (серверная пагинация — GET /api/tasks?page&size) */}
             {!isLoading && !isError && totalPages > 1 && (
                 <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+            )}
+
+            {/* Панель массовых действий — только учителю и только при выбранном > 0. */}
+            {isTeacher && selectedIds.size > 0 && (
+                <BulkActionsBar selectedCount={selectedIds.size} onAction={setBulkAction} />
+            )}
+            {isTeacher && (
+                <TasksBulkPopup action={bulkAction} selectedCount={selectedIds.size} onClose={closeBulkPopup} />
             )}
         </div>
     );
@@ -263,12 +285,13 @@ function collectTopics(tasks: TaskSummary[]) {
 }
 
 // Карточка задания — отображение + действия владельца (удаление).
-// Дизайн: чекбокс слева; в шапке название (заглушка «Без названия», если пустое) и справа сверху
-// publicId как ссылка на детальную страницу; ниже — превью, затем общий ряд чипов
+// Дизайн: чекбокс слева (только учителю — bulk-выбор); в шапке название (заглушка «Без названия», если пустое)
+// и справа сверху publicId как ссылка на детальную страницу; ниже — превью, затем общий ряд чипов
 // (грамматические типы → темы → механики → Mixed), в футере количество позиций жирным.
 // Пункт «Редактировать» временно не делаем (edit-режим формы — отдельная задача).
 function TaskCard({
     task,
+    selectable,
     selected,
     canManage,
     deleting,
@@ -276,6 +299,7 @@ function TaskCard({
     onDelete,
 }: {
     task: TaskSummary;
+    selectable: boolean;
     selected: boolean;
     canManage: boolean;
     deleting: boolean;
@@ -284,13 +308,15 @@ function TaskCard({
 }) {
     return (
         <div className={`${styles.card} ${selected ? styles.cardSelected : ''}`}>
-            <input
-                type="checkbox"
-                className={styles.checkbox}
-                checked={selected}
-                onChange={() => onToggleSelect(task.id)}
-                aria-label={`Выбрать задание ${task.name ?? task.publicId}`}
-            />
+            {selectable && (
+                <input
+                    type="checkbox"
+                    className={styles.checkbox}
+                    checked={selected}
+                    onChange={() => onToggleSelect(task.id)}
+                    aria-label={`Выбрать задание ${task.name ?? task.publicId}`}
+                />
+            )}
 
             <div className={styles.body}>
                 <div className={styles.headerRow}>
