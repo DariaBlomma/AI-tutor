@@ -1,0 +1,58 @@
+@use '@/shared/styles/variables' as *;
+
+// Компактный подтвержающий попап у кнопки «Удалить».
+// Позиционирование (fixed-координаты, flip/shift) задаёт Radix Popover через inline-стили.
+.popup {
+  z-index: 120; // поверх нижнего меню (100) и bulk-панели (90)
+  width: 240px;
+  background: $bg;
+  border: 1px solid rgba(255, 107, 107, 0.45);
+  border-radius: var(--r, 6px);
+  padding: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.text {
+  font-size: 13px;
+  color: $c1;
+  line-height: 1.4;
+  margin-bottom: 10px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.btnGhost,
+.btnDanger {
+  padding: 7px 12px;
+  border-radius: var(--r, 6px);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+}
+
+.btnGhost {
+  background: transparent;
+  border: 1px solid rgba(157, 124, 242, 0.45);
+  color: $c1;
+}
+
+.btnDanger {
+  background: #ff6b6b;
+  border: 1px solid #ff6b6b;
+  color: #0f0f0f;
+}

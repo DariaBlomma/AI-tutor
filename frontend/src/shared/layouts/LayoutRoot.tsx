@@ -6,7 +6,8 @@ import type { AppBottomNavActive } from '@/shared/widgets/AppBottomNav/types';
 const NAV_ACTIVE_BY_PATH: Record<string, AppBottomNavActive> = {
     '/': 'home',
     '/teacher/reports': 'reports',
-    '/bank': 'bank',
+    // Страницы банка заданий (список, создание, справочники) — под общим нижним меню.
+    '/tasks-bank': 'bank',
     '/profile': 'profile',
 };
 

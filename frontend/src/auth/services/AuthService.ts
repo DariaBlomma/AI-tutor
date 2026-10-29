@@ -7,6 +7,9 @@ const EXPIRES_KEY = 'token:expires';
 const ROLE_KEY = 'token:role';
 const ERROR_KEY = 'auth:error';
 
+// Превентивное обновление access-токена: если до истечения остаётся меньше этого времени.
+const REFRESH_AHEAD_MS = 2 * 60 * 1000;
+
 export class AuthService {
     public static token: JwtTokenMin | undefined;
 
@@ -17,6 +20,20 @@ export class AuthService {
 
         if (access && refresh && expires) {
             this.token = { access, refresh, expires };
+        }
+    }
+
+    // Синхронизирует токен с localStorage: интерцептор api (AxiosInstance) обновляет
+    // токены напрямую при 401 — после этого AuthService должен видеть актуальные значения.
+    private static syncFromStorage(): void {
+        const access = localStorage.getItem(ACCESS_KEY);
+        const refresh = localStorage.getItem(REFRESH_KEY);
+        const expires = localStorage.getItem(EXPIRES_KEY);
+
+        if (access && refresh && expires) {
+            this.token = { access, refresh, expires };
+        } else {
+            this.token = undefined;
         }
     }
 
@@ -71,6 +88,26 @@ export class AuthService {
     static get isAuthenticated(): boolean {
         if (!this.token?.access || !this.token.expires) return false;
         return Date.parse(this.token.expires) > Date.now();
+    }
+
+    // Время жизни access-токена из claim "exp" (в секундах); undefined, если разобрать не удалось.
+    private static getAccessExpiresAtMs(): number | undefined {
+        const payload = this.decodeJwtPayload(this.token?.access);
+        const exp = Number(payload?.exp);
+        return Number.isFinite(exp) ? exp * 1000 : undefined;
+    }
+
+    // Актуальность сессии: сверяемся и с localStorage (его обновляет интерцептор при 401),
+    // и с claim "exp" из JWT — expiresAt от бэка может расходиться с реальным TTL токена.
+    private static hasValidSession(): boolean {
+        this.syncFromStorage();
+        if (!this.token?.access) return false;
+
+        const fromExpiresField = this.token.expires ? Date.parse(this.token.expires) > Date.now() : false;
+        const jwtExp = this.getAccessExpiresAtMs();
+        const fromJwt = jwtExp !== undefined && jwtExp > Date.now();
+
+        return fromExpiresField || fromJwt;
     }
 
     // Роль пользователя: из AuthResponse (localStorage) либо из access-токена (JWT claim "role").
@@ -144,15 +181,23 @@ export class AuthService {
     // Проверяет сессию при входе на сайт: если access-токен просрочен, пытается обновить его.
     // Возвращает true, если сессия активна; false — если нет (токены очищены).
     static async checkSession(): Promise<boolean> {
-        if (!this.token?.access) return false;
-
-        if (this.isAuthenticated) return true;
-
-        const refreshed = await this.refreshToken();
-        if (!refreshed) {
-            this.removeToken();
+        if (!this.hasValidSession()) {
+            // Access-токен истёк — пробуем обновить по refresh-токену из localStorage.
+            const refreshed = await this.refreshToken();
+            if (!refreshed) {
+                this.removeToken();
+            }
+            return refreshed;
         }
-        return refreshed;
+
+        // Сессия жива, но access скоро истекает (например, пользователь вернулся к открытой
+        // вкладке спустя время) — обновляем превентивно, чтобы следующий запрос не дал 401.
+        const jwtExp = this.getAccessExpiresAtMs();
+        if (jwtExp !== undefined && jwtExp - Date.now() < REFRESH_AHEAD_MS) {
+            await this.refreshToken();
+        }
+
+        return this.isAuthenticated || this.hasValidSession();
     }
 
     static async signOut() {
@@ -166,6 +211,7 @@ export class AuthService {
     }
 
     static async refreshToken(): Promise<boolean> {
+        this.syncFromStorage();
         if (!this.token?.refresh) return false;
 
         try {
