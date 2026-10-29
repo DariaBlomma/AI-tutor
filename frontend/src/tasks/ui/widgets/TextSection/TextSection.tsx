@@ -9,11 +9,7 @@ export function TextSection({ title, text, onTitleChange, onTextChange, required
         <div className={styles.section}>
             <div className={styles.sectionTitle}>
                 <span>Текст</span>
-                {required ? (
-                    <span className={styles.required}>обязателен для TFNS / MATCHING</span>
-                ) : (
-                    <span className={styles.optional}>не нужен для выбранного типа</span>
-                )}
+                {required && <span className={styles.req}>*</span>}
             </div>
 
             <div className={styles.field}>
