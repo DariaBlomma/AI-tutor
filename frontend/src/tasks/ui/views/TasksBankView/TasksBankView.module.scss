@@ -65,35 +65,114 @@
 }
 
 .card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
   background: rgba(157, 124, 242, 0.05);
   border: 1px solid rgba(157, 124, 242, 0.2);
   border-radius: var(--r, 6px);
   padding: 14px;
+
+  &.cardSelected {
+    border-color: var(--p);
+    background: rgba(157, 124, 242, 0.1);
+  }
 }
 
-.cardTop {
+.checkbox {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--p);
+  cursor: pointer;
+}
+
+.body {
+  flex: 1;
+  min-width: 0; // чтобы длинные названия не растягивали карточку
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.tag {
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(157, 124, 242, 0.12);
+  color: var(--c1);
+  font-size: 11px;
+}
+
+.mixedTag {
+  background: rgba(255, 217, 61, 0.15);
+  border: 1px solid rgba(255, 217, 61, 0.4);
+  color: #ffd93d;
+  font-weight: 600;
+}
+
+.footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-  margin-bottom: 6px;
+  flex-wrap: wrap;
 }
 
-.cardName {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.mixedBadge {
-  flex-shrink: 0;
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: rgba(255, 217, 61, 0.15);
-  border: 1px solid rgba(255, 217, 61, 0.4);
-  color: #ffd93d;
+.count {
   font-size: 11px;
-  font-weight: 600;
+  color: var(--c3);
+
+  strong {
+    color: var(--c1);
+    font-weight: 700;
+  }
 }
+
+.actions {
+  display: flex;
+  gap: 6px;
+}
+
+.actionBtn {
+  padding: 5px 10px;
+  background: rgba(157, 124, 242, 0.12);
+  border: 1px solid rgba(157, 124, 242, 0.35);
+  border-radius: var(--r, 6px);
+  color: var(--c1);
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+}
+
+.dangerBtn {
+  background: rgba(255, 107, 107, 0.12);
+  border-color: rgba(255, 107, 107, 0.45);
+  color: #ff6b6b;
+}
+
+
+
 
 .preview {
   font-size: 12px;
@@ -106,26 +185,8 @@
   overflow: hidden;
 }
 
-.meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 8px;
-}
 
-.metaChip {
-  padding: 3px 8px;
-  border-radius: 4px;
-  background: rgba(157, 124, 242, 0.12);
-  color: var(--c1);
-  font-size: 11px;
-}
 
-.topicChip {
-  background: transparent;
-  border: 1px solid rgba(157, 124, 242, 0.3);
-  color: var(--c3);
-}
 
 .count {
   font-size: 11px;
@@ -193,10 +254,14 @@
 }
 
 .publicId {
+  flex-shrink: 0;
   font-size: 11px;
   color: var(--p);
   font-family: monospace;
-  margin-bottom: 6px;
+
+  &.publicIdLink:hover {
+    text-decoration: underline;
+  }
 }
 
 .pagination {

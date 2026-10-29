@@ -45,6 +45,14 @@ export class AuthService {
         localStorage.removeItem(ROLE_KEY);
     }
 
+    // Id текущего пользователя — из claim "userId" access-токена (бэк выдаёт токены с этим claim).
+    static getUserId(): number | undefined {
+        const payload = this.decodeJwtPayload(this.token?.access);
+        const value = payload?.userId;
+        const id = typeof value === 'number' ? value : Number(value);
+        return Number.isFinite(id) ? id : undefined;
+    }
+
     static setError(error: AuthError) {
         localStorage.setItem(ERROR_KEY, JSON.stringify(error));
     }

@@ -57,7 +57,7 @@ export const ITEM_TYPE_OPTIONS: Array<{ value: ItemType; label: string }> = [
 export interface TaskSummary {
     id: number;
     publicId: string;
-    /** Необязательное на бэке (миграция 017) — без названия показываем публичный id. */
+    /** Необязательное на бэке (миграция 017) — без названия показываем заглушку «Без названия». */
     name: string | null;
     previewText: string | null;
     isMixed: boolean;
@@ -66,6 +66,10 @@ export interface TaskSummary {
     taskTypes: GrammarType[];
     itemCount: number;
     createdAt: string;
+    /** Уникальные механики пунктов задания (чипы в карточке). */
+    itemTypes?: ItemType[];
+    /** Автор задания — действия (удаление) доступны только владельцу. */
+    createdById?: number | null;
 }
 
 /** task_types — на бэке это сущность, а не enum. Механики пунктов (ItemType) фиксированы. */
