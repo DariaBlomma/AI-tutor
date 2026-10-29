@@ -325,7 +325,16 @@ function TaskCard({
                     <span className={styles.publicId}>{task.publicId}</span>
                 </div>
 
-                {task.previewText && <div className={styles.preview}>{task.previewText}</div>}
+                {task.previewText && (
+                    <ol className={styles.previewList}>
+                        {task.previewText.split('\n').map((line, i) => (
+                            // Индекс стабильный (строки превью не меняются на месте) — ключ по номеру строки.
+                            <li key={`pv-${i}`} className={styles.previewLine}>
+                                {line.replace(/^\d+\.\s*/, '')}
+                            </li>
+                        ))}
+                    </ol>
+                )}
 
                 <div className={styles.tags}>
                     {task.taskTypes.map((type) => (
