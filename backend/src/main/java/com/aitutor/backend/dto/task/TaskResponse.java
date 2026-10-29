@@ -16,6 +16,7 @@ public class TaskResponse {
     private String publicId;
     private String name;
     private String previewText;
+    private String instruction;
     private String context;
     private Boolean isMixed;
     private Set<TopicResponse> topics;

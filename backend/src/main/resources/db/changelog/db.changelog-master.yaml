@@ -31,3 +31,5 @@ databaseChangeLog:
       file: db/changelog/changes/016-users-partial-unique-indexes.sql
   - include:
       file: db/changelog/changes/017-tasks-name-nullable.sql
+  - include:
+      file: db/changelog/changes/018-tasks-instruction.sql

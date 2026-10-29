@@ -2,6 +2,7 @@ import type { ItemTypeInfo, ItemType } from '@/tasks/types';
 
 // Максимумы, зеркалящие валидацию бэка (TaskCreateRequest / TaskContentValidator).
 export const TASK_NAME_MAX_LENGTH = 200;
+export const INSTRUCTION_MAX_LENGTH = 1000; // tasks.instruction @Size(max=1000)
 export const ANSWER_MAX_LENGTH = 200;
 export const REF_NAME_MAX_LENGTH = 100; // topics/task-types name @Size(max=100)
 

@@ -36,6 +36,10 @@ public class Task {
     @Column(name = "preview_text", columnDefinition = "TEXT")
     private String previewText;
 
+    /** Необязательная инструкция для ученика (миграция 018): «что нужно сделать в задании». */
+    @Column(name = "instruction", length = 1000)
+    private String instruction;
+
     @Column(nullable = false)
     private Boolean isMixed = false;
 

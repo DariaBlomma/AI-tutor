@@ -117,6 +117,8 @@ export interface TaskItemRequestDto {
 export interface TaskCreateRequestDto {
     /** Необязательное: бэк допускает null (миграция 017-tasks-name-nullable). */
     name: string | null;
+    /** Необязательная инструкция для ученика (миграция 018), есть у любого типа заданий. */
+    instruction?: string | null;
     context?: string | null;
     items: TaskItemRequestDto[];
     topicIds?: number[];
@@ -141,6 +143,8 @@ export interface TaskResponseDto {
     publicId: string;
     name: string;
     previewText: string | null;
+    /** Инструкция для ученика; null = не заполнена (поле необязательное). */
+    instruction: string | null;
     context: string | null;
     isMixed: boolean;
     topics: Topic[];

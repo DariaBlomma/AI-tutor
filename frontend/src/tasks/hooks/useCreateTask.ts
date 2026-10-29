@@ -7,6 +7,8 @@ import type { ItemType, TaskItemDraft } from '@/tasks/types';
 
 export interface CreateTaskFormState {
     name: string;
+    /** Необязательная инструкция для ученика (tasks.instruction). */
+    instruction: string;
     topicIds: number[];
     grammarTypeIds: number[];
     /** Механика всего задания (выбирается до конструктора пунктов). */
