@@ -48,7 +48,7 @@ export function TaskItemCard({ item, index, isFirst, isLast, error, onChange, on
                             <BaseInputText
                                 value={item.answer}
                                 maxLength={ANSWER_MAX_LENGTH}
-                                placeholder={item.itemType === 'GAP_FILL' ? 'Слово, которое ученик впишет в пропуск' : undefined}
+                                placeholder="Правильный ответ"
                                 onChange={(e) => patch({ answer: e.target.value })}
                             />
                         </div>

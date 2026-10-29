@@ -48,8 +48,12 @@ Java 21 · Spring Boot · Maven · PostgreSQL · Liquibase.
 }
 ```
 
-Поля `content`: `options` — необязательный непустой массив строк (если есть — ученик выбирает из них),
+Поля `content`: `options` — необязательный непустой массив строк (список-подсказка: отображается в превью
+и задании через слэш после prompt, на проверку ответа НЕ влияет),
 `explanation` — необязательная строка.
+
+Проверка ответов WORD_FORMATION и GAP_FILL — детерминированная (ExactMatchChecker): trim + регистронезависимое
+сравнение с `correctAnswer`. LLM не проверяет, а оценивает/анализирует ответ — получает и `correctAnswer`, и `options`.
 
 ### TFNS (True / False / Not stated)
 
