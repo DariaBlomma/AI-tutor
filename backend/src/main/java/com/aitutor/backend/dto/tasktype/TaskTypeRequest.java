@@ -16,4 +16,8 @@ public class TaskTypeRequest {
 
     @Size(max = 1000, message = "Описание не длиннее 1000 символов")
     private String description;
+
+    /** Необязательная базовая инструкция («что нужно сделать»); пустое значение очищает поле. */
+    @Size(max = 1000, message = "Инструкция не длиннее 1000 символов")
+    private String instruction;
 }

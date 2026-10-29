@@ -139,6 +139,7 @@ public class TaskService {
                 // попадает сразу в INSERT (без UPDATE после вставки)
                 .publicId(publicIdGenerator.nextTaskId())
                 .name(request.getName())
+                .instruction(request.getInstruction())
                 .context(request.getContext())
                 .createdBy(teacher)
                 .topics(topics)
@@ -167,6 +168,7 @@ public class TaskService {
         Set<TaskType> taskTypes = resolveTaskTypes(request.getTaskTypeIds());
 
         task.setName(request.getName());
+        task.setInstruction(request.getInstruction());
         task.setContext(request.getContext());
         task.setTopics(topics);
         task.setTaskTypes(taskTypes);

@@ -18,6 +18,10 @@ public class TaskUpdateRequest {
     @Size(max = 200)
     private String name;
 
+    /** Необязательная инструкция; пустое значение очищает поле (edit in place). */
+    @Size(max = 1000)
+    private String instruction;
+
     private String context;
 
     /** Полный список пунктов: старые, отсутствующие в запросе, удаляются (orphanRemoval). */

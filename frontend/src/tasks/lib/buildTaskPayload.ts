@@ -84,6 +84,7 @@ function buildItemRequest(item: TaskItemDraft): TaskItemRequestDto {
  */
 export function buildTaskPayload(form: {
     name: string;
+    instruction: string;
     topicIds: number[];
     grammarTypeIds: number[];
     itemType: ItemType;
@@ -101,6 +102,8 @@ export function buildTaskPayload(form: {
     return {
         // Название необязательное: пустая строка -> null (бэк допускает tasks.name = NULL).
         name: orNull(form.name),
+        // Инструкция необязательна и не зависит от типа задания (миграция 018).
+        instruction: orNull(form.instruction),
         context,
         items: form.items.map(buildItemRequest),
         topicIds: form.topicIds,

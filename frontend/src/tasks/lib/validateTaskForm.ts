@@ -1,8 +1,9 @@
 import type { ItemType, TaskItemDraft } from '@/tasks/types';
-import { ANSWER_MAX_LENGTH, GAP_MARK, TASK_NAME_MAX_LENGTH, TFNS_ANSWERS, isTextRequiredItem } from '@/tasks/data';
+import { ANSWER_MAX_LENGTH, GAP_MARK, INSTRUCTION_MAX_LENGTH, TASK_NAME_MAX_LENGTH, TFNS_ANSWERS, isTextRequiredItem } from '@/tasks/data';
 
 export interface TaskFormErrors {
     name?: string;
+    instruction?: string;
     text?: string;
     /** id пункта -> текст ошибки (подсветка карточки). */
     items: Record<number, string>;
@@ -43,6 +44,7 @@ function validateItem(item: TaskItemDraft): string | null {
 /** Локальная валидация перед POST /api/tasks (зеркалит правила TaskContentValidator). */
 export function validateTaskForm(form: {
     name: string;
+    instruction: string;
     grammarTypeIds: number[];
     itemType: ItemType;
     materialText: string;
@@ -51,6 +53,10 @@ export function validateTaskForm(form: {
     const errors: TaskFormErrors = { items: {} };
 
     if (form.name.trim().length > TASK_NAME_MAX_LENGTH) errors.name = `Название не длиннее ${TASK_NAME_MAX_LENGTH} символов`;
+    // Инструкция необязательна — проверяем только лимит (@Size(max=1000) на бэке).
+    if (form.instruction.trim().length > INSTRUCTION_MAX_LENGTH) {
+        errors.instruction = `Инструкция не длиннее ${INSTRUCTION_MAX_LENGTH} символов`;
+    }
 
     form.items.forEach((item) => {
         const message = validateItem(item);
@@ -67,5 +73,5 @@ export function validateTaskForm(form: {
 }
 
 export function isFormValid(errors: TaskFormErrors, grammarTypesSelected: boolean): boolean {
-    return !errors.name && !errors.text && Object.keys(errors.items).length === 0 && grammarTypesSelected;
+    return !errors.name && !errors.instruction && !errors.text && Object.keys(errors.items).length === 0 && grammarTypesSelected;
 }

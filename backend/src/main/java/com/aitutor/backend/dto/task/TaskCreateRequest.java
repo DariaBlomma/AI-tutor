@@ -17,6 +17,10 @@ public class TaskCreateRequest {
     @Size(max = 200, message = "Название не длиннее 200 символов")
     private String name;
 
+    /** Необязательная инструкция для ученика («что нужно сделать»), есть у любого типа заданий. */
+    @Size(max = 1000, message = "Инструкция не длиннее 1000 символов")
+    private String instruction;
+
     private String context;   // JSON-строка: общий текст/списки, если нужны
 
     @NotEmpty(message = "Добавьте хотя бы один пункт задания")

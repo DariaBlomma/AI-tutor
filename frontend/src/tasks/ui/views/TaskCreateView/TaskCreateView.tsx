@@ -2,13 +2,14 @@ import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { BaseInputText } from '@/shared/ui-kit/BaseInputText/BaseInputText';
 import { ChipsMultiselect } from '@/tasks/ui/widgets/ChipsMultiselect/ChipsMultiselect';
+import { InstructionSection } from '@/tasks/ui/widgets/InstructionSection/InstructionSection';
 import { ItemTypeSelect } from '@/tasks/ui/widgets/ItemTypeSelect/ItemTypeSelect';
 import { TextSection } from '@/tasks/ui/widgets/TextSection/TextSection';
 import { TaskItemCard } from '@/tasks/ui/widgets/TaskItemCard/TaskItemCard';
 import { useCreateTask } from '@/tasks/hooks/useCreateTask';
 import { useTaskRefs } from '@/tasks/hooks/useTaskRefs';
 import { needsText, validateTaskForm } from '@/tasks/lib/validateTaskForm';
-import { TASK_NAME_MAX_LENGTH } from '@/tasks/data';
+import { INSTRUCTION_MAX_LENGTH, TASK_NAME_MAX_LENGTH } from '@/tasks/data';
 import type { ItemType, TaskItemDraft } from '@/tasks/types';
 import styles from './TaskCreateView.module.scss';
 
@@ -35,6 +36,7 @@ export function TaskCreateView() {
     const navigate = useNavigate();
 
     const [name, setName] = useState('');
+    const [instruction, setInstruction] = useState('');
     const [topicIds, setTopicIds] = useState<number[]>([]);
     const [grammarTypeIds, setGrammarTypeIds] = useState<number[]>([]);
     const [itemType, setItemType] = useState<ItemType>('WORD_FORMATION');
@@ -52,8 +54,8 @@ export function TaskCreateView() {
     const { submit, isSubmitting, error } = useCreateTask(goBackToBank);
 
     const form = useMemo(
-        () => ({ name, topicIds, grammarTypeIds, itemType, materialTitle, materialText, items }),
-        [name, topicIds, grammarTypeIds, itemType, materialTitle, materialText, items],
+        () => ({ name, instruction, topicIds, grammarTypeIds, itemType, materialTitle, materialText, items }),
+        [name, instruction, topicIds, grammarTypeIds, itemType, materialTitle, materialText, items],
     );
 
     const errors = validateTaskForm(form);
@@ -101,6 +103,14 @@ export function TaskCreateView() {
                 <div className={styles.sectionTitle}>Тип задания</div>
                 <ItemTypeSelect value={itemType} onChange={handleItemTypeChange} />
             </div>
+
+            {/* ИНСТРУКЦИЯ — необязательное ТЗ для ученика, есть у любого типа заданий */}
+            <InstructionSection
+                value={instruction}
+                maxLength={INSTRUCTION_MAX_LENGTH}
+                onChange={setInstruction}
+                error={showErrors ? errors.instruction : undefined}
+            />
 
             {/* ОСНОВНОЕ */}
             <div className={styles.section}>

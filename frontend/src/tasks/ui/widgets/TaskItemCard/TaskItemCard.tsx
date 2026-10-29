@@ -138,8 +138,8 @@ export function TaskItemCard({ item, index, isFirst, isLast, error, onChange, on
                                     <button
                                         key={answer}
                                         type="button"
-                                        className={`${styles.chip} ${item.tfnsAnswer === answer ? styles.chipSelected : ''}`}
-                                        onClick={() => patch({ tfnsAnswer: answer })}
+                                        className={`${styles.chip} ${item.answer === answer ? styles.chipSelected : ''}`}
+                                        onClick={() => patch({ answer })}
                                     >
                                         {answer}
                                     </button>
