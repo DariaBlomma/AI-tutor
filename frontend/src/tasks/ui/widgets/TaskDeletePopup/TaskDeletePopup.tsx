@@ -3,15 +3,18 @@ import * as Popover from '@radix-ui/react-popover';
 import type { TaskDeletePopupProps } from './types';
 import styles from './TaskDeletePopup.module.scss';
 
+// Пустой прямоугольник — фолбэк, если якорь вдруг недоступен (кнопка размонтирована).
+const EMPTY_RECT: DOMRect = new DOMRect();
+
 // Попап подтверждения удаления задания — маленький «попвер» рядом с кнопкой «Удалить»,
 // НЕ полноэкранная модалка с затемнением. Реализован на Radix Popover: портал,
 // автопозиционирование по якорю (кнопке), flip/shift в пределах экрана, закрытие по
 // клику вне и Esc — всё из коробки.
-export function TaskDeletePopup({ taskName, busy = false, anchorRef, open, onOpenChange, onConfirm }: TaskDeletePopupProps) {
+export function TaskDeletePopup({ taskName, busy = false, getAnchorRect, open, onOpenChange, onConfirm }: TaskDeletePopupProps) {
     return (
         <Popover.Root open={open} onOpenChange={(next) => !next && onOpenChange()}>
-            {/* Невидимый якорь поверх кнопки-удаления (координаты от вызывающей стороны). */}
-            <Popover.Anchor virtualRef={anchorRef} />
+            {/* Невидимый якорь поверх кнопки-удаления конкретной карточки (координаты отдаёт вызывающая сторона). */}
+            <Popover.Anchor virtualRef={{ current: { getBoundingClientRect: () => getAnchorRect() ?? EMPTY_RECT } }} />
             <Popover.Portal>
                 <Popover.Content
                     className={styles.popup}

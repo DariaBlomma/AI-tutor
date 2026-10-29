@@ -48,17 +48,34 @@ export function TasksBankView() {
 
     // Подтверждение удаления — компактный попап рядом с кнопкой «Удалить» (вместо нативного confirm).
     // Позиционирование по кнопке-якорю берёт на себя Radix Popover (virtual ref + flip/shift).
+    // Якорь — конкретная кнопка кликнувшей карточки: ref собираем через callback в Map по id задания
+    // (общий ref на все карточки указывал бы всегда на последнюю отрендеренную кнопку).
     const [deleteTarget, setDeleteTarget] = useState<TaskSummary | null>(null);
-    const deleteBtnRef = useRef<HTMLButtonElement>(null);
+    const deleteBtnRefs = useRef(new Map<number, HTMLButtonElement>());
 
-    const openDeletePopup = useCallback((task: TaskSummary) => {
-        // Ref общий для всех карточек, но клик идёт именно по кнопке открытой карточки —
-        // на момент клика ref указывает на нужную кнопку.
-        if (deleteBtnRef.current) setDeleteTarget(task);
-    }, []);
+    const setDeleteBtnRef = useCallback(
+        (taskId: number) => (el: HTMLButtonElement | null) => {
+            if (el) deleteBtnRefs.current.set(taskId, el);
+            else deleteBtnRefs.current.delete(taskId);
+        },
+        [],
+    );
+
+    const getDeleteAnchor = useCallback(
+        (taskId: number): DOMRect | null => {
+            const el = deleteBtnRefs.current.get(taskId);
+            return el ? el.getBoundingClientRect() : null;
+        },
+        [],
+    );
 
     // Закрытие попапа удаления (клик вне / Esc / «Отмена»).
     const closeDeletePopup = useCallback(() => setDeleteTarget(null), []);
+
+    const openDeletePopup = useCallback((task: TaskSummary) => {
+        // Попап открываем только если кнопка этой карточки на месте (якорь найден в Map по id).
+        if (deleteBtnRefs.current.has(task.id)) setDeleteTarget(task);
+    }, []);
 
     const toggleSelect = useCallback((id: number) => {
         setSelectedIds((prev) => {
@@ -233,7 +250,7 @@ export function TasksBankView() {
                             deleting={deletingId === task.id}
                             onToggleSelect={toggleSelect}
                             onDelete={openDeletePopup}
-                            deleteBtnRef={deleteBtnRef}
+                            registerDeleteBtn={setDeleteBtnRef}
                         />
                     ))}
                 </div>
@@ -257,7 +274,7 @@ export function TasksBankView() {
                 <TaskDeletePopup
                     taskName={deleteTarget.name?.trim() || deleteTarget.publicId}
                     busy={deletingId === deleteTarget.id}
-                    anchorRef={deleteBtnRef}
+                    getAnchorRect={() => getDeleteAnchor(deleteTarget.id)}
                     open
                     onOpenChange={closeDeletePopup}
                     onConfirm={confirmDelete}
@@ -325,7 +342,7 @@ function TaskCard({
     deleting,
     onToggleSelect,
     onDelete,
-    deleteBtnRef,
+    registerDeleteBtn,
 }: {
     task: TaskSummary;
     selectable: boolean;
@@ -334,9 +351,10 @@ function TaskCard({
     deleting: boolean;
     onToggleSelect: (id: number) => void;
     onDelete: (task: TaskSummary) => void;
-    // Общий ref кнопки «Удалить» — виджет использует его координаты как якорь для попапа
-    // (в момент клика ref указывает именно на кнопку этой карточки).
-    deleteBtnRef: React.RefObject<HTMLButtonElement>;
+    // Регистрация кнопки «Удалить» этой карточки по id задания — виджет-попап берёт
+    // координаты именно этой кнопки как якорь (общий ref на все карточки не подходит:
+    // в него последовательно записывалась бы всегда кнопка последней отрендеренной карточки).
+    registerDeleteBtn: (taskId: number) => (el: HTMLButtonElement | null) => void;
 }) {
     return (
         <div className={`${styles.card} ${selected ? styles.cardSelected : ''}`}>
@@ -402,7 +420,7 @@ function TaskCard({
                                 Редактировать
                             </button>
                             <button
-                                ref={deleteBtnRef}
+                                ref={registerDeleteBtn(task.id)}
                                 type="button"
                                 className={`${styles.actionBtn} ${styles.dangerBtn}`}
                                 disabled={deleting}
