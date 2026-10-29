@@ -17,7 +17,8 @@ export interface TaskItemDraft {
     /** Ответ/эталон (WORD_FORMATION/GAP_FILL — вписываемое слово; TFNS — TRUE/FALSE/NOT STATED);
      *  не используется для MATCHING. */
     answer: string;
-    /** WORD_FORMATION: слово-база из скобок. */
+    /** WORD_FORMATION: слово-база (content.base). В prompt не дублируется — раннер сам
+     *  отобразит его в скобках после пропуска. */
     base: string;
     /** GAP_FILL: необязательные опции-подсказки через запятую (content.options). */
     options: string;

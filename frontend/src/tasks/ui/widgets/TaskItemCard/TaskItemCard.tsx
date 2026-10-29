@@ -37,7 +37,7 @@ export function TaskItemCard({ item, index, isFirst, isLast, error, onChange, on
                             <textarea
                                 className={styles.textarea}
                                 value={item.prompt}
-                                placeholder={`Используйте ${GAP_MARK} для пропуска${item.itemType === 'WORD_FORMATION' ? ' и (СЛОВО) в скобках' : ''}`}
+                                placeholder={`Используйте ${GAP_MARK} для пропуска`}
                                 onChange={(e) => patch({ prompt: e.target.value })}
                             />
                         </div>
@@ -55,6 +55,8 @@ export function TaskItemCard({ item, index, isFirst, isLast, error, onChange, on
                     </>
                 )}
 
+                {/* WORD_FORMATION: prompt — только предложение с ___; слово-база вводится отдельно,
+                    раннер сам отрендерит (BASE) после пропуска (см. backend README). */}
                 {item.itemType === 'WORD_FORMATION' && (
                     <div className={styles.field}>
                         <label className={styles.label}>
@@ -62,7 +64,7 @@ export function TaskItemCard({ item, index, isFirst, isLast, error, onChange, on
                         </label>
                         <BaseInputText
                             value={item.base}
-                            placeholder="Например: KIND (слово в скобках)"
+                            placeholder="Например: BE"
                             onChange={(e) => patch({ base: e.target.value })}
                         />
                     </div>
