@@ -48,7 +48,7 @@ export function TaskItemCard({ item, index, isFirst, isLast, error, onChange, on
                             <BaseInputText
                                 value={item.answer}
                                 maxLength={ANSWER_MAX_LENGTH}
-                                placeholder={item.itemType === 'GAP_FILL' ? 'Слово, которое ученик впишет в пропуск' : undefined}
+                                placeholder="Правильный ответ"
                                 onChange={(e) => patch({ answer: e.target.value })}
                             />
                         </div>
@@ -81,39 +81,6 @@ export function TaskItemCard({ item, index, isFirst, isLast, error, onChange, on
                             onChange={(e) => patch({ options: e.target.value })}
                         />
                     </div>
-                )}
-
-                {item.itemType === 'TFNS' && (
-                    <>
-                        <div className={styles.field}>
-                            <label className={styles.label}>
-                                Утверждение <span className={styles.req}>*</span>
-                            </label>
-                            <textarea
-                                className={styles.textarea}
-                                value={item.prompt}
-                                placeholder="Введите утверждение для проверки"
-                                onChange={(e) => patch({ prompt: e.target.value })}
-                            />
-                        </div>
-                        <div className={styles.field}>
-                            <label className={styles.label}>
-                                Правильный ответ <span className={styles.req}>*</span>
-                            </label>
-                            <div className={styles.chips}>
-                                {TFNS_ANSWERS.map((answer) => (
-                                    <button
-                                        key={answer}
-                                        type="button"
-                                        className={`${styles.chip} ${item.answer === answer ? styles.chipSelected : ''}`}
-                                        onClick={() => patch({ answer })}
-                                    >
-                                        {answer}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    </>
                 )}
 
                 {item.itemType === 'TFNS' && (

@@ -11,6 +11,7 @@ import java.util.List;
  * Строит превью задания для отображения в общем списке банка заданий.
  * Зависит от типа пунктов:
  * - пропуски (WORD_FORMATION, GAP_FILL) — первые несколько prompt'ов с "___";
+ *   если в content есть options (список-подсказка), они дописываются через " / " после prompt;
  * - форматы с материалом/вариантами (TFNS, MATCHING) — первые несколько утверждений/заголовков.
  */
 @Component
@@ -18,6 +19,8 @@ public class TaskPreviewBuilder {
 
     private static final int MAX_LINES = 3;
     private static final int MAX_LINE_LENGTH = 120;
+    // Разделитель подсказок-опций при отображении (решение по UX: варианты через слэш).
+    private static final String OPTIONS_SEPARATOR = " / ";
 
     // Единый ObjectMapper внедряется из контекста (поток-безопасен), а не создаётся на каждый пункт.
     private final ObjectMapper objectMapper;
@@ -43,12 +46,40 @@ public class TaskPreviewBuilder {
             return truncate(item.getPrompt());
         }
         return switch (item.getItemType()) {
-            case WORD_FORMATION, GAP_FILL -> truncate(item.getPrompt());
+            // GAP_FILL: к prompt дописываем необязательные подсказки-опции через слэш.
+            case GAP_FILL -> truncate(withOptions(item.getPrompt(), item.getContent()));
+            case WORD_FORMATION -> truncate(item.getPrompt());
             // TFNS: показываем утверждение из prompt.
             case TFNS -> truncate(item.getPrompt());
             // MATCHING: промпта может не быть — показываем левую часть пары из content.
             case MATCHING -> matchingLine(item);
         };
+    }
+
+    // "prompt (opt1 / opt2)" — options берутся из content JSONB; если их нет/парс упал — только prompt.
+    private String withOptions(String prompt, String contentJson) {
+        String base = prompt == null ? "" : prompt.strip();
+        if (contentJson == null || contentJson.isBlank()) {
+            return base;
+        }
+        try {
+            JsonNode options = objectMapper.readTree(contentJson).path("options");
+            if (!options.isArray() || options.isEmpty()) {
+                return base;
+            }
+            StringBuilder joined = new StringBuilder();
+            options.forEach(o -> {
+                if (o.isTextual() && !o.asText().isBlank()) {
+                    if (!joined.isEmpty()) {
+                        joined.append(OPTIONS_SEPARATOR);
+                    }
+                    joined.append(o.asText().strip());
+                }
+            });
+            return joined.isEmpty() ? base : base + " (" + joined + ")";
+        } catch (Exception e) {
+            return base;
+        }
     }
 
     private String matchingLine(TaskItem item) {
