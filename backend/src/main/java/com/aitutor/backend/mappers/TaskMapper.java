@@ -35,6 +35,13 @@ public interface TaskMapper {
                 .taskTypes(mapTaskTypes(task.getTaskTypes()))
                 .itemCount(task.getItems() == null ? 0 : task.getItems().size())
                 .createdAt(task.getCreatedAt())
+                .itemTypes(task.getItems() == null
+                        ? java.util.List.of()
+                        : task.getItems().stream()
+                                .map(TaskItem::getItemType)
+                                .distinct()
+                                .toList())
+                .createdById(task.getCreatedBy() == null ? null : task.getCreatedBy().getId())
                 .build();
     }
 

@@ -16,6 +16,14 @@ const SEARCH_DEBOUNCE_MS = 300;
 const MECHANIC_ITEMS: ChipItem[] = ITEM_TYPE_OPTIONS.map((o, i) => ({ id: i + 1, name: o.label }));
 const MECHANIC_BY_ID = new Map(MECHANIC_ITEMS.map((c, i) => [c.id, ITEM_TYPE_OPTIONS[i].value]));
 
+// Подписи чипов механик в карточке задания (короткие, как в дизайне).
+const MECHANIC_CHIP_LABELS: Record<ItemType, string> = {
+    WORD_FORMATION: 'word formation',
+    GAP_FILL: 'gap fill',
+    TFNS: 'TFNS',
+    MATCHING: 'matching',
+};
+
 // Страница «Банк заданий» — общая для учителя и ученика:
 // список и фильтры видят все авторизованные; кнопки создания — только учителю.
 // Фильтры: поиск (name/publicId), грамматический тип и пагинация — серверные (GET /api/tasks);
@@ -24,6 +32,22 @@ const MECHANIC_BY_ID = new Map(MECHANIC_ITEMS.map((c, i) => [c.id, ITEM_TYPE_OPT
 // /tasks-bank/topics и /tasks-bank/grammar-types (кнопка «+» у чипов, только учитель).
 export function TasksBankView() {
     const isTeacher = AuthService.getUserRole() === 'TEACHER';
+    // Действия с заданием (удаление) доступны только владельцу — бэк это же проверяет (403).
+    const currentUserId = AuthService.getUserId();
+
+    // Множественный выбор карточек (чекбоксы) — для будущих bulk-действий.
+    const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+    const [deletingId, setDeletingId] = useState<number | null>(null);
+    const [actionError, setActionError] = useState<string | null>(null);
+
+    const toggleSelect = useCallback((id: number) => {
+        setSelectedIds((prev) => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id);
+            else next.add(id);
+            return next;
+        });
+    }, []);
 
     // Поиск: input обновляется сразу, запрос — с дебаунсом.
     const [searchInput, setSearchInput] = useState('');
@@ -51,7 +75,31 @@ export function TasksBankView() {
         [debouncedSearch, grammarTypeId, itemType, includeMixed],
     );
 
-    const { pageItems, totalCount, totalPages, page, setPage, isLoading, isError, error } = useTasksBank(fetcher);
+    const { pageItems, totalCount, totalPages, page, setPage, isLoading, isError, error, reload } = useTasksBank(fetcher);
+
+    // Удаление задания (только владелец): confirm -> DELETE /api/tasks/{id} -> перезагрузка страницы.
+    const handleDelete = useCallback(
+        async (task: TaskSummary) => {
+            if (!window.confirm(`Удалить задание «${task.name?.trim() || task.publicId}»?`)) return;
+            setDeletingId(task.id);
+            setActionError(null);
+            try {
+                await TasksBankService.deleteTask(task.id);
+                setSelectedIds((prev) => {
+                    const next = new Set(prev);
+                    next.delete(task.id);
+                    return next;
+                });
+                reload();
+            } catch (e) {
+                setActionError(e instanceof Error ? e.message : 'Не удалось удалить задание.');
+            } finally {
+                setDeletingId(null);
+            }
+        },
+        [reload],
+    );
+
 
     // Справочники нужны для фильтров.
     // Бэк закрывает GET /topics от STUDENT (403) — ученику берём только типы,
@@ -139,6 +187,7 @@ export function TasksBankView() {
             </label>
 
             {(isError || error) && <div className={styles.notice}>{error ?? 'Не удалось загрузить банк заданий.'}</div>}
+            {actionError && <div className={styles.notice}>{actionError}</div>}
 
             {!isLoading && !isError && !visibleTasks.length && (
                 <div className={styles.notice}>Заданий по выбранным фильтрам нет.</div>
@@ -147,7 +196,15 @@ export function TasksBankView() {
             {!isLoading && !isError && (
                 <div className={styles.list}>
                     {visibleTasks.map((task) => (
-                        <TaskCard key={task.id} task={task} />
+                        <TaskCard
+                            key={task.id}
+                            task={task}
+                            selected={selectedIds.has(task.id)}
+                            canManage={isTeacher && task.createdById != null && task.createdById === currentUserId}
+                            deleting={deletingId === task.id}
+                            onToggleSelect={toggleSelect}
+                            onDelete={handleDelete}
+                        />
                     ))}
                 </div>
             )}
@@ -205,33 +262,90 @@ function collectTopics(tasks: TaskSummary[]) {
     return [...byId.values()];
 }
 
-// Карточка задания — только отображение (клики/действия будут позже).
-function TaskCard({ task }: { task: TaskSummary }) {
+// Карточка задания — отображение + действия владельца (удаление).
+// Дизайн: чекбокс слева; в шапке название (заглушка «Без названия», если пустое) и справа сверху
+// publicId как ссылка на детальную страницу; ниже — превью, затем общий ряд чипов
+// (грамматические типы → темы → механики → Mixed), в футере количество позиций жирным.
+// Пункт «Редактировать» временно не делаем (edit-режим формы — отдельная задача).
+function TaskCard({
+    task,
+    selected,
+    canManage,
+    deleting,
+    onToggleSelect,
+    onDelete,
+}: {
+    task: TaskSummary;
+    selected: boolean;
+    canManage: boolean;
+    deleting: boolean;
+    onToggleSelect: (id: number) => void;
+    onDelete: (task: TaskSummary) => void;
+}) {
     return (
-        <div className={styles.card}>
-            <div className={styles.cardTop}>
-                <span className={styles.cardName}>{task.name ?? task.publicId}</span>
-                {task.isMixed && <span className={styles.mixedBadge}>Mixed</span>}
-            </div>
+        <div className={`${styles.card} ${selected ? styles.cardSelected : ''}`}>
+            <input
+                type="checkbox"
+                className={styles.checkbox}
+                checked={selected}
+                onChange={() => onToggleSelect(task.id)}
+                aria-label={`Выбрать задание ${task.name ?? task.publicId}`}
+            />
 
-            {task.publicId && <div className={styles.publicId}>{task.publicId}</div>}
+            <div className={styles.body}>
+                <div className={styles.headerRow}>
+                    <span className={styles.title}>{task.name?.trim() || 'Без названия'}</span>
+                    {/* TODO: страница детального просмотра ещё не создана — ссылка появится вместе с роутом. */}
+                    <span className={styles.publicId}>{task.publicId}</span>
+                </div>
 
-            {task.previewText && <div className={styles.preview}>{task.previewText}</div>}
+                {task.previewText && <div className={styles.preview}>{task.previewText}</div>}
 
-            <div className={styles.meta}>
-                {task.taskTypes.map((type) => (
-                    <span key={type.id} className={styles.metaChip}>
-                        {type.name}
+                <div className={styles.tags}>
+                    {task.taskTypes.map((type) => (
+                        <span key={`tt-${type.id}`} className={styles.tag}>
+                            {type.name}
+                        </span>
+                    ))}
+                    {task.topics.map((topic) => (
+                        <span key={`tp-${topic.id}`} className={styles.tag}>
+                            {topic.name}
+                        </span>
+                    ))}
+                    {(task.itemTypes ?? []).map((mechanic) => (
+                        <span key={`mt-${mechanic}`} className={styles.tag}>
+                            {MECHANIC_CHIP_LABELS[mechanic]}
+                        </span>
+                    ))}
+                    {task.isMixed && <span className={`${styles.tag} ${styles.mixedTag}`}>Mixed</span>}
+                </div>
+
+                <div className={styles.footer}>
+                    <span className={styles.count}>
+                        Позиций: <strong>{task.itemCount}</strong>
                     </span>
-                ))}
-                {task.topics.map((topic) => (
-                    <span key={topic.id} className={`${styles.metaChip} ${styles.topicChip}`}>
-                        {topic.name}
-                    </span>
-                ))}
+                    {canManage && (
+                        <div className={styles.actions}>
+                            <button
+                                type="button"
+                                className={styles.actionBtn}
+                                disabled
+                                title="Редактирование будет доступно позже"
+                            >
+                                Редактировать
+                            </button>
+                            <button
+                                type="button"
+                                className={`${styles.actionBtn} ${styles.dangerBtn}`}
+                                disabled={deleting}
+                                onClick={() => onDelete(task)}
+                            >
+                                {deleting ? 'Удаление…' : 'Удалить'}
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
-
-            <div className={styles.count}>Позиций: {task.itemCount}</div>
         </div>
     );
 }

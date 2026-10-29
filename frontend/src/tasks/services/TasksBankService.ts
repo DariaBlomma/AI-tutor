@@ -20,4 +20,9 @@ export class TasksBankService {
         const response = await api.post<TaskResponseDto>(TASKS_PATH, payload);
         return response.data;
     }
+
+    /** DELETE /api/tasks/{id} -> 204. Бэк проверяет владение (403 для чужих заданий). */
+    static async deleteTask(id: number): Promise<void> {
+        await api.delete<void>(`${TASKS_PATH}/${id}`);
+    }
 }

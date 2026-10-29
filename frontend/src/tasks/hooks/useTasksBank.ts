@@ -15,6 +15,8 @@ export interface UseTasksBankResult {
     isLoading: boolean;
     isError: boolean;
     error: string | null;
+    /** Принудительная перезагрузка текущей страницы (например, после удаления задания). */
+    reload: () => void;
 }
 
 /**
@@ -28,6 +30,9 @@ export function useTasksBank(fetcher: (page: number, size: number) => Promise<Pa
     const [isError, setIsError] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [page, setPage] = useState(0);
+    // Счётчик перезагрузок: инкремент заставляет effect ниже запросить текущую страницу заново.
+    const [reloadToken, setReloadToken] = useState(0);
+    const reload = () => setReloadToken((t) => t + 1);
 
     // Смена фильтров перезагружает список — возвращаемся на первую страницу.
     useEffect(() => {
@@ -57,7 +62,7 @@ export function useTasksBank(fetcher: (page: number, size: number) => Promise<Pa
         return () => {
             active = false;
         };
-    }, [fetcher, page]);
+    }, [fetcher, page, reloadToken]);
 
     const pageItems = pageData?.content ?? [];
     const totalPages = Math.max(1, pageData?.totalPages ?? 1);
@@ -72,5 +77,6 @@ export function useTasksBank(fetcher: (page: number, size: number) => Promise<Pa
         isLoading,
         isError,
         error,
+        reload,
     };
 }
