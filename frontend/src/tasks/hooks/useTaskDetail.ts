@@ -32,6 +32,10 @@ export function useTaskDetail(
     useEffect(() => {
         let active = true;
 
+        // Сбрасываем ошибку предыдущей загрузки: иначе при повторном запросе (reload,
+        // смена publicId) экран на долю секунды показывал красный блок прошлой ошибки.
+        setIsError(false);
+        setError(null);
         setIsLoading(true);
         fetcher(publicId)
             .then((data) => {
