@@ -1,3 +1,5 @@
+@use '@/shared/styles/variables' as *;
+
 .modal {
   display: flex;
   flex-direction: column;
@@ -16,18 +18,20 @@
   color: var(--c3);
 }
 
-.notice {
-  background: rgba(255, 99, 99, 0.12);
-  border: 1px solid #ff6363;
-  color: #d33;
-  padding: 8px 10px;
-  border-radius: 6px;
-  font-size: 13px;
-}
-
+// Информационное состояние (пусто) — нейтральный цвет темы.
 .empty {
   font-size: 13px;
   color: var(--c3);
+}
+
+// Ошибка — красный акцент темы (отдельный класс: загрузка не должна выглядеть ошибкой).
+.error {
+  background: rgba(255, 107, 107, 0.12);
+  border: 1px solid $err;
+  color: $err;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 13px;
 }
 
 .list {

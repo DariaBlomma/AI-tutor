@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { BaseModal } from '@/shared/ui-kit/BaseModal/BaseModal';
+import { Loader } from '@/shared/ui-kit/Loader/Loader';
 import { useTaskCourses } from '@/teacher/hooks/useTaskCourses';
 import styles from './TaskCoursePopup.module.scss';
 
@@ -33,9 +34,9 @@ export function TaskCoursePopup({ open, onClose, taskId }: TaskCoursePopupProps)
                 <div className={styles.title}>Курсы</div>
                 <p className={styles.hint}>Добавьте задание в курс или уберите из курса.</p>
 
-                {(error || actionError) && <div className={styles.notice}>{actionError ?? error}</div>}
+                {(error || actionError) && <div className={styles.error}>{actionError ?? error}</div>}
 
-                {isLoading && <div className={styles.empty}>Загрузка…</div>}
+                {isLoading && <Loader />}
                 {!isLoading && !courses.length && <div className={styles.empty}>Курсов пока нет.</div>}
 
                 {!isLoading && (

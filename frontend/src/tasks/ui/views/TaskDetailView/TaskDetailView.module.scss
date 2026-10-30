@@ -153,10 +153,18 @@
 
 
 
+// Информационное состояние (пусто/не найдено) — нейтральный цвет темы.
 .notice {
-  background: rgba(255, 99, 99, 0.12);
-  border: 1px solid #ff6363;
-  color: #d33;
+  font-size: 13px;
+  color: var(--c3);
+  padding: 12px 0;
+}
+
+// Ошибка запроса — красный акцент темы; отдельный класс, чтобы загрузка не «светилась» ошибкой.
+.error {
+  background: rgba(255, 107, 107, 0.12);
+  border: 1px solid var(--err);
+  color: var(--err);
   padding: 10px 12px;
   border-radius: 6px;
   font-size: 13px;

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { AuthService } from '@/auth/services/AuthService.ts';
 import { useTaskDetail } from '@/tasks/hooks/useTaskDetail';
+import { Loader } from '@/shared/ui-kit/Loader/Loader';
 import { TaskPreviewChips } from '@/tasks/ui/widgets/TaskPreviewChips/TaskPreviewChips';
 import { TaskCoursePopup } from '@/tasks/ui/widgets/TaskCoursePopup/TaskCoursePopup';
 import { TaskAssignPopup } from '@/tasks/ui/widgets/TaskAssignPopup/TaskAssignPopup';
@@ -34,16 +35,18 @@ export function TaskDetailView({ publicId }: TaskDetailViewProps) {
         return (
             <div className={styles.page}>
                 <BackLink />
-                <div className={styles.notice}>Загрузка…</div>
+                <Loader />
             </div>
         );
     }
 
+    // Ошибка запроса и «задание не найдено» — разные состояния: у ошибки показываем её текст,
+    // иначе пустой результат трактуем как «не найдено» (без красного стиля).
     if (isError || !task) {
         return (
             <div className={styles.page}>
                 <BackLink />
-                <div className={styles.notice}>{error ?? 'Задание не найдено.'}</div>
+                <div className={isError ? styles.error : styles.notice}>{error ?? 'Задание не найдено.'}</div>
             </div>
         );
     }
