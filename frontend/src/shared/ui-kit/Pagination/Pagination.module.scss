@@ -1,0 +1,132 @@
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+/* Кнопки-стрелки: пунктирная рамка, как в дизайне */
+.arrowBtn {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: transparent;
+  border: 2px dashed var(--p);
+  border-radius: 6px;
+  color: var(--p);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover:not(:disabled) {
+    background: rgba(157, 124, 242, 0.1);
+    border-style: solid;
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+}
+
+/* Элемент страницы — контейнер 40×40, SVG внутри 40×35 (пропорционально) */
+.pageItem {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  svg {
+    width: 40px;
+    height: 35px;
+    overflow: visible;
+  }
+}
+
+/* Трапеция (верхняя часть) */
+.navTrap {
+  fill: transparent;
+  stroke: var(--p);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  transition: all 0.2s ease;
+}
+
+/* Треугольник (нижняя часть) */
+.navTri {
+  fill: transparent;
+  stroke: var(--p);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  transition: all 0.2s ease;
+}
+
+/* Линия-разделитель между трапецией и треугольником */
+.navDivider {
+  stroke: var(--bg);
+  stroke-width: 2;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+/* Номер страницы в треугольнике — белый; y=14 — ближе к широкой части, чтобы влезало двузначное число */
+.pageNumber {
+  fill: var(--c1);
+  font-size: 10px;
+  font-weight: 600;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+
+/* Активное состояние — плотный градиент (те же тона/угол 135deg, что у кнопки «Создать задание») */
+.pageItemActive {
+  .navTrap,
+  .navTri {
+    fill: url(#ui-kit-pagination-active-gradient);
+    stroke: var(--p);
+  }
+
+  .navDivider {
+    opacity: 1;
+  }
+}
+
+/* Hover для неактивных */
+.pageItem:not(.pageItemActive):hover {
+  .navTrap {
+    fill: rgba(157, 124, 242, 0.15);
+  }
+
+  .navTri {
+    fill: rgba(157, 124, 242, 0.08);
+  }
+}
+
+.ellipsis {
+  color: var(--c3);
+  font-size: 14px;
+  padding: 0 4px;
+  user-select: none;
+  font-weight: 600;
+}
