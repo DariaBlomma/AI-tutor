@@ -3,9 +3,52 @@
   align-items: center;
   gap: 10px;
   padding: 16px 0;
+
+  // Условный вариант ({isLoading && <Loader/>}): виден сразу, без fade — иначе
+  // анимация появления стартовала бы с opacity 0 и «задерживала» спиннер на кадр.
+  &.immediate {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  // Авто-режим (<Loader active={...} />): контейнер всегда в DOM, но скрыт без
+  // занимаемой высоты. Плавное появление/исчезновение спиннера вместо мгновенного
+  // «мигания» на один кадр при быстрых ответах.
+  &:not(.immediate) {
+    opacity: 0;
+    visibility: hidden;
+    height: 0;
+    min-height: 0;
+    padding: 0;
+    overflow: hidden;
+    transition:
+      opacity 0.2s ease,
+      visibility 0s linear 0.2s;
+
+    &.visible {
+      opacity: 1;
+      visibility: visible;
+      height: auto;
+      padding: 16px 0;
+      transition:
+        opacity 0.2s ease,
+        visibility 0s linear 0s;
+    }
+  }
 }
 
 .label {
   font-size: 13px;
   color: var(--c3);
+}
+
+// Пользователь просит меньше движения — убираем fade полностью (лоадер появляется сразу).
+@media (prefers-reduced-motion: reduce) {
+  .loader:not(.immediate) {
+    transition: none;
+
+    &.visible {
+      transition: none;
+    }
+  }
 }

@@ -4,6 +4,11 @@ import type { PageDto, TaskSummary } from '@/tasks/types';
 
 export const TASKS_PAGE_SIZE = 10;
 
+// Минимальная длительность состояния загрузки (мс). Защита от «мигания»: если ответ
+// приходит быстрее, спиннер и затемнение списка всё равно успевают отрисоваться полный
+// цикл transition, а не исчезнуть через один кадр.
+const MIN_LOADING_MS = 250;
+
 export interface UseTasksBankResult {
     /** Элементы текущей страницы (серверная пагинация: бэк режет сам). */
     pageItems: TaskSummary[];
@@ -43,20 +48,37 @@ export function useTasksBank(fetcher: (page: number, size: number) => Promise<Pa
         let active = true;
 
         setIsLoading(true);
+        const startedAt = Date.now();
+        // Минимальная длительность загрузки: без неё мгновенный ответ (кэш/локалка) даёт
+        // кадр «появился спиннер → пропал», и список визуально мигает. Сглаживаем переход,
+        // не показывая лоадер дольше самого запроса при медленной сети.
+        const finish = (fn: () => void) => {
+            window.setTimeout(fn, Math.max(0, MIN_LOADING_MS - (Date.now() - startedAt)));
+        };
         fetcher(page, TASKS_PAGE_SIZE)
             .then((data) => {
                 if (!active) return;
-                setPageData(data);
-                setIsError(false);
-                setError(null);
+                finish(() => {
+                    if (!active) return;
+                    setPageData(data);
+                    setIsError(false);
+                    setError(null);
+                });
             })
             .catch((e) => {
                 if (!active) return;
-                setIsError(true);
-                setError(extractErrorMessage(e as Error));
+                finish(() => {
+                    if (!active) return;
+                    setIsError(true);
+                    setError(extractErrorMessage(e as Error));
+                });
             })
             .finally(() => {
-                if (active) setIsLoading(false);
+                if (active) {
+                    finish(() => {
+                        if (active) setIsLoading(false);
+                    });
+                }
             });
 
         return () => {

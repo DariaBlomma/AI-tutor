@@ -314,15 +314,19 @@ export function TasksBankView() {
             {actionError && <div className={styles.error}>{actionError}</div>}
 
             {/* Загрузка: спиннер над уже отрисованными карточками (список не исчезает целиком —
-                иначе страница «прыгала» высотой на каждый запрос). Подпись у самого Loader. */}
-            {isLoading && <Loader />}
+                иначе страница «прыгает» высотой на каждый запрос). Авто-режим лоадера: короткий
+                ответ (<150 мс) спиннер не показывает вовсе, длинный — плавно fade-in/fade-out. */}
+            <Loader active={isLoading} />
 
             {!isError && !isLoading && !visibleTasks.length && (
                 <div className={styles.notice}>Заданий по выбранным фильтрам нет.</div>
             )}
 
             {!isError && (
-                <div className={`${styles.list} ${isLoading ? styles.listLoading : ''}`}>
+                <div
+                    className={`${styles.list} ${isLoading ? styles.listLoading : ''}`}
+                    aria-busy={isLoading}
+                >
                     {visibleTasks.map((task) => (
                         <TaskCard
                             key={task.id}
