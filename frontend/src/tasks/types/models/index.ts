@@ -109,6 +109,14 @@ export interface MatchingContentDto {
     explanation?: string;
 }
 
+/** Подписи механик пунктов (enum ItemType) — короткие чипы в карточке банка и на просмотре задания. */
+export const MECHANIC_CHIP_LABELS: Record<ItemType, string> = {
+    WORD_FORMATION: 'word formation',
+    GAP_FILL: 'gap fill',
+    TFNS: 'TFNS',
+    MATCHING: 'matching',
+};
+
 /** POST /api/tasks -> TaskItemRequest. content — JSON-строка по схеме ItemType. */
 export interface TaskItemRequestDto {
     itemType: ItemType;

@@ -1,0 +1,92 @@
+.modal {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: var(--c1);
+}
+
+.title {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.hint {
+  margin: 0;
+  font-size: 13px;
+  color: var(--c3);
+}
+
+.notice {
+  background: rgba(255, 99, 99, 0.12);
+  border: 1px solid #ff6363;
+  color: #d33;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.empty {
+  font-size: 13px;
+  color: var(--c3);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 45vh;
+  overflow-y: auto;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid rgba(157, 124, 242, 0.25);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.itemName {
+  font-size: 14px;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.actionBtn {
+  flex-shrink: 0;
+  border: 1px solid var(--p);
+  background: transparent;
+  color: var(--p);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+}
+
+.dangerBtn {
+  border-color: #ff6363;
+  color: #d33;
+}
+
+.closeBtn {
+  align-self: flex-end;
+  border: none;
+  background: none;
+  color: var(--c3);
+  font-size: 13px;
+  cursor: pointer;
+
+  &:active {
+    opacity: 0.7;
+  }
+}
