@@ -59,25 +59,8 @@
   }
 }
 
-.tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 20px;
-}
 
-.tag {
-  font-size: 11px;
-  padding: 3px 8px;
-  border-radius: 999px;
-  background: rgba(157, 124, 242, 0.12);
-  color: var(--p);
-}
 
-.mixedTag {
-  background: rgba(242, 168, 77, 0.15);
-  color: #b26a00;
-}
 
 .section {
   margin-bottom: 24px;
@@ -164,49 +147,11 @@
 }
 
 // Раскрывающийся блок «Ответы» (только учитель).
-.answersToggle {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: none;
-  border: none;
-  border-bottom: 1px solid rgba(157, 124, 242, 0.2);
-  padding: 6px 0;
-  cursor: pointer;
-  color: var(--c1);
-}
 
-.answersToggleTitle {
-  font-size: 15px;
-  font-weight: 600;
-}
 
-.answersHint {
-  font-size: 12px;
-  font-weight: 400;
-  color: var(--c3);
-}
 
-.chevron {
-  font-size: 11px;
-  color: var(--p);
-}
 
-.answersList {
-  list-style: none;
-  margin: 12px 0 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
 
-.answerRow {
-  display: flex;
-  gap: 8px;
-  font-size: 14px;
-}
 
 .notice {
   background: rgba(255, 99, 99, 0.12);

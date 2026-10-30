@@ -5,10 +5,10 @@ import {Link} from "@tanstack/react-router";
 
 // Нижнее меню всего приложения — переиспользуется на всех страницах,
 // поэтому рендерится один раз в LayoutRoot (активный пункт берётся из текущего маршрута).
-export function AppBottomNav({ active }: AppBottomNavProps) {
+export function AppBottomNav({ active, hiddenIds = [] }: AppBottomNavProps) {
     return (
         <nav className={styles.bottomNav}>
-            {APP_BOTTOM_NAV_ITEMS.map(({ id, label, Icon, to }) => (
+            {APP_BOTTOM_NAV_ITEMS.filter(({ id }) => !hiddenIds.includes(id)).map(({ id, label, Icon, to }) => (
                <Link
                     to={to}
                     key={id}

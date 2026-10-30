@@ -9,8 +9,9 @@ import { ChipsMultiselect } from '@/tasks/ui/widgets/ChipsMultiselect/ChipsMulti
 import { BulkActionsBar } from '@/tasks/ui/widgets/BulkActionsBar/BulkActionsBar';
 import { TaskDeletePopup } from '@/tasks/ui/widgets/TaskDeletePopup/TaskDeletePopup';
 import { TasksBulkPopup } from '@/tasks/ui/widgets/TasksBulkPopup/TasksBulkPopup';
+import { TaskPreviewChips } from '@/tasks/ui/widgets/TaskPreviewChips/TaskPreviewChips';
 import type { BulkAction } from '@/tasks/ui/widgets/TasksBulkPopup/types';
-import { ITEM_TYPE_OPTIONS, MECHANIC_CHIP_LABELS } from '@/tasks/types';
+import { ITEM_TYPE_OPTIONS } from '@/tasks/types';
 import type { ChipItem } from '@/tasks/ui/widgets/ChipsMultiselect/types';
 import type { ItemType, TaskSummary } from '@/tasks/types';
 import styles from './TasksBankView.module.scss';
@@ -353,24 +354,13 @@ function TaskCard({
                     </ol>
                 )}
 
-                <div className={styles.tags}>
-                    {task.taskTypes.map((type) => (
-                        <span key={`tt-${type.id}`} className={styles.tag}>
-                            {type.name}
-                        </span>
-                    ))}
-                    {task.topics.map((topic) => (
-                        <span key={`tp-${topic.id}`} className={styles.tag}>
-                            {topic.name}
-                        </span>
-                    ))}
-                    {(task.itemTypes ?? []).map((mechanic) => (
-                        <span key={`mt-${mechanic}`} className={styles.tag}>
-                            {MECHANIC_CHIP_LABELS[mechanic]}
-                        </span>
-                    ))}
-                    {task.isMixed && <span className={`${styles.tag} ${styles.mixedTag}`}>Mixed</span>}
-                </div>
+                {/* Чипы задания — общий компонент со страницей просмотра (TaskDetailView). */}
+                <TaskPreviewChips
+                    grammarTypes={task.taskTypes}
+                    topics={task.topics}
+                    itemTypes={task.itemTypes ?? []}
+                    isMixed={task.isMixed}
+                />
 
                 <div className={styles.footer}>
                     <span className={styles.count}>
