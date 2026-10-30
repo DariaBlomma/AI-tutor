@@ -34,6 +34,16 @@ public interface CourseTaskRepository extends JpaRepository<CourseTask, Long> {
 
     boolean existsByCourseIdAndTaskId(Long courseId, Long taskId);
 
+    /**
+     * Id курсов учителя, куда включено задание — один SELECT вместо N проверок
+     * existsByCourseIdAndTaskId для попапа «Добавить в курс» (страница просмотра задания).
+     */
+    @Query("""
+            SELECT ct.course.id FROM CourseTask ct
+            WHERE ct.task.id = :taskId AND ct.course.teacher.id = :teacherId
+            """)
+    List<Long> findCourseIdsByTaskId(@Param("teacherId") Long teacherId, @Param("taskId") Long taskId);
+
     int countByCourseId(Long courseId);
 
     @Modifying
