@@ -123,6 +123,16 @@ export function TasksBankView() {
 
     const { pageItems, totalCount, totalPages, page, setPage, isLoading, isError, error, reload } = useTasksBank(fetcher);
 
+    // Смена страницы: всегда запрашиваем данные и поднимаем список в начало (пагинация — под списком).
+    const changePage = useCallback(
+        (nextPage: number) => {
+            if (nextPage === page || nextPage < 0 || nextPage > totalPages - 1) return;
+            setPage(nextPage);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        },
+        [page, setPage, totalPages],
+    );
+
     // Удаление задания (только владелец): подтверждение в попапе у кнопки -> DELETE /api/tasks/{id} -> перезагрузка страницы.
     const confirmDelete = useCallback(async () => {
         if (!deleteTarget) return;
@@ -258,8 +268,8 @@ export function TasksBankView() {
             )}
 
             {/* Постраничная навигация (серверная пагинация — GET /api/tasks?page&size) */}
-            {!isLoading && !isError && totalPages > 1 && (
-                <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+            {!isError && totalPages >= 1 && (
+                <Pagination page={page} totalPages={totalPages} onPageChange={changePage} />
             )}
 
             {/* Панель массовых действий — только учителю и только при выбранном > 0. */}
