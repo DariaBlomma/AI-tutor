@@ -31,7 +31,7 @@ public class TaskCreateRequest {
 
     /** Уровни CEFR задания: минимум один (миграция 021). */
     @NotEmpty(message = "Выберите хотя бы один уровень языка")
-    private List<CefrLevel> levels;
+    private Set<CefrLevel> levels;
 
     /** Тип экзамена: OGE / EGE (nullable = не указан) — фильтр банка заданий. */
     private ExamType examType;
