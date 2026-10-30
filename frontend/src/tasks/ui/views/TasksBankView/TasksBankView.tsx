@@ -1,10 +1,11 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { AuthService } from '@/auth/services/AuthService.ts';
 import { TasksBankService } from '@/tasks/services/TasksBankService';
 import { useTasksBank } from '@/tasks/hooks/useTasksBank';
 import { useTaskRefs } from '@/tasks/hooks/useTaskRefs';
 import { Pagination } from '@/shared/ui-kit/Pagination/Pagination';
+import { Loader } from '@/shared/ui-kit/Loader/Loader';
 import { ChipsMultiselect } from '@/tasks/ui/widgets/ChipsMultiselect/ChipsMultiselect';
 import { BulkActionsBar } from '@/tasks/ui/widgets/BulkActionsBar/BulkActionsBar';
 import { TaskDeletePopup } from '@/tasks/ui/widgets/TaskDeletePopup/TaskDeletePopup';
@@ -102,10 +103,27 @@ export function TasksBankView() {
     const [level, setLevel] = useState<CefrLevel | null>(null);
     const [examType, setExamType] = useState<ExamType | null>(null);
     const [topicId, setTopicId] = useState<number | null>(null);
-    const [includeMixed, setIncludeMixed] = useState(true);
+    // Галочка «Включать смешанные задания»: по умолчанию выключена — совпадает с дефолтом
+    // бэкенда (TaskController: includeMixed=false). Разница состояний теперь видна сразу.
+    const [includeMixed, setIncludeMixed] = useState(false);
+
+    // Смена фильтра возвращает на первую страницу (сбрасывает и скролл-позицию списка):
+    // иначе при галочке/фильтре остаётся старый page, а новых страниц может не быть —
+    // бэк отдаёт пустую страницу, UI выглядит сломанным.
+    const applyFilter = <T,>(setter: (value: T) => void) => (value: T) => {
+        setter(value);
+        setPage(0);
+    };
+    const changeGrammarType = applyFilter(setGrammarTypeId);
+    const changeItemType = applyFilter(setItemType);
+    const changeLevel = applyFilter(setLevel);
+    const changeExamType = applyFilter(setExamType);
+    const changeTopic = applyFilter(setTopicId);
+    const changeIncludeMixed = applyFilter(setIncludeMixed);
 
     const applySearch = (value: string) => {
         setSearchInput(value);
+        setPage(0);
         window.setTimeout(() => setDebouncedSearch(value), SEARCH_DEBOUNCE_MS);
     };
 
@@ -135,6 +153,11 @@ export function TasksBankView() {
         },
         [page, setPage, totalPages],
     );
+
+    // Плавный подъём к началу списка при смене фильтра/галочки.
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [debouncedSearch, grammarTypeId, itemType, level, examType, includeMixed]);
 
     // Удаление задания (только владелец): подтверждение в попапе у кнопки -> DELETE /api/tasks/{id} -> перезагрузка страницы.
     const confirmDelete = useCallback(async () => {
@@ -205,8 +228,8 @@ export function TasksBankView() {
                     items={refs.grammarTypes}
                     selectedIds={grammarTypeId == null ? [] : [grammarTypeId]}
                     single
-                    onChange={(ids) => setGrammarTypeId(ids[0] ?? null)}
-                    onClear={() => setGrammarTypeId(null)}
+                    onChange={(ids) => changeGrammarType(ids[0] ?? null)}
+                    onClear={() => changeGrammarType(null)}
                     clearLabel="Все типы"
                     manageTo={isTeacher ? '/tasks-bank/grammar-types' : undefined}
                 />
@@ -219,8 +242,8 @@ export function TasksBankView() {
                     items={topicsForFilter}
                     selectedIds={topicId == null ? [] : [topicId]}
                     single
-                    onChange={(ids) => setTopicId(ids[0] ?? null)}
-                    onClear={() => setTopicId(null)}
+                    onChange={(ids) => changeTopic(ids[0] ?? null)}
+                    onClear={() => changeTopic(null)}
                     clearLabel="Все темы"
                     manageTo={isTeacher ? '/tasks-bank/topics' : undefined}
                 />
@@ -233,8 +256,8 @@ export function TasksBankView() {
                     items={MECHANIC_ITEMS}
                     selectedIds={itemType == null ? [] : [MECHANIC_ITEMS.findIndex((c) => MECHANIC_BY_ID.get(c.id) === itemType) + 1]}
                     single
-                    onChange={(ids) => setItemType(ids.length ? (MECHANIC_BY_ID.get(ids[0]) ?? null) : null)}
-                    onClear={() => setItemType(null)}
+                    onChange={(ids) => changeItemType(ids.length ? (MECHANIC_BY_ID.get(ids[0]) ?? null) : null)}
+                    onClear={() => changeItemType(null)}
                     clearLabel="Все"
                 />
             </div>
@@ -246,8 +269,8 @@ export function TasksBankView() {
                     items={LEVEL_ITEMS}
                     selectedIds={level == null ? [] : [LEVEL_ITEMS.findIndex((c) => LEVEL_BY_ID.get(c.id) === level) + 1]}
                     single
-                    onChange={(ids) => setLevel(ids.length ? (LEVEL_BY_ID.get(ids[0]) ?? null) : null)}
-                    onClear={() => setLevel(null)}
+                    onChange={(ids) => changeLevel(ids.length ? (LEVEL_BY_ID.get(ids[0]) ?? null) : null)}
+                    onClear={() => changeLevel(null)}
                     clearLabel="Все уровни"
                 />
             </div>
@@ -259,27 +282,32 @@ export function TasksBankView() {
                     items={EXAM_ITEMS}
                     selectedIds={examType == null ? [] : [EXAM_ITEMS.findIndex((c) => EXAM_BY_ID.get(c.id) === examType) + 1]}
                     single
-                    onChange={(ids) => setExamType(ids.length ? (EXAM_BY_ID.get(ids[0]) ?? null) : null)}
-                    onClear={() => setExamType(null)}
+                    onChange={(ids) => changeExamType(ids.length ? (EXAM_BY_ID.get(ids[0]) ?? null) : null)}
+                    onClear={() => changeExamType(null)}
                     clearLabel="Все экзамены"
                 />
             </div>
 
-            {/* Смешанные задания */}
+            {/* Смешанные задания: включена — в выдачу попадают задания с 2+ грамматическими типами,
+                выключена — только «чистые» (один тип). Фильтр серверный (includeMixed). */}
             <label className={styles.mixedToggle}>
-                <input type="checkbox" checked={includeMixed} onChange={(e) => setIncludeMixed(e.target.checked)} />
+                <input type="checkbox" checked={includeMixed} onChange={(e) => changeIncludeMixed(e.target.checked)} />
                 <span>Включать смешанные задания</span>
             </label>
 
-            {(isError || error) && <div className={styles.notice}>{error ?? 'Не удалось загрузить банк заданий.'}</div>}
-            {actionError && <div className={styles.notice}>{actionError}</div>}
+            {(isError || error) && <div className={styles.error}>{error ?? 'Не удалось загрузить банк заданий.'}</div>}
+            {actionError && <div className={styles.error}>{actionError}</div>}
 
-            {!isLoading && !isError && !visibleTasks.length && (
+            {/* Загрузка: спиннер над уже отрисованными карточками (список не исчезает целиком —
+                иначе страница «прыгала» высотой на каждый запрос). Подпись у самого Loader. */}
+            {isLoading && <Loader />}
+
+            {!isError && !isLoading && !visibleTasks.length && (
                 <div className={styles.notice}>Заданий по выбранным фильтрам нет.</div>
             )}
 
-            {!isLoading && !isError && (
-                <div className={styles.list}>
+            {!isError && (
+                <div className={`${styles.list} ${isLoading ? styles.listLoading : ''}`}>
                     {visibleTasks.map((task) => (
                         <TaskCard
                             key={task.id}

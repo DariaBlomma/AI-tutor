@@ -58,10 +58,28 @@
   padding: 12px 0;
 }
 
+// Ошибка запроса — красный акцент темы (отдельный класс, чтобы информационные состояния не «светились» ошибкой).
+.error {
+  background: rgba(255, 107, 107, 0.12);
+  border: 1px solid var(--err);
+  color: var(--err);
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
 .list {
   display: flex;
   flex-direction: column;
   gap: 10px;
+
+  // Данные перезапрашиваются (фильтр/галочка/страница): старые карточки остаются на месте,
+  // слегка подсвечиваем их — страница не «прыгает» высотой.
+  &.listLoading {
+    opacity: 0.55;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+  }
 }
 
 .card {

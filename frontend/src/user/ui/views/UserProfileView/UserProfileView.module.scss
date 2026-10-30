@@ -27,6 +27,12 @@
   font-size: 14px;
 }
 
+// Ошибка загрузки профиля — красный акцент темы (раньше использовался тот же .status, что и для «Загрузка…»).
+.error {
+  color: $err;
+  font-size: 14px;
+}
+
 .trianglesWrap {
   position: relative;
   width: 320px;

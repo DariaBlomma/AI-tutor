@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { BaseModal } from '@/shared/ui-kit/BaseModal/BaseModal';
+import { Loader } from '@/shared/ui-kit/Loader/Loader';
 import { studentDisplayName } from '@/shared/utils/studentDisplayName';
 import { useAssignTaskToStudents } from '@/teacher/hooks/useAssignTaskToStudents';
 import styles from './TaskAssignPopup.module.scss';
@@ -45,7 +46,7 @@ export function TaskAssignPopup({ open, onClose, taskId }: TaskAssignPopupProps)
                     </div>
                 )}
 
-                {isLoadingStudents && <div className={styles.empty}>Загрузка…</div>}
+                {isLoadingStudents && <Loader />}
                 {!isLoadingStudents && !students.length && (
                     <div className={styles.empty}>У вас пока нет учеников.</div>
                 )}

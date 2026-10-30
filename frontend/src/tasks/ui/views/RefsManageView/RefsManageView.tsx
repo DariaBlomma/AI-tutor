@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router';
+import { Loader } from '@/shared/ui-kit/Loader/Loader';
 import { useTaskRefs } from '@/tasks/hooks/useTaskRefs';
 import { RefCrudPanel } from '@/tasks/ui/widgets/RefCrudPanel/RefCrudPanel';
 import type { GrammarType, Topic } from '@/tasks/types';
@@ -40,7 +41,7 @@ export function RefsManageView({ kind }: RefsManageViewProps) {
                 <p>Добавляйте, переименовывайте и удаляйте элементы справочника.</p>
             </div>
 
-            {refs.isLoading && <div className={styles.notice}>Загрузка…</div>}
+            {refs.isLoading && <Loader />}
 
             {!refs.isLoading && (
                 <RefCrudPanel
