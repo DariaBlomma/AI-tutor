@@ -117,3 +117,13 @@
   color: var(--c3);
   font-size: 14px;
 }
+
+// Ошибка загрузки — красный акцент темы (отдельный класс, чтобы загрузка/пусто не выглядели ошибкой).
+.error {
+  background: rgba(255, 107, 107, 0.12);
+  border: 1px solid var(--err);
+  color: var(--err);
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+}

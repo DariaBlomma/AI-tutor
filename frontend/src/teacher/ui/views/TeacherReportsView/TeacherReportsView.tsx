@@ -1,5 +1,6 @@
 import styles from './TeacherReportsView.module.scss';
 import { useCallback } from 'react';
+import { Loader } from '@/shared/ui-kit/Loader/Loader';
 import { TeacherReportsService } from '@/teacher/services/TeacherReportsService';
 import { useTeacherReports } from '@/teacher/hooks/useTeacherReports';
 import type { StudentReportSummary } from '@/teacher/types';
@@ -21,9 +22,9 @@ export function TeacherReportsView() {
             <div className={styles.section}>
                 <div className={styles.sectionTitle}>Мои ученики</div>
 
-                {isLoading && <div className={styles.notice}>Загрузка…</div>}
-                {isError && <div className={styles.notice}>Не удалось загрузить отчёты.</div>}
-                {!reports.length && <div className={styles.notice}>Нет учеников</div>}
+                {isLoading && <Loader />}
+                {isError && <div className={styles.error}>Не удалось загрузить отчёты.</div>}
+                {!isLoading && !isError && !reports.length && <div className={styles.notice}>Нет учеников</div>}
 
 
                 {!isLoading && !isError && (

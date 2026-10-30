@@ -295,8 +295,8 @@ export function TasksBankView() {
                 <span>Включать смешанные задания</span>
             </label>
 
-            {(isError || error) && <div className={styles.notice}>{error ?? 'Не удалось загрузить банк заданий.'}</div>}
-            {actionError && <div className={styles.notice}>{actionError}</div>}
+            {(isError || error) && <div className={styles.error}>{error ?? 'Не удалось загрузить банк заданий.'}</div>}
+            {actionError && <div className={styles.error}>{actionError}</div>}
 
             {/* Загрузка: спиннер над уже отрисованными карточками (список не исчезает целиком —
                 иначе страница «прыгала» высотой на каждый запрос). Подпись у самого Loader. */}

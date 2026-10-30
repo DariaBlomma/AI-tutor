@@ -5,6 +5,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { AuthService } from '@/auth/services/AuthService';
 import { buildStudentStatCells } from '@/student/lib/formatStudentStats';
 import { IconCopy, IconTrapezoidShape, IconTrianglesFrame } from '@/shared/icons';
+import { Loader } from '@/shared/ui-kit/Loader/Loader';
 import { useUserProfile } from '@/user/hooks/useUserProfile';
 
 import styles from './UserProfileView.module.scss';
@@ -57,8 +58,8 @@ export function UserProfileView() {
         <div className={styles.page}>
             <h1 className={styles.title}>TutorAI</h1>
 
-            {isPending && <p className={styles.status}>Загрузка…</p>}
-            {isError && <p className={styles.status}>Не удалось загрузить профиль</p>}
+            {isPending && <Loader />}
+            {isError && <p className={styles.error}>Не удалось загрузить профиль</p>}
 
             {profile && (
                 <div className={styles.trianglesWrap} data-role={profile.role}>
