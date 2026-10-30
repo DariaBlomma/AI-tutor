@@ -43,10 +43,17 @@ public class Task {
     @Column(nullable = false)
     private Boolean isMixed = false;
 
-    /** Уровень CEFR (миграция 020, колонка task_level — level является зарезервированным словом SQL). */
+    /**
+     * Уровни CEFR задания (миграция 021): минимум один обязателен, задание может иметь несколько.
+     * level — reserved word в H2, поэтому таблица task_levels и поле levels.
+     */
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "task_levels", joinColumns = @JoinColumn(name = "task_id"))
+    @Column(name = "level", nullable = false, length = 4)
     @Enumerated(EnumType.STRING)
-    @Column(name = "task_level", length = 4)
-    private com.aitutor.backend.enums.CefrLevel level;
+    @OrderColumn(nullable = false)
+    @Builder.Default
+    private List<com.aitutor.backend.enums.CefrLevel> levels = new ArrayList<>();
 
     /** Тип экзамена (миграция 020): OGE / EGE, nullable = не указан. */
     @Enumerated(EnumType.STRING)

@@ -21,8 +21,8 @@ public class TaskResponse {
     private String instruction;
     private String context;
     private Boolean isMixed;
-    /** Уровень CEFR задания (nullable = не указан). */
-    private CefrLevel level;
+    /** Уровни CEFR задания (минимум один с миграции 021; у старых данных может быть пусто). */
+    private List<CefrLevel> levels;
     /** Тип экзамена: OGE / EGE (nullable = не указан). */
     private ExamType examType;
     private Set<TopicResponse> topics;

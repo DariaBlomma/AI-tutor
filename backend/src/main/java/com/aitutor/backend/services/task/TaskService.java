@@ -166,7 +166,7 @@ public class TaskService {
                 .taskTypes(taskTypes)
                 // Бизнес-правило: больше одного типа => задание "смешанное"
                 .isMixed(taskTypes.size() > 1)
-                .level(request.getLevel())
+                .levels(request.getLevels() == null ? new ArrayList<>() : new ArrayList<>(request.getLevels()))
                 .examType(request.getExamType())
                 .items(items)
                 .build();
@@ -197,8 +197,9 @@ public class TaskService {
         // Состав типов в запросе заведомо активный (resolveTaskTypes), поэтому is_mixed
         // пересчитываем по нему; деактивация типа в справочнике обрабатывается TaskTypeService.
         task.setIsMixed(taskTypes.size() > 1);
-        // Уровень и тип экзамена — обычные необязательные поля: null в запросе очищает значение (edit in place).
-        task.setLevel(request.getLevel());
+        // Уровни — обязательный список (задаётся только через сеттер whole-list, см. TaskEntityTest),
+        // тип экзамена — необязательное поле: null в запросе очищает значение (edit in place).
+        task.setLevels(request.getLevels() == null ? List.of() : request.getLevels());
         task.setExamType(request.getExamType());
 
         // Полная замена списка пунктов: отсутствующие в запросе удаляются через orphanRemoval

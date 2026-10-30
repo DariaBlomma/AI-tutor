@@ -63,12 +63,13 @@ public final class TaskSpecifications {
     }
 
     /**
-     * Фильтр по уровню CEFR (enum CefrLevel: A1..C1). Задания без уровня при выбранном фильтре не попадают.
+     * Фильтр по уровню CEFR (enum CefrLevel: A1..C1): задание подходит, если уровень есть в его списке.
+     * Задания без уровней (старые данные до заполнения) при выбранном фильтре не попадают.
      */
     public static Specification<Task> byLevel(com.aitutor.backend.enums.CefrLevel level) {
         return (root, query, cb) -> level == null
                 ? cb.conjunction()
-                : cb.equal(root.get("level"), level);
+                : cb.isMember(level, root.get("levels"));
     }
 
     /**

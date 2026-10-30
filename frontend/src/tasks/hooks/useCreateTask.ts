@@ -13,8 +13,8 @@ export interface CreateTaskFormState {
     grammarTypeIds: number[];
     /** Механика всего задания (выбирается до конструктора пунктов). */
     itemType: ItemType;
-    /** Уровень CEFR (enum CefrLevel), null = не указан. */
-    level: CefrLevel | null;
+    /** Уровни CEFR (enum CefrLevel), минимум один — серверный фильтр банка заданий. */
+    levels: CefrLevel[];
     /** Тип экзамена (enum ExamType: OGE/EGE), null = не указан. */
     examType: ExamType | null;
     materialTitle: string;

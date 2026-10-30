@@ -40,8 +40,8 @@ export interface TasksQueryParams {
     /** Имя query-параметра бэкенда GET /api/tasks. */
     taskTypeId?: number;
     itemType?: ItemType;
-    /** Уровень CEFR (enum CefrLevel) — серверный фильтр. */
-    level?: CefrLevel;
+    /** Уровни CEFR (enum CefrLevel) — серверный фильтр (минимум один с миграции 021). */
+    levels?: CefrLevel;
     /** Тип экзамена (enum ExamType: OGE/EGE) — серверный фильтр. */
     examType?: ExamType;
     includeMixed?: boolean;
@@ -86,8 +86,8 @@ export interface TaskSummary {
     name: string | null;
     previewText: string | null;
     isMixed: boolean;
-    /** Уровень CEFR; null = не указан (миграция 020). */
-    level?: CefrLevel | null;
+    /** Уровни CEFR задания (пусто = не указаны, старые данные до заполнения). */
+    levels?: CefrLevel[] | null;
     /** Тип экзамена (OGE/EGE); null = не указан. */
     examType?: ExamType | null;
     topics: Topic[];
@@ -161,8 +161,8 @@ export interface TaskCreateRequestDto {
     /** Необязательная инструкция для ученика (миграция 018), есть у любого типа заданий. */
     instruction?: string | null;
     context?: string | null;
-    /** Необязательный уровень CEFR (enum CefrLevel). */
-    level?: CefrLevel | null;
+    /** Уровни CEFR (enum CefrLevel): минимум один — как на бэке (@NotEmpty). */
+    levels: CefrLevel[];
     /** Необязательный тип экзамена (enum ExamType: OGE/EGE). */
     examType?: ExamType | null;
     items: TaskItemRequestDto[];
@@ -192,8 +192,8 @@ export interface TaskResponseDto {
     instruction: string | null;
     context: string | null;
     isMixed: boolean;
-    /** Уровень CEFR; null = не заполнен. */
-    level?: CefrLevel | null;
+    /** Уровни CEFR задания (пусто = не заполнены). */
+    levels?: CefrLevel[] | null;
     /** Тип экзамена (OGE/EGE); null = не заполнен. */
     examType?: ExamType | null;
     topics: Topic[];

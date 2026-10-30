@@ -31,8 +31,9 @@ public class TaskUpdateRequest {
     @Valid
     private List<TaskItemRequest> items;
 
-    /** Уровень CEFR (nullable = не указан) — фильтр банка заданий. */
-    private CefrLevel level;
+    /** Уровни CEFR задания: минимум один (миграция 021). */
+    @NotEmpty(message = "Выберите хотя бы один уровень языка")
+    private List<CefrLevel> levels;
 
     /** Тип экзамена: OGE / EGE (nullable = не указан) — фильтр банка заданий. */
     private ExamType examType;

@@ -48,7 +48,7 @@ export function TaskCreateView() {
     const [topicIds, setTopicIds] = useState<number[]>([]);
     const [grammarTypeIds, setGrammarTypeIds] = useState<number[]>([]);
     const [itemType, setItemType] = useState<ItemType>('WORD_FORMATION');
-    const [level, setLevel] = useState<CefrLevel | null>(null);
+    const [levels, setLevels] = useState<CefrLevel[]>([]);
     const [examType, setExamType] = useState<ExamType | null>(null);
     const [materialTitle, setMaterialTitle] = useState('');
     const [materialText, setMaterialText] = useState('');
@@ -64,8 +64,8 @@ export function TaskCreateView() {
     const { submit, isSubmitting, error } = useCreateTask(goBackToBank);
 
     const form = useMemo(
-        () => ({ name, instruction, topicIds, grammarTypeIds, itemType, level, examType, materialTitle, materialText, items }),
-        [name, instruction, topicIds, grammarTypeIds, itemType, level, examType, materialTitle, materialText, items],
+        () => ({ name, instruction, topicIds, grammarTypeIds, itemType, levels, examType, materialTitle, materialText, items }),
+        [name, instruction, topicIds, grammarTypeIds, itemType, levels, examType, materialTitle, materialText, items],
     );
 
     const errors = validateTaskForm(form);
@@ -142,15 +142,15 @@ export function TaskCreateView() {
                 </div>
 
                 <div className={styles.field}>
-                    <label className={styles.label}>Уровень языка</label>
+                    <label className={styles.label}>Уровень языка *</label>
                     <ChipsMultiselect
                         items={LEVEL_ITEMS}
-                        selectedIds={level == null ? [] : [LEVEL_ITEMS.findIndex((c) => LEVEL_BY_ID.get(c.id) === level) + 1]}
-                        single
-                        onChange={(ids) => setLevel(ids.length ? (LEVEL_BY_ID.get(ids[0]) ?? null) : null)}
-                        onClear={() => setLevel(null)}
+                        selectedIds={levels.map((lv) => LEVEL_ITEMS.findIndex((c) => LEVEL_BY_ID.get(c.id) === lv) + 1)}
+                        onChange={(ids) => setLevels(ids.map((id) => LEVEL_BY_ID.get(id)).filter(Boolean) as CefrLevel[])}
+                        onClear={() => setLevels([])}
                         clearLabel="Без уровня"
                     />
+                    {showErrors && errors.levels && <div className={styles.fieldError}>{errors.levels}</div>}
                 </div>
 
                 <div className={styles.field}>

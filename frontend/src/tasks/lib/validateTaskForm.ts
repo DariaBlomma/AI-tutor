@@ -4,6 +4,8 @@ import { ANSWER_MAX_LENGTH, GAP_MARK, INSTRUCTION_MAX_LENGTH, TASK_NAME_MAX_LENG
 export interface TaskFormErrors {
     name?: string;
     instruction?: string;
+    /** Минимум один уровень CEFR (обязательное поле с миграции 021). */
+    levels?: string;
     text?: string;
     /** id пункта -> текст ошибки (подсветка карточки). */
     items: Record<number, string>;
@@ -46,6 +48,7 @@ export function validateTaskForm(form: {
     name: string;
     instruction: string;
     grammarTypeIds: number[];
+    levels: unknown[];
     itemType: ItemType;
     materialText: string;
     items: TaskItemDraft[];
@@ -69,9 +72,14 @@ export function validateTaskForm(form: {
         errors.text = 'Текст обязателен для TFNS / MATCHING';
     }
 
+    // Уровень языка обязателен с миграции 021 (@NotEmpty на бэке), можно выбрать несколько.
+    if (!form.levels.length) {
+        errors.levels = 'Выберите хотя бы один уровень языка';
+    }
+
     return errors;
 }
 
 export function isFormValid(errors: TaskFormErrors, grammarTypesSelected: boolean): boolean {
-    return !errors.name && !errors.instruction && !errors.text && Object.keys(errors.items).length === 0 && grammarTypesSelected;
+    return !errors.name && !errors.instruction && !errors.levels && !errors.text && Object.keys(errors.items).length === 0 && grammarTypesSelected;
 }

@@ -115,7 +115,7 @@ export function TasksBankView() {
                 search: debouncedSearch.trim() || undefined,
                 taskTypeId: grammarTypeId ?? undefined,
                 itemType: itemType ?? undefined,
-                level: level ?? undefined,
+                levels: level ?? undefined,
                 examType: examType ?? undefined,
                 includeMixed,
                 page,
@@ -392,7 +392,7 @@ function TaskCard({
 
                 {/* Чипы задания — общий компонент со страницей просмотра (TaskDetailView). */}
                 <TaskPreviewChips
-                    level={task.level}
+                    levels={task.levels}
                     examType={task.examType}
                     grammarTypes={task.taskTypes}
                     topics={task.topics}

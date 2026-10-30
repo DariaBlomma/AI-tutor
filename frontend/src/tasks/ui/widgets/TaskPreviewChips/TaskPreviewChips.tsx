@@ -9,13 +9,17 @@ import styles from './TaskPreviewChips.module.scss';
 // в пунктах её не дублируем.
 const EXAM_LABEL: Record<string, string> = Object.fromEntries(EXAM_TYPE_OPTIONS.map((o) => [o.value, o.label]));
 
-export function TaskPreviewChips({ grammarTypes, topics, itemTypes, isMixed, level, examType }: TaskPreviewChipsProps) {
+export function TaskPreviewChips({ grammarTypes, topics, itemTypes, isMixed, levels, examType }: TaskPreviewChipsProps) {
     // itemTypes мог прийти с бэка с повторами — нормализуем к уникальному списку.
     const uniqueItemTypes = [...new Set(itemTypes)] as ItemType[];
 
     return (
         <div className={styles.tags}>
-            {level && <span className={styles.tag}>{level}</span>}
+            {(levels ?? []).map((level) => (
+                <span key={`lv-${level}`} className={styles.tag}>
+                    {level}
+                </span>
+            ))}
             {examType && <span className={styles.tag}>{EXAM_LABEL[examType] ?? examType}</span>}
             {grammarTypes.map((type) => (
                 <span key={`tt-${type.id}`} className={styles.tag}>

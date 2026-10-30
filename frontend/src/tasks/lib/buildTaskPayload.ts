@@ -96,7 +96,7 @@ export function buildTaskPayload(form: CreateTaskFormState): TaskCreateRequestDt
         // Инструкция необязательна и не зависит от типа задания (миграция 018).
         instruction: orNull(form.instruction),
         context,
-        level: form.level,
+        levels: form.levels,
         examType: form.examType,
         items: form.items.map(buildItemRequest),
         topicIds: form.topicIds,
