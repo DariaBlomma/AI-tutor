@@ -33,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -166,7 +167,7 @@ public class TaskService {
                 .taskTypes(taskTypes)
                 // Бизнес-правило: больше одного типа => задание "смешанное"
                 .isMixed(taskTypes.size() > 1)
-                .levels(request.getLevels() == null ? new ArrayList<>() : new ArrayList<>(request.getLevels()))
+                .levels(request.getLevels() == null ? new HashSet<>() : new HashSet<>(request.getLevels()))
                 .examType(request.getExamType())
                 .items(items)
                 .build();
@@ -197,9 +198,9 @@ public class TaskService {
         // Состав типов в запросе заведомо активный (resolveTaskTypes), поэтому is_mixed
         // пересчитываем по нему; деактивация типа в справочнике обрабатывается TaskTypeService.
         task.setIsMixed(taskTypes.size() > 1);
-        // Уровни — обязательный список (задаётся только через сеттер whole-list, см. TaskEntityTest),
+        // Уровни — обязательный набор тегов (whole-list сеттер, см. TaskEntityTest),
         // тип экзамена — необязательное поле: null в запросе очищает значение (edit in place).
-        task.setLevels(request.getLevels() == null ? List.of() : request.getLevels());
+        task.setLevels(request.getLevels() == null ? Set.of() : request.getLevels());
         task.setExamType(request.getExamType());
 
         // Полная замена списка пунктов: отсутствующие в запросе удаляются через orphanRemoval

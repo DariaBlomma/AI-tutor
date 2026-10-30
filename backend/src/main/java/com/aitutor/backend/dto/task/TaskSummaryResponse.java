@@ -26,7 +26,7 @@ public class TaskSummaryResponse {
     private String previewText;
     private Boolean isMixed;
     /** Уровни CEFR задания (чипы/фильтр в банке; у старых данных может быть пусто). */
-    private List<CefrLevel> levels;
+    private Set<CefrLevel> levels;
     /** Тип экзамена: OGE / EGE (чипы/фильтр в банке). */
     private ExamType examType;
     private Set<TopicResponse> topics;

@@ -46,14 +46,15 @@ public class Task {
     /**
      * Уровни CEFR задания (миграция 021): минимум один обязателен, задание может иметь несколько.
      * level — reserved word в H2, поэтому таблица task_levels и поле levels.
+     * Set, а не List: уровни — это набор тегов (как topics/taskTypes), порядок не имеет смысла,
+     * а List + @OrderColumn требовал бы служебной колонки levels_order (миграции 021/022).
      */
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "task_levels", joinColumns = @JoinColumn(name = "task_id"))
     @Column(name = "level", nullable = false, length = 4)
     @Enumerated(EnumType.STRING)
-    @OrderColumn(nullable = false)
     @Builder.Default
-    private List<com.aitutor.backend.enums.CefrLevel> levels = new ArrayList<>();
+    private Set<com.aitutor.backend.enums.CefrLevel> levels = new HashSet<>();
 
     /** Тип экзамена (миграция 020): OGE / EGE, nullable = не указан. */
     @Enumerated(EnumType.STRING)
