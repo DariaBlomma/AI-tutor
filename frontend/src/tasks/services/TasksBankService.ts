@@ -1,5 +1,5 @@
 import { api } from '@/core/api/AxiosInstance';
-import type { PageDto, TaskCreateRequestDto, TaskResponseDto, TasksQueryParams, TaskSummary } from '@/tasks/types';
+import type { PageDto, TaskCreateRequestDto, TaskResponseDto, TaskUpdateRequestDto, TasksQueryParams, TaskSummary } from '@/tasks/types';
 
 // Базовый путь контроллера заданий (TaskController, context-path /api уже в baseURL).
 const TASKS_PATH = '/tasks';
@@ -18,6 +18,12 @@ export class TasksBankService {
     /** POST /api/tasks -> TaskResponse. */
     static async createTask(payload: TaskCreateRequestDto): Promise<TaskResponseDto> {
         const response = await api.post<TaskResponseDto>(TASKS_PATH, payload);
+        return response.data;
+    }
+
+    /** PUT /api/tasks/{id} -> TaskResponse — редактирование задания (бэк проверяет владение, 403 для чужих). */
+    static async updateTask(id: number, payload: TaskUpdateRequestDto): Promise<TaskResponseDto> {
+        const response = await api.put<TaskResponseDto>(`${TASKS_PATH}/${id}`, payload);
         return response.data;
     }
 

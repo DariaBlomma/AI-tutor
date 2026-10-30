@@ -171,6 +171,19 @@ export interface TaskCreateRequestDto {
     taskTypeIds: number[];
 }
 
+/** PUT /api/tasks/{id} -> TaskUpdateRequest (com.aitutor.backend.dto.task.TaskUpdateRequest). */
+export interface TaskUpdateRequestDto {
+    name: string | null;
+    instruction?: string | null;
+    context?: string | null;
+    /** Полный список пунктов: отсутствующие в запросе удаляются на бэке (orphanRemoval). */
+    items: TaskItemRequestDto[];
+    levels: CefrLevel[];
+    examType?: ExamType | null;
+    topicIds?: number[];
+    taskTypeIds: number[];
+}
+
 /** POST/PUT /api/topics -> TopicRequest. */
 export interface RefNameRequestDto {
     name: string;
