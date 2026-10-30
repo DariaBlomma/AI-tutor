@@ -22,6 +22,7 @@ import { Route as TasksBankCreateRouteImport } from './routes/tasks-bank/create'
 import { Route as TasksBankGrammarTypesRouteImport } from './routes/tasks-bank/grammar-types'
 import { Route as TasksBankTopicsRouteImport } from './routes/tasks-bank/topics'
 import { Route as TeacherReportsRouteImport } from './routes/teacher/reports'
+import { Route as TasksBankPublicIdEditRouteImport } from './routes/tasks-bank/$publicId.edit'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -88,6 +89,11 @@ const TeacherReportsRoute = TeacherReportsRouteImport.update({
   path: '/teacher/reports',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TasksBankPublicIdEditRoute = TasksBankPublicIdEditRouteImport.update({
+  id: '/edit',
+  path: '/edit',
+  getParentRoute: () => TasksBankPublicIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -97,12 +103,13 @@ export interface FileRoutesByFullPath {
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/sign-up': typeof AuthSignUpRoute
-  '/tasks-bank/$publicId': typeof TasksBankPublicIdRoute
+  '/tasks-bank/$publicId': typeof TasksBankPublicIdRouteWithChildren
   '/tasks-bank/create': typeof TasksBankCreateRoute
   '/tasks-bank/grammar-types': typeof TasksBankGrammarTypesRoute
   '/tasks-bank/topics': typeof TasksBankTopicsRoute
   '/teacher/reports': typeof TeacherReportsRoute
   '/tasks-bank/': typeof TasksBankIndexRoute
+  '/tasks-bank/$publicId/edit': typeof TasksBankPublicIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -112,12 +119,13 @@ export interface FileRoutesByTo {
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/sign-up': typeof AuthSignUpRoute
-  '/tasks-bank/$publicId': typeof TasksBankPublicIdRoute
+  '/tasks-bank/$publicId': typeof TasksBankPublicIdRouteWithChildren
   '/tasks-bank/create': typeof TasksBankCreateRoute
   '/tasks-bank/grammar-types': typeof TasksBankGrammarTypesRoute
   '/tasks-bank/topics': typeof TasksBankTopicsRoute
   '/teacher/reports': typeof TeacherReportsRoute
   '/tasks-bank': typeof TasksBankIndexRoute
+  '/tasks-bank/$publicId/edit': typeof TasksBankPublicIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -128,12 +136,13 @@ export interface FileRoutesById {
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/sign-up': typeof AuthSignUpRoute
-  '/tasks-bank/$publicId': typeof TasksBankPublicIdRoute
+  '/tasks-bank/$publicId': typeof TasksBankPublicIdRouteWithChildren
   '/tasks-bank/create': typeof TasksBankCreateRoute
   '/tasks-bank/grammar-types': typeof TasksBankGrammarTypesRoute
   '/tasks-bank/topics': typeof TasksBankTopicsRoute
   '/teacher/reports': typeof TeacherReportsRoute
   '/tasks-bank/': typeof TasksBankIndexRoute
+  '/tasks-bank/$publicId/edit': typeof TasksBankPublicIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -151,6 +160,7 @@ export interface FileRouteTypes {
     | '/tasks-bank/topics'
     | '/teacher/reports'
     | '/tasks-bank/'
+    | '/tasks-bank/$publicId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -166,6 +176,7 @@ export interface FileRouteTypes {
     | '/tasks-bank/topics'
     | '/teacher/reports'
     | '/tasks-bank'
+    | '/tasks-bank/$publicId/edit'
   id:
     | '__root__'
     | '/'
@@ -181,13 +192,14 @@ export interface FileRouteTypes {
     | '/tasks-bank/topics'
     | '/teacher/reports'
     | '/tasks-bank/'
+    | '/tasks-bank/$publicId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRouteRoute: typeof AuthRouteRouteWithChildren
   ProfileRoute: typeof ProfileRoute
-  TasksBankPublicIdRoute: typeof TasksBankPublicIdRoute
+  TasksBankPublicIdRoute: typeof TasksBankPublicIdRouteWithChildren
   TasksBankCreateRoute: typeof TasksBankCreateRoute
   TasksBankGrammarTypesRoute: typeof TasksBankGrammarTypesRoute
   TasksBankTopicsRoute: typeof TasksBankTopicsRoute
@@ -288,6 +300,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeacherReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tasks-bank/$publicId/edit': {
+      id: '/tasks-bank/$publicId/edit'
+      path: '/edit'
+      fullPath: '/tasks-bank/$publicId/edit'
+      preLoaderRoute: typeof TasksBankPublicIdEditRouteImport
+      parentRoute: typeof TasksBankPublicIdRoute
+    }
   }
 }
 
@@ -309,11 +328,22 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
   AuthRouteRouteChildren,
 )
 
+interface TasksBankPublicIdRouteChildren {
+  TasksBankPublicIdEditRoute: typeof TasksBankPublicIdEditRoute
+}
+
+const TasksBankPublicIdRouteChildren: TasksBankPublicIdRouteChildren = {
+  TasksBankPublicIdEditRoute: TasksBankPublicIdEditRoute,
+}
+
+const TasksBankPublicIdRouteWithChildren =
+  TasksBankPublicIdRoute._addFileChildren(TasksBankPublicIdRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRouteRoute: AuthRouteRouteWithChildren,
   ProfileRoute: ProfileRoute,
-  TasksBankPublicIdRoute: TasksBankPublicIdRoute,
+  TasksBankPublicIdRoute: TasksBankPublicIdRouteWithChildren,
   TasksBankCreateRoute: TasksBankCreateRoute,
   TasksBankGrammarTypesRoute: TasksBankGrammarTypesRoute,
   TasksBankTopicsRoute: TasksBankTopicsRoute,
