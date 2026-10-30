@@ -1,4 +1,5 @@
 import { Outlet, useLocation } from '@tanstack/react-router';
+import { AuthService } from '@/auth/services/AuthService.ts';
 import { AppBottomNav } from '@/shared/widgets/AppBottomNav/AppBottomNav';
 import type { AppBottomNavActive } from '@/shared/widgets/AppBottomNav/types';
 
@@ -6,7 +7,7 @@ import type { AppBottomNavActive } from '@/shared/widgets/AppBottomNav/types';
 const NAV_ACTIVE_BY_PATH: Record<string, AppBottomNavActive> = {
     '/': 'home',
     '/teacher/reports': 'reports',
-    // Страницы банка заданий (список, создание, справочники) — под общим нижним меню.
+    // Страницы банка заданий (список, просмотр задания, создание, справочники) — под общим нижним меню.
     '/tasks-bank': 'bank',
     '/profile': 'profile',
 };
@@ -21,8 +22,14 @@ export function LayoutRoot() {
     return (
         <main className="main">
             <Outlet />
-            {/* Нижнее меню — общий элемент всего приложения, рендерится один раз здесь. */}
-            {navActive && <AppBottomNav active={navActive}/>}
+            {/* Нижнее меню — общий элемент всего приложения, рендерится один раз здесь.
+                Пункт «Банк заданий» скрыт для ученика: весь раздел доступен только учителю. */}
+            {navActive && (
+                <AppBottomNav
+                    active={navActive}
+                    hiddenIds={AuthService.getUserRole() === 'TEACHER' ? [] : ['bank']}
+                />
+            )}
         </main>
     );
 }

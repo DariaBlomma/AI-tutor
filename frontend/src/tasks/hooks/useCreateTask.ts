@@ -3,7 +3,7 @@ import { extractErrorMessage } from '@/core/api/utils/errors';
 import { TasksBankService } from '@/tasks/services/TasksBankService';
 import { buildTaskPayload } from '@/tasks/lib/buildTaskPayload';
 import { isFormValid, validateTaskForm } from '@/tasks/lib/validateTaskForm';
-import type { ItemType, TaskItemDraft } from '@/tasks/types';
+import type { CefrLevel, ExamType, ItemType, TaskItemDraft } from '@/tasks/types';
 
 export interface CreateTaskFormState {
     name: string;
@@ -13,6 +13,10 @@ export interface CreateTaskFormState {
     grammarTypeIds: number[];
     /** Механика всего задания (выбирается до конструктора пунктов). */
     itemType: ItemType;
+    /** Уровни CEFR (enum CefrLevel), минимум один — серверный фильтр банка заданий. */
+    levels: CefrLevel[];
+    /** Тип экзамена (enum ExamType: OGE/EGE), null = не указан. */
+    examType: ExamType | null;
     materialTitle: string;
     materialText: string;
     items: TaskItemDraft[];

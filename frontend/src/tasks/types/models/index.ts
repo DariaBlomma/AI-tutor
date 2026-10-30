@@ -40,6 +40,10 @@ export interface TasksQueryParams {
     /** Имя query-параметра бэкенда GET /api/tasks. */
     taskTypeId?: number;
     itemType?: ItemType;
+    /** Уровни CEFR (enum CefrLevel) — серверный фильтр (минимум один с миграции 021). */
+    levels?: CefrLevel;
+    /** Тип экзамена (enum ExamType: OGE/EGE) — серверный фильтр. */
+    examType?: ExamType;
     includeMixed?: boolean;
     page?: number;
     size?: number;
@@ -53,6 +57,27 @@ export const ITEM_TYPE_OPTIONS: Array<{ value: ItemType; label: string }> = [
     { value: 'MATCHING', label: 'Matching' },
 ];
 
+/** com.aitutor.backend.enums.CefrLevel — уровень CEFR задания (фильтр банка заданий). */
+export type CefrLevel = 'A1' | 'A2' | 'B1' | 'B2' | 'C1';
+
+/** Варианты уровня языка для фильтра (enum CefrLevel; подписи = сами значения). */
+export const CEFR_LEVEL_OPTIONS: Array<{ value: CefrLevel; label: string }> = [
+    { value: 'A1', label: 'A1' },
+    { value: 'A2', label: 'A2' },
+    { value: 'B1', label: 'B1' },
+    { value: 'B2', label: 'B2' },
+    { value: 'C1', label: 'C1' },
+];
+
+/** com.aitutor.backend.enums.ExamType — тип экзамена (закрытый enum: сейчас ОГЭ и ЕГЭ). */
+export type ExamType = 'OGE' | 'EGE';
+
+/** Варианты экзамена для фильтра (enum ExamType) с подписями для UI. */
+export const EXAM_TYPE_OPTIONS: Array<{ value: ExamType; label: string }> = [
+    { value: 'OGE', label: 'ОГЭ' },
+    { value: 'EGE', label: 'ЕГЭ' },
+];
+
 /** GET /api/tasks -> TaskSummaryResponse (лёгкая карточка банка, без контента). */
 export interface TaskSummary {
     id: number;
@@ -61,6 +86,10 @@ export interface TaskSummary {
     name: string | null;
     previewText: string | null;
     isMixed: boolean;
+    /** Уровни CEFR задания (пусто = не указаны, старые данные до заполнения). */
+    levels?: CefrLevel[] | null;
+    /** Тип экзамена (OGE/EGE); null = не указан. */
+    examType?: ExamType | null;
     topics: Topic[];
     /** JSON-поле бэкенда TaskSummaryResponse.taskTypes (фронтенд-именование — grammarTypes). */
     taskTypes: GrammarType[];
@@ -132,6 +161,10 @@ export interface TaskCreateRequestDto {
     /** Необязательная инструкция для ученика (миграция 018), есть у любого типа заданий. */
     instruction?: string | null;
     context?: string | null;
+    /** Уровни CEFR (enum CefrLevel): минимум один — как на бэке (@NotEmpty). */
+    levels: CefrLevel[];
+    /** Необязательный тип экзамена (enum ExamType: OGE/EGE). */
+    examType?: ExamType | null;
     items: TaskItemRequestDto[];
     topicIds?: number[];
     /** Имя поля бэкенда TaskCreateRequest — не переименовывается. */
@@ -159,6 +192,10 @@ export interface TaskResponseDto {
     instruction: string | null;
     context: string | null;
     isMixed: boolean;
+    /** Уровни CEFR задания (пусто = не заполнены). */
+    levels?: CefrLevel[] | null;
+    /** Тип экзамена (OGE/EGE); null = не заполнен. */
+    examType?: ExamType | null;
     topics: Topic[];
     /** JSON-поле бэкенда TaskResponse.taskTypes. */
     taskTypes: GrammarType[];

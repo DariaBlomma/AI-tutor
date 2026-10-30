@@ -1,0 +1,22 @@
+// Стиль чипов — как у превью-карточки в общем списке банка заданий (TasksBankView).
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.tag {
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(157, 124, 242, 0.12);
+  color: var(--c1);
+  font-size: 11px;
+}
+
+.mixedTag {
+  background: rgba(255, 217, 61, 0.15);
+  border: 1px solid rgba(255, 217, 61, 0.4);
+  color: #ffd93d;
+  font-weight: 600;
+}

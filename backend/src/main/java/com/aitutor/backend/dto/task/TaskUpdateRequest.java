@@ -1,5 +1,7 @@
 package com.aitutor.backend.dto.task;
 
+import com.aitutor.backend.enums.CefrLevel;
+import com.aitutor.backend.enums.ExamType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
@@ -28,6 +30,13 @@ public class TaskUpdateRequest {
     @NotEmpty(message = "Добавьте хотя бы один пункт задания")
     @Valid
     private List<TaskItemRequest> items;
+
+    /** Уровни CEFR задания: минимум один (миграция 021). */
+    @NotEmpty(message = "Выберите хотя бы один уровень языка")
+    private List<CefrLevel> levels;
+
+    /** Тип экзамена: OGE / EGE (nullable = не указан) — фильтр банка заданий. */
+    private ExamType examType;
 
     private Set<Long> topicIds;
 

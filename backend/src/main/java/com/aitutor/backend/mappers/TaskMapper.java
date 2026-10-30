@@ -31,6 +31,8 @@ public interface TaskMapper {
                 .name(task.getName())
                 .previewText(task.getPreviewText())
                 .isMixed(task.getIsMixed())
+                .levels(task.getLevels())
+                .examType(task.getExamType())
                 .topics(mapTopics(task.getTopics()))
                 .taskTypes(mapTaskTypes(task.getTaskTypes()))
                 .itemCount(task.getItems() == null ? 0 : task.getItems().size())

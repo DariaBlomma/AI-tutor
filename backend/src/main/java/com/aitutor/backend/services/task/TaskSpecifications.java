@@ -62,6 +62,25 @@ public final class TaskSpecifications {
         };
     }
 
+    /**
+     * Фильтр по уровню CEFR (enum CefrLevel: A1..C1): задание подходит, если уровень есть в его списке.
+     * Задания без уровней (старые данные до заполнения) при выбранном фильтре не попадают.
+     */
+    public static Specification<Task> byLevel(com.aitutor.backend.enums.CefrLevel level) {
+        return (root, query, cb) -> level == null
+                ? cb.conjunction()
+                : cb.isMember(level, root.get("levels"));
+    }
+
+    /**
+     * Фильтр по типу экзамена (enum ExamType: OGE / EGE). Задания без экзамена при фильтре не попадают.
+     */
+    public static Specification<Task> byExamType(com.aitutor.backend.enums.ExamType examType) {
+        return (root, query, cb) -> examType == null
+                ? cb.conjunction()
+                : cb.equal(root.get("examType"), examType);
+    }
+
     /** Поиск по названию или публичному id (TSK-1), регистронезависимо. */
     public static Specification<Task> byNameOrPublicId(String search) {
         return (root, query, cb) -> {

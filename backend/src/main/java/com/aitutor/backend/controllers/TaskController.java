@@ -32,9 +32,13 @@ public class TaskController {
             @RequestParam(required = false) String search,
             // Механика пунктов (WORD_FORMATION / GAP_FILL / TFNS / MATCHING) — nullable
             @RequestParam(required = false) com.aitutor.backend.enums.ItemType itemType,
+            // Уровень CEFR (A1..C1) — nullable
+            @RequestParam(required = false) com.aitutor.backend.enums.CefrLevel level,
+            // Тип экзамена (OGE / EGE) — nullable
+            @RequestParam(required = false) com.aitutor.backend.enums.ExamType examType,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return taskService.getAllPaged(taskTypeId, includeMixed, search, itemType, page, size);
+        return taskService.getAllPaged(taskTypeId, includeMixed, search, itemType, level, examType, page, size);
     }
 
     /** Детальная карточка: полный контент (topics, taskTypes, items). */

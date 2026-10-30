@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { AuthService } from '@/auth/services/AuthService.ts';
 import { useTaskDetail } from '@/tasks/hooks/useTaskDetail';
+import { TaskPreviewChips } from '@/tasks/ui/widgets/TaskPreviewChips/TaskPreviewChips';
 import { TaskCoursePopup } from '@/tasks/ui/widgets/TaskCoursePopup/TaskCoursePopup';
 import { TaskAssignPopup } from '@/tasks/ui/widgets/TaskAssignPopup/TaskAssignPopup';
-import { MECHANIC_CHIP_LABELS } from '@/tasks/types';
-import type { ItemType, TaskItemResponseDto } from '@/tasks/types';
+import type { TaskItemResponseDto } from '@/tasks/types';
 import {
     parseGapFillContent,
     parseMatchingContent,
@@ -20,16 +20,15 @@ interface TaskDetailViewProps {
 }
 
 // Экран «Просмотр задания»: максимум подробностей — название, описание (инструкция),
-// материал, все пункты с правильными ответами. Правильные ответы и блок «Ответы» видны
-// только учителю (бэк отдаёт correctAnswer в GET /tasks/by-public-id, ученик их не видит).
-// Быстрые действия учителя: курсы (добавить/убрать через попап выбора курса) и назначение ученику.
+// материал, все пункты; правильный ответ — под каждым пунктом (только учителю).
+// Чипы (типы/темы/механики/Mixed) показываются один раз вверху — переиспользуется
+// компонент TaskPreviewChips со списком банка; механику в каждом пункте не дублируем.
+// Быстрые действия учителя: курсы (добавить через попап выбора курса) и назначение ученику.
 export function TaskDetailView({ publicId }: TaskDetailViewProps) {
     const isTeacher = AuthService.getUserRole() === 'TEACHER';
     const { task, isLoading, isError, error } = useTaskDetail(publicId);
     const [coursePopupOpen, setCoursePopupOpen] = useState(false);
     const [assignPopupOpen, setAssignPopupOpen] = useState(false);
-    // Блок «Ответы» (правильные ответы задания) — раскрывающийся/скрывающийся по клику на заголовок.
-    const [answersOpen, setAnswersOpen] = useState(false);
 
     if (isLoading) {
         return (
@@ -50,7 +49,8 @@ export function TaskDetailView({ publicId }: TaskDetailViewProps) {
     }
 
     const context = parseTaskContext(task.context);
-    const itemTypes = [...new Set(task.items.map((item) => item.itemType))] as ItemType[];
+    // Механики пунктов — уникальные ItemType задания; чипы с ними показываются один раз вверху.
+    const itemTypes = [...new Set(task.items.map((item) => item.itemType))];
 
     return (
         <div className={styles.page}>
@@ -65,7 +65,7 @@ export function TaskDetailView({ publicId }: TaskDetailViewProps) {
             {isTeacher && (
                 <div className={styles.actions}>
                     <button type="button" className={styles.actionBtn} onClick={() => setCoursePopupOpen(true)}>
-                        Добавить/Удалить из курса
+                        Добавить в курс
                     </button>
                     <button type="button" className={styles.actionBtn} onClick={() => setAssignPopupOpen(true)}>
                         Назначить ученику
@@ -73,24 +73,7 @@ export function TaskDetailView({ publicId }: TaskDetailViewProps) {
                 </div>
             )}
 
-            <div className={styles.tags}>
-                {task.taskTypes.map((type) => (
-                    <span key={`tt-${type.id}`} className={styles.tag}>
-                        {type.name}
-                    </span>
-                ))}
-                {task.topics.map((topic) => (
-                    <span key={`tp-${topic.id}`} className={styles.tag}>
-                        {topic.name}
-                    </span>
-                ))}
-                {itemTypes.map((mechanic) => (
-                    <span key={`mt-${mechanic}`} className={styles.tag}>
-                        {MECHANIC_CHIP_LABELS[mechanic]}
-                    </span>
-                ))}
-                {task.isMixed && <span className={`${styles.tag} ${styles.mixedTag}`}>Mixed</span>}
-            </div>
+            <TaskPreviewChips levels={task.levels} examType={task.examType} grammarTypes={task.taskTypes} topics={task.topics} itemTypes={itemTypes} isMixed={task.isMixed} />
 
             {task.instruction && (
                 <section className={styles.section}>
@@ -107,6 +90,7 @@ export function TaskDetailView({ publicId }: TaskDetailViewProps) {
                 </section>
             )}
 
+            {/* Только учитель: правильные ответы задания (ученик их не видит) — под каждым пунктом. */}
             <section className={styles.section}>
                 <h2 className={styles.sectionTitle}>Пункты ({task.items.length})</h2>
                 <ol className={styles.items}>
@@ -115,33 +99,6 @@ export function TaskDetailView({ publicId }: TaskDetailViewProps) {
                     ))}
                 </ol>
             </section>
-
-            {/* Только учитель: правильные ответы задания (ученик их не видит) — раскрывающийся блок. */}
-            {isTeacher && (
-                <section className={styles.section}>
-                    <button
-                        type="button"
-                        className={styles.answersToggle}
-                        aria-expanded={answersOpen}
-                        onClick={() => setAnswersOpen((prev) => !prev)}
-                    >
-                        <span className={styles.answersToggleTitle}>
-                            Ответы {!answersOpen && <span className={styles.answersHint}>({task.items.length})</span>}
-                        </span>
-                        <span className={styles.chevron}>{answersOpen ? '▲' : '▼'}</span>
-                    </button>
-                    {answersOpen && (
-                        <ul className={styles.answersList}>
-                            {task.items.map((item, index) => (
-                                <li key={`ans-${item.id}`} className={styles.answerRow}>
-                                    <strong>{index + 1}.</strong>
-                                    <span>{formatCorrectAnswer(item)}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-                </section>
-            )}
 
             {isTeacher && coursePopupOpen && (
                 <TaskCoursePopup open onClose={() => setCoursePopupOpen(false)} taskId={task.id} />
@@ -162,7 +119,8 @@ function BackLink() {
 }
 
 // Один пункт задания: prompt/механика-специфичные поля (база, опции, пара) + пояснение.
-// Правильный ответ показываем только учителю (showAnswers).
+// Механику здесь не подписываем — чипы с механиками показаны один раз вверху страницы.
+// Правильный ответ показываем только учителю (showAnswers) — под пунктом.
 function TaskDetailItem({ item, showAnswers }: { item: TaskItemResponseDto; showAnswers: boolean }) {
     const word = parseWordFormationContent(item.content);
     const gap = parseGapFillContent(item.content);
@@ -171,9 +129,7 @@ function TaskDetailItem({ item, showAnswers }: { item: TaskItemResponseDto; show
 
     return (
         <li className={styles.item}>
-            <div className={styles.itemHeader}>
-                Пункт {item.position + 1} · {MECHANIC_CHIP_LABELS[item.itemType]}
-            </div>
+            <div className={styles.itemHeader}>Пункт {item.position + 1}</div>
 
             {item.prompt && <p className={styles.itemPrompt}>{item.prompt}</p>}
 
