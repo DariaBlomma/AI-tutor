@@ -9,10 +9,11 @@ import { ChipsMultiselect } from '@/tasks/ui/widgets/ChipsMultiselect/ChipsMulti
 import { BulkActionsBar } from '@/tasks/ui/widgets/BulkActionsBar/BulkActionsBar';
 import { TaskDeletePopup } from '@/tasks/ui/widgets/TaskDeletePopup/TaskDeletePopup';
 import { TasksBulkPopup } from '@/tasks/ui/widgets/TasksBulkPopup/TasksBulkPopup';
+import { TaskPreviewChips } from '@/tasks/ui/widgets/TaskPreviewChips/TaskPreviewChips';
 import type { BulkAction } from '@/tasks/ui/widgets/TasksBulkPopup/types';
-import { ITEM_TYPE_OPTIONS, MECHANIC_CHIP_LABELS } from '@/tasks/types';
+import { CEFR_LEVEL_OPTIONS, EXAM_TYPE_OPTIONS, ITEM_TYPE_OPTIONS } from '@/tasks/types';
 import type { ChipItem } from '@/tasks/ui/widgets/ChipsMultiselect/types';
-import type { ItemType, TaskSummary } from '@/tasks/types';
+import type { CefrLevel, ExamType, ItemType, TaskSummary } from '@/tasks/types';
 import styles from './TasksBankView.module.scss';
 
 const SEARCH_DEBOUNCE_MS = 300;
@@ -20,6 +21,12 @@ const SEARCH_DEBOUNCE_MS = 300;
 // Чипы механик (enum ItemType) — фиксированный список, id числовые для общего виджета чипов.
 const MECHANIC_ITEMS: ChipItem[] = ITEM_TYPE_OPTIONS.map((o, i) => ({ id: i + 1, name: o.label }));
 const MECHANIC_BY_ID = new Map(MECHANIC_ITEMS.map((c, i) => [c.id, ITEM_TYPE_OPTIONS[i].value]));
+
+// Чипы уровня CEFR (enum CefrLevel A1..C1) и экзамена (enum ExamType: ОГЭ/ЕГЭ) — тоже фиксированные списки.
+const LEVEL_ITEMS: ChipItem[] = CEFR_LEVEL_OPTIONS.map((o, i) => ({ id: i + 1, name: o.label }));
+const LEVEL_BY_ID = new Map(LEVEL_ITEMS.map((c, i) => [c.id, CEFR_LEVEL_OPTIONS[i].value]));
+const EXAM_ITEMS: ChipItem[] = EXAM_TYPE_OPTIONS.map((o, i) => ({ id: i + 1, name: o.label }));
+const EXAM_BY_ID = new Map(EXAM_ITEMS.map((c, i) => [c.id, EXAM_TYPE_OPTIONS[i].value]));
 
 // Страница «Банк заданий» — общая для учителя и ученика:
 // список и фильтры видят все авторизованные; кнопки создания — только учителю.
@@ -92,6 +99,8 @@ export function TasksBankView() {
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [grammarTypeId, setGrammarTypeId] = useState<number | null>(null);
     const [itemType, setItemType] = useState<ItemType | null>(null);
+    const [level, setLevel] = useState<CefrLevel | null>(null);
+    const [examType, setExamType] = useState<ExamType | null>(null);
     const [topicId, setTopicId] = useState<number | null>(null);
     const [includeMixed, setIncludeMixed] = useState(true);
 
@@ -106,11 +115,13 @@ export function TasksBankView() {
                 search: debouncedSearch.trim() || undefined,
                 taskTypeId: grammarTypeId ?? undefined,
                 itemType: itemType ?? undefined,
+                levels: level ?? undefined,
+                examType: examType ?? undefined,
                 includeMixed,
                 page,
                 size,
             }),
-        [debouncedSearch, grammarTypeId, itemType, includeMixed],
+        [debouncedSearch, grammarTypeId, itemType, level, examType, includeMixed],
     );
 
     const { pageItems, totalCount, totalPages, page, setPage, isLoading, isError, error, reload } = useTasksBank(fetcher);
@@ -225,6 +236,32 @@ export function TasksBankView() {
                     onChange={(ids) => setItemType(ids.length ? (MECHANIC_BY_ID.get(ids[0]) ?? null) : null)}
                     onClear={() => setItemType(null)}
                     clearLabel="Все"
+                />
+            </div>
+
+            {/* Фильтр по уровню языка (enum CefrLevel A1..C1) — серверный */}
+            <div className={styles.filterBlock}>
+                <div className={styles.filterLabel}>Уровень языка</div>
+                <ChipsMultiselect
+                    items={LEVEL_ITEMS}
+                    selectedIds={level == null ? [] : [LEVEL_ITEMS.findIndex((c) => LEVEL_BY_ID.get(c.id) === level) + 1]}
+                    single
+                    onChange={(ids) => setLevel(ids.length ? (LEVEL_BY_ID.get(ids[0]) ?? null) : null)}
+                    onClear={() => setLevel(null)}
+                    clearLabel="Все уровни"
+                />
+            </div>
+
+            {/* Фильтр по типу экзамена (enum ExamType: ОГЭ / ЕГЭ) — серверный */}
+            <div className={styles.filterBlock}>
+                <div className={styles.filterLabel}>Экзамен</div>
+                <ChipsMultiselect
+                    items={EXAM_ITEMS}
+                    selectedIds={examType == null ? [] : [EXAM_ITEMS.findIndex((c) => EXAM_BY_ID.get(c.id) === examType) + 1]}
+                    single
+                    onChange={(ids) => setExamType(ids.length ? (EXAM_BY_ID.get(ids[0]) ?? null) : null)}
+                    onClear={() => setExamType(null)}
+                    clearLabel="Все экзамены"
                 />
             </div>
 
@@ -353,24 +390,15 @@ function TaskCard({
                     </ol>
                 )}
 
-                <div className={styles.tags}>
-                    {task.taskTypes.map((type) => (
-                        <span key={`tt-${type.id}`} className={styles.tag}>
-                            {type.name}
-                        </span>
-                    ))}
-                    {task.topics.map((topic) => (
-                        <span key={`tp-${topic.id}`} className={styles.tag}>
-                            {topic.name}
-                        </span>
-                    ))}
-                    {(task.itemTypes ?? []).map((mechanic) => (
-                        <span key={`mt-${mechanic}`} className={styles.tag}>
-                            {MECHANIC_CHIP_LABELS[mechanic]}
-                        </span>
-                    ))}
-                    {task.isMixed && <span className={`${styles.tag} ${styles.mixedTag}`}>Mixed</span>}
-                </div>
+                {/* Чипы задания — общий компонент со страницей просмотра (TaskDetailView). */}
+                <TaskPreviewChips
+                    levels={task.levels}
+                    examType={task.examType}
+                    grammarTypes={task.taskTypes}
+                    topics={task.topics}
+                    itemTypes={task.itemTypes ?? []}
+                    isMixed={task.isMixed}
+                />
 
                 <div className={styles.footer}>
                     <span className={styles.count}>

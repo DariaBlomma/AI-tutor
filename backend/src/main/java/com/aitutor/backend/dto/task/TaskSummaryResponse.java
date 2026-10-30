@@ -2,6 +2,8 @@ package com.aitutor.backend.dto.task;
 
 import com.aitutor.backend.dto.topic.TopicResponse;
 import com.aitutor.backend.dto.tasktype.TaskTypeResponse;
+import com.aitutor.backend.enums.CefrLevel;
+import com.aitutor.backend.enums.ExamType;
 import com.aitutor.backend.enums.ItemType;
 import lombok.*;
 
@@ -23,6 +25,10 @@ public class TaskSummaryResponse {
     private String name;
     private String previewText;
     private Boolean isMixed;
+    /** Уровни CEFR задания (чипы/фильтр в банке; у старых данных может быть пусто). */
+    private List<CefrLevel> levels;
+    /** Тип экзамена: OGE / EGE (чипы/фильтр в банке). */
+    private ExamType examType;
     private Set<TopicResponse> topics;
     private Set<TaskTypeResponse> taskTypes;
     private Integer itemCount;

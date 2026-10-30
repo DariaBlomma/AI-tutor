@@ -8,6 +8,8 @@ import com.aitutor.backend.dto.task.TaskUpdateRequest;
 import com.aitutor.backend.entities.Task;
 import com.aitutor.backend.entities.TaskItem;
 import com.aitutor.backend.entities.TaskType;
+import com.aitutor.backend.enums.CefrLevel;
+import com.aitutor.backend.enums.ExamType;
 import com.aitutor.backend.enums.ItemType;
 import com.aitutor.backend.entities.Topic;
 import com.aitutor.backend.entities.User;
@@ -84,8 +86,12 @@ public class TaskService {
      */
     @Transactional(readOnly = true)
     public Page<TaskSummaryResponse> getAllPaged(Long taskTypeId, boolean includeMixed, String search,
-                                                 ItemType itemType, int page, int size) {
-        Specification<Task> spec = buildSpec(taskTypeId, includeMixed, search).and(TaskSpecifications.byItemType(itemType));
+                                                 ItemType itemType, CefrLevel level, ExamType examType,
+                                                 int page, int size) {
+        Specification<Task> spec = buildSpec(taskTypeId, includeMixed, search)
+                .and(TaskSpecifications.byItemType(itemType))
+                .and(TaskSpecifications.byLevel(level))
+                .and(TaskSpecifications.byExamType(examType));
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
 
         Page<Long> idPage = taskRepository.findAll(spec, PageRequest.of(page, size, sort))
@@ -160,6 +166,8 @@ public class TaskService {
                 .taskTypes(taskTypes)
                 // Бизнес-правило: больше одного типа => задание "смешанное"
                 .isMixed(taskTypes.size() > 1)
+                .levels(request.getLevels() == null ? new ArrayList<>() : new ArrayList<>(request.getLevels()))
+                .examType(request.getExamType())
                 .items(items)
                 .build();
 
@@ -189,6 +197,10 @@ public class TaskService {
         // Состав типов в запросе заведомо активный (resolveTaskTypes), поэтому is_mixed
         // пересчитываем по нему; деактивация типа в справочнике обрабатывается TaskTypeService.
         task.setIsMixed(taskTypes.size() > 1);
+        // Уровни — обязательный список (задаётся только через сеттер whole-list, см. TaskEntityTest),
+        // тип экзамена — необязательное поле: null в запросе очищает значение (edit in place).
+        task.setLevels(request.getLevels() == null ? List.of() : request.getLevels());
+        task.setExamType(request.getExamType());
 
         // Полная замена списка пунктов: отсутствующие в запросе удаляются через orphanRemoval
         task.getItems().clear();

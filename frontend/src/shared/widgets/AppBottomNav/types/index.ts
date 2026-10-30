@@ -13,4 +13,6 @@ export interface AppBottomNavItem {
 
 export interface AppBottomNavProps {
     active: AppBottomNavActive;
+    /** Пункты, которые нужно скрыть (напр. «bank» для ученика — раздел доступен только учителю). */
+    hiddenIds?: AppBottomNavActive[];
 }

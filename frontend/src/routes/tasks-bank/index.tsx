@@ -4,10 +4,12 @@ import { AuthService } from '@/auth/services/AuthService.ts';
 
 export const Route = createFileRoute('/tasks-bank/')({
     loader: () => {
-        // Общая страница для учителя и ученика: смотреть банк могут все авторизованные.
-        // Кнопки создания/редактирования внутри страницы показываются только учителю.
+        // Раздел «Банк заданий» виден только учителю: ученика редиректим на главную.
         if (!AuthService.isAuthenticated) {
             throw redirect({ to: '/auth/login' });
+        }
+        if (AuthService.getUserRole() !== 'TEACHER') {
+            throw redirect({ to: '/' });
         }
     },
     component: () => <TasksBankView/>,

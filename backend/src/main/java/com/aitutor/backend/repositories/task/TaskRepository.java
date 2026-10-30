@@ -18,11 +18,11 @@ import java.util.Optional;
 public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificationExecutor<Task> {
 
     /** Полный граф: темы, типы и контент — для детальной карточки задания. */
-    @EntityGraph(attributePaths = {"topics", "taskTypes", "items"})
+    @EntityGraph(attributePaths = {"topics", "taskTypes", "items", "levels"})
     Optional<Task> findWithRelationsById(Long id);
 
     /** Тот же полный граф по публичному id (T-000123) — для страницы детального просмотра. */
-    @EntityGraph(attributePaths = {"topics", "taskTypes", "items"})
+    @EntityGraph(attributePaths = {"topics", "taskTypes", "items", "levels"})
     Optional<Task> findWithRelationsByPublicId(String publicId);
 
     /**
@@ -49,14 +49,14 @@ public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificat
     void recalculateMixedFlag(@Param("taskId") Long taskId);
 
     /** Список с полным графом (topics, taskTypes, items) за фиксированное число запросов — против N+1 в банке заданий. */
-    @EntityGraph(attributePaths = {"topics", "taskTypes", "items"})
+    @EntityGraph(attributePaths = {"topics", "taskTypes", "items", "levels"})
     List<Task> findAllByIdIn(List<Long> ids);
 
     /**
      * Пагинированный вариант: тот же полный граф, но только для id текущей страницы.
      * COUNT-запрос считает сами задания (distinct по task), без раздувания collection-join'ами.
      */
-    @EntityGraph(attributePaths = {"topics", "taskTypes", "items"})
+    @EntityGraph(attributePaths = {"topics", "taskTypes", "items", "levels"})
     @Query(value = "SELECT t FROM Task t WHERE t.id IN :ids",
            countQuery = "SELECT COUNT(t) FROM Task t WHERE t.id IN :ids")
     Page<Task> findPageByIdIn(@Param("ids") List<Long> ids, Pageable pageable);
