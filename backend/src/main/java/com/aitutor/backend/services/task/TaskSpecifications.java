@@ -23,21 +23,28 @@ public final class TaskSpecifications {
     }
 
     /**
-     * Фильтр по типу задания.
-     * includeMixed=false (строгий поиск) — только "чистые" задания выбранного типа (is_mixed = false).
-     * includeMixed=true  (расширенный) — все задания, где встречается тип, включая смешанные.
+     * Фильтр по типу задания + смешанности.
+     * Тип выбран: задание подходит, если этот тип среди его типов; при includeMixed=false
+     * дополнительно требуется «чистота» задания — ровно один тип (считаем по составу taskTypes,
+     * а не по денормализованному флагу is_mixed, который могут забыть пересчитать).
+     * Тип не выбран: includeMixed=false скрывает смешанные (2+ типов) задания,
+     * includeMixed=true — без ограничений.
      */
     public static Specification<Task> byTaskType(Long taskTypeId, boolean includeMixed) {
         return (root, query, cb) -> {
-            if (taskTypeId == null) {
-                return cb.conjunction();
+            Predicate typeMatches = cb.conjunction();
+            if (taskTypeId != null) {
+                Join<Object, Object> types = root.join("taskTypes");
+                typeMatches = cb.equal(types.get("id"), taskTypeId);
             }
-            Join<Object, Object> types = root.join("taskTypes");
-            Predicate typeMatches = cb.equal(types.get("id"), taskTypeId);
             if (includeMixed) {
                 return typeMatches;
             }
-            return cb.and(typeMatches, cb.isFalse(root.get("isMixed")));
+            Subquery<Long> countSub = query.subquery(Long.class);
+            Root<Task> t2 = countSub.from(Task.class);
+            countSub.select(cb.count(t2.join("taskTypes")))
+                    .where(cb.equal(t2.get("id"), root.get("id")));
+            return cb.and(typeMatches, cb.lessThanOrEqualTo(countSub, 1L));
         };
     }
 
