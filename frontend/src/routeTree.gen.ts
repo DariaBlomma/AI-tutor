@@ -17,6 +17,7 @@ import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
 import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
 import { Route as TasksBankIndexRouteImport } from './routes/tasks-bank/index'
+import { Route as TasksBankPublicIdRouteImport } from './routes/tasks-bank/$publicId'
 import { Route as TasksBankCreateRouteImport } from './routes/tasks-bank/create'
 import { Route as TasksBankGrammarTypesRouteImport } from './routes/tasks-bank/grammar-types'
 import { Route as TasksBankTopicsRouteImport } from './routes/tasks-bank/topics'
@@ -62,6 +63,11 @@ const TasksBankIndexRoute = TasksBankIndexRouteImport.update({
   path: '/tasks-bank/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TasksBankPublicIdRoute = TasksBankPublicIdRouteImport.update({
+  id: '/tasks-bank/$publicId',
+  path: '/tasks-bank/$publicId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TasksBankCreateRoute = TasksBankCreateRouteImport.update({
   id: '/tasks-bank/create',
   path: '/tasks-bank/create',
@@ -91,6 +97,7 @@ export interface FileRoutesByFullPath {
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/tasks-bank/$publicId': typeof TasksBankPublicIdRoute
   '/tasks-bank/create': typeof TasksBankCreateRoute
   '/tasks-bank/grammar-types': typeof TasksBankGrammarTypesRoute
   '/tasks-bank/topics': typeof TasksBankTopicsRoute
@@ -105,6 +112,7 @@ export interface FileRoutesByTo {
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/tasks-bank/$publicId': typeof TasksBankPublicIdRoute
   '/tasks-bank/create': typeof TasksBankCreateRoute
   '/tasks-bank/grammar-types': typeof TasksBankGrammarTypesRoute
   '/tasks-bank/topics': typeof TasksBankTopicsRoute
@@ -120,6 +128,7 @@ export interface FileRoutesById {
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/tasks-bank/$publicId': typeof TasksBankPublicIdRoute
   '/tasks-bank/create': typeof TasksBankCreateRoute
   '/tasks-bank/grammar-types': typeof TasksBankGrammarTypesRoute
   '/tasks-bank/topics': typeof TasksBankTopicsRoute
@@ -136,6 +145,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/sign-up'
+    | '/tasks-bank/$publicId'
     | '/tasks-bank/create'
     | '/tasks-bank/grammar-types'
     | '/tasks-bank/topics'
@@ -150,6 +160,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/sign-up'
+    | '/tasks-bank/$publicId'
     | '/tasks-bank/create'
     | '/tasks-bank/grammar-types'
     | '/tasks-bank/topics'
@@ -164,6 +175,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/sign-up'
+    | '/tasks-bank/$publicId'
     | '/tasks-bank/create'
     | '/tasks-bank/grammar-types'
     | '/tasks-bank/topics'
@@ -175,6 +187,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRouteRoute: typeof AuthRouteRouteWithChildren
   ProfileRoute: typeof ProfileRoute
+  TasksBankPublicIdRoute: typeof TasksBankPublicIdRoute
   TasksBankCreateRoute: typeof TasksBankCreateRoute
   TasksBankGrammarTypesRoute: typeof TasksBankGrammarTypesRoute
   TasksBankTopicsRoute: typeof TasksBankTopicsRoute
@@ -240,6 +253,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TasksBankIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tasks-bank/$publicId': {
+      id: '/tasks-bank/$publicId'
+      path: '/tasks-bank/$publicId'
+      fullPath: '/tasks-bank/$publicId'
+      preLoaderRoute: typeof TasksBankPublicIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tasks-bank/create': {
       id: '/tasks-bank/create'
       path: '/tasks-bank/create'
@@ -293,6 +313,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRouteRoute: AuthRouteRouteWithChildren,
   ProfileRoute: ProfileRoute,
+  TasksBankPublicIdRoute: TasksBankPublicIdRoute,
   TasksBankCreateRoute: TasksBankCreateRoute,
   TasksBankGrammarTypesRoute: TasksBankGrammarTypesRoute,
   TasksBankTopicsRoute: TasksBankTopicsRoute,
