@@ -73,7 +73,7 @@ export function TaskDetailView({ publicId }: TaskDetailViewProps) {
                 </div>
             )}
 
-            <TaskPreviewChips grammarTypes={task.taskTypes} topics={task.topics} itemTypes={itemTypes} isMixed={task.isMixed} />
+            <TaskPreviewChips level={task.level} examType={task.examType} grammarTypes={task.taskTypes} topics={task.topics} itemTypes={itemTypes} isMixed={task.isMixed} />
 
             {task.instruction && (
                 <section className={styles.section}>

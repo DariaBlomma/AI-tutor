@@ -1,4 +1,4 @@
-import { MECHANIC_CHIP_LABELS } from '@/tasks/types';
+import { EXAM_TYPE_OPTIONS, MECHANIC_CHIP_LABELS } from '@/tasks/types';
 import type { ItemType } from '@/tasks/types';
 import type { TaskPreviewChipsProps } from './types';
 import styles from './TaskPreviewChips.module.scss';
@@ -7,12 +7,16 @@ import styles from './TaskPreviewChips.module.scss';
 // и порядок и в превью-карточке списка банка (TasksBankView), и на странице просмотра
 // задания (TaskDetailView). Механику задания показываем чипами только один раз — вверху,
 // в пунктах её не дублируем.
-export function TaskPreviewChips({ grammarTypes, topics, itemTypes, isMixed }: TaskPreviewChipsProps) {
+const EXAM_LABEL: Record<string, string> = Object.fromEntries(EXAM_TYPE_OPTIONS.map((o) => [o.value, o.label]));
+
+export function TaskPreviewChips({ grammarTypes, topics, itemTypes, isMixed, level, examType }: TaskPreviewChipsProps) {
     // itemTypes мог прийти с бэка с повторами — нормализуем к уникальному списку.
     const uniqueItemTypes = [...new Set(itemTypes)] as ItemType[];
 
     return (
         <div className={styles.tags}>
+            {level && <span className={styles.tag}>{level}</span>}
+            {examType && <span className={styles.tag}>{EXAM_LABEL[examType] ?? examType}</span>}
             {grammarTypes.map((type) => (
                 <span key={`tt-${type.id}`} className={styles.tag}>
                     {type.name}

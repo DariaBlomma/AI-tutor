@@ -43,6 +43,16 @@ public class Task {
     @Column(nullable = false)
     private Boolean isMixed = false;
 
+    /** Уровень CEFR (миграция 020, колонка task_level — level является зарезервированным словом SQL). */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "task_level", length = 4)
+    private com.aitutor.backend.enums.CefrLevel level;
+
+    /** Тип экзамена (миграция 020): OGE / EGE, nullable = не указан. */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "exam_type", length = 30)
+    private com.aitutor.backend.enums.ExamType examType;
+
     @Column(name = "deleted_at")
     private Instant deletedAt;
 

@@ -1,6 +1,10 @@
-import type { GrammarType, ItemType, Topic } from '@/tasks/types';
+import type { CefrLevel, ExamType, GrammarType, ItemType, Topic } from '@/tasks/types';
 
 export interface TaskPreviewChipsProps {
+    /** Уровень CEFR задания (nullable = не указан). */
+    level?: CefrLevel | null;
+    /** Тип экзамена (OGE/EGE, nullable = не указан). */
+    examType?: ExamType | null;
     /** Грамматические типы задания (task_types). */
     grammarTypes: GrammarType[];
     /** Темы задания. */

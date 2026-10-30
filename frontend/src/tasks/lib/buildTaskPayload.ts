@@ -1,6 +1,5 @@
 import type {
     GapFillContentDto,
-    ItemType,
     MatchingContentDto,
     TaskContextDto,
     TaskCreateRequestDto,
@@ -10,6 +9,7 @@ import type {
     WordFormationContentDto,
 } from '@/tasks/types';
 import { needsText } from './validateTaskForm';
+import type { CreateTaskFormState } from '@/tasks/hooks/useCreateTask';
 
 const blank = (value: string): boolean => value.trim().length === 0;
 const orNull = (value: string): string | null => (blank(value) ? null : value.trim());
@@ -82,16 +82,7 @@ function buildItemRequest(item: TaskItemDraft): TaskItemRequestDto {
  * Текст-материал (context) сериализуется только если он нужен для выбранной механики
  * (TFNS/MATCHING); требования к пунктам ловит локальная валидация (см. validateTaskForm).
  */
-export function buildTaskPayload(form: {
-    name: string;
-    instruction: string;
-    topicIds: number[];
-    grammarTypeIds: number[];
-    itemType: ItemType;
-    materialTitle: string;
-    materialText: string;
-    items: TaskItemDraft[];
-}): TaskCreateRequestDto {
+export function buildTaskPayload(form: CreateTaskFormState): TaskCreateRequestDto {
     let context: string | null = null;
     if (needsText(form.itemType)) {
         const dto: TaskContextDto = { type: 'TEXT', text: form.materialText.trim() };
@@ -105,6 +96,8 @@ export function buildTaskPayload(form: {
         // Инструкция необязательна и не зависит от типа задания (миграция 018).
         instruction: orNull(form.instruction),
         context,
+        level: form.level,
+        examType: form.examType,
         items: form.items.map(buildItemRequest),
         topicIds: form.topicIds,
         // Имя поля DTO бэкенда (TaskCreateRequest.taskTypeIds) не меняем — только фронтенд-именование.

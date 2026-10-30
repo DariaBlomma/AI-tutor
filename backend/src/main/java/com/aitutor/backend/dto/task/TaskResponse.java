@@ -1,6 +1,8 @@
 package com.aitutor.backend.dto.task;
 
 import com.aitutor.backend.dto.topic.TopicResponse;
+import com.aitutor.backend.enums.CefrLevel;
+import com.aitutor.backend.enums.ExamType;
 import com.aitutor.backend.dto.tasktype.TaskTypeResponse;
 import lombok.*;
 import java.time.Instant;
@@ -19,6 +21,10 @@ public class TaskResponse {
     private String instruction;
     private String context;
     private Boolean isMixed;
+    /** Уровень CEFR задания (nullable = не указан). */
+    private CefrLevel level;
+    /** Тип экзамена: OGE / EGE (nullable = не указан). */
+    private ExamType examType;
     private Set<TopicResponse> topics;
     private Set<TaskTypeResponse> taskTypes;
     private List<TaskItemResponse> items;
