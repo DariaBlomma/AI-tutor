@@ -43,6 +43,12 @@ public class TaskController {
         return taskService.getById(id);
     }
 
+    /** Детальная карточка по публичному id (T-000123) — ссылка в банке заданий ведёт на страницу просмотра. */
+    @GetMapping("/by-public-id/{publicId}")
+    public TaskResponse getByPublicId(@PathVariable String publicId) {
+        return taskService.getByPublicId(publicId);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public TaskResponse create(@Valid @RequestBody TaskCreateRequest request,

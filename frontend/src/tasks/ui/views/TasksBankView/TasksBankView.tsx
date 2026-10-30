@@ -10,7 +10,7 @@ import { BulkActionsBar } from '@/tasks/ui/widgets/BulkActionsBar/BulkActionsBar
 import { TaskDeletePopup } from '@/tasks/ui/widgets/TaskDeletePopup/TaskDeletePopup';
 import { TasksBulkPopup } from '@/tasks/ui/widgets/TasksBulkPopup/TasksBulkPopup';
 import type { BulkAction } from '@/tasks/ui/widgets/TasksBulkPopup/types';
-import { ITEM_TYPE_OPTIONS } from '@/tasks/types';
+import { ITEM_TYPE_OPTIONS, MECHANIC_CHIP_LABELS } from '@/tasks/types';
 import type { ChipItem } from '@/tasks/ui/widgets/ChipsMultiselect/types';
 import type { ItemType, TaskSummary } from '@/tasks/types';
 import styles from './TasksBankView.module.scss';
@@ -20,14 +20,6 @@ const SEARCH_DEBOUNCE_MS = 300;
 // Чипы механик (enum ItemType) — фиксированный список, id числовые для общего виджета чипов.
 const MECHANIC_ITEMS: ChipItem[] = ITEM_TYPE_OPTIONS.map((o, i) => ({ id: i + 1, name: o.label }));
 const MECHANIC_BY_ID = new Map(MECHANIC_ITEMS.map((c, i) => [c.id, ITEM_TYPE_OPTIONS[i].value]));
-
-// Подписи чипов механик в карточке задания (короткие, как в дизайне).
-const MECHANIC_CHIP_LABELS: Record<ItemType, string> = {
-    WORD_FORMATION: 'word formation',
-    GAP_FILL: 'gap fill',
-    TFNS: 'TFNS',
-    MATCHING: 'matching',
-};
 
 // Страница «Банк заданий» — общая для учителя и ученика:
 // список и фильтры видят все авторизованные; кнопки создания — только учителю.
@@ -122,6 +114,16 @@ export function TasksBankView() {
     );
 
     const { pageItems, totalCount, totalPages, page, setPage, isLoading, isError, error, reload } = useTasksBank(fetcher);
+
+    // Смена страницы: всегда запрашиваем данные и поднимаем список в начало (пагинация — под списком).
+    const changePage = useCallback(
+        (nextPage: number) => {
+            if (nextPage === page || nextPage < 0 || nextPage > totalPages - 1) return;
+            setPage(nextPage);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        },
+        [page, setPage, totalPages],
+    );
 
     // Удаление задания (только владелец): подтверждение в попапе у кнопки -> DELETE /api/tasks/{id} -> перезагрузка страницы.
     const confirmDelete = useCallback(async () => {
@@ -258,8 +260,8 @@ export function TasksBankView() {
             )}
 
             {/* Постраничная навигация (серверная пагинация — GET /api/tasks?page&size) */}
-            {!isLoading && !isError && totalPages > 1 && (
-                <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+            {!isError && totalPages >= 1 && (
+                <Pagination page={page} totalPages={totalPages} onPageChange={changePage} />
             )}
 
             {/* Панель массовых действий — только учителю и только при выбранном > 0. */}
@@ -334,8 +336,10 @@ function TaskCard({
             <div className={styles.body}>
                 <div className={styles.headerRow}>
                     <span className={styles.title}>{task.name?.trim() || 'Без названия'}</span>
-                    {/* TODO: страница детального просмотра ещё не создана — ссылка появится вместе с роутом. */}
-                    <span className={styles.publicId}>{task.publicId}</span>
+                    {/* Ссылка на детальную страницу просмотра задания (роут /tasks-bank/$publicId). */}
+                    <Link to="/tasks-bank/$publicId" params={{ publicId: task.publicId }} className={`${styles.publicId} ${styles.publicIdLink}`}>
+                        {task.publicId}
+                    </Link>
                 </div>
 
                 {task.previewText && (

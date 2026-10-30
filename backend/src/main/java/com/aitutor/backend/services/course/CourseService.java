@@ -1,5 +1,6 @@
 package com.aitutor.backend.services.course;
 
+import com.aitutor.backend.dto.course.CourseByTaskResponse;
 import com.aitutor.backend.dto.course.CourseRequest;
 import com.aitutor.backend.dto.course.CourseResponse;
 import com.aitutor.backend.dto.course.CourseSummaryResponse;
@@ -20,7 +21,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Курсы — «плейлисты» из заданий банка. Задания не копируются: курс хранит только
@@ -46,6 +49,28 @@ public class CourseService {
                         .taskCount(courseTaskRepository.countByCourseId(c.getId()))
                         .createdAt(c.getCreatedAt())
                         .updatedAt(c.getUpdatedAt())
+                        .build())
+                .toList();
+    }
+
+    /**
+     * Мои курсы с флагом «задание уже в курсе» — данные попапа выбора курса
+     * на странице просмотра задания (Добавить/Удалить из курса). Чужое/удалённое
+     * задание отвечает 404 так же, как TaskService.getById.
+     */
+    @Transactional(readOnly = true)
+    public List<CourseByTaskResponse> getAllWithTaskFlag(Long taskId, Long teacherId) {
+        taskRepository.findWithRelationsById(taskId)
+                .filter(t -> t.getDeletedAt() == null)
+                .orElseThrow(() -> new ResourceNotFoundException("Задание не найдено: id=" + taskId));
+
+        Set<Long> courseIdsWithTask = new HashSet<>(courseTaskRepository.findCourseIdsByTaskId(teacherId, taskId));
+        return courseRepository.findByTeacherIdAndDeletedAtIsNullOrderByCreatedAtDesc(teacherId)
+                .stream()
+                .map(c -> CourseByTaskResponse.builder()
+                        .id(c.getId())
+                        .name(c.getName())
+                        .hasTask(courseIdsWithTask.contains(c.getId()))
                         .build())
                 .toList();
     }

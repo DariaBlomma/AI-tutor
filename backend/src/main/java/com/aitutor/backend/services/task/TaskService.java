@@ -121,6 +121,20 @@ public class TaskService {
         return taskMapper.toResponse(findActiveWithRelations(id));
     }
 
+    /**
+     * Детальная карточка по публичному id (T-000123) — страница просмотра задания.
+     * Удалённое задание отвечает 404 так же, как и по внутреннему id.
+     */
+    @Transactional(readOnly = true)
+    public TaskResponse getByPublicId(String publicId) {
+        Task task = taskRepository.findWithRelationsByPublicId(publicId)
+                .orElseThrow(() -> new ResourceNotFoundException("Задание не найдено: publicId=" + publicId));
+        if (task.getDeletedAt() != null) {
+            throw new ResourceNotFoundException("Задание удалено: publicId=" + publicId);
+        }
+        return taskMapper.toResponse(task);
+    }
+
     @Transactional
     public TaskResponse create(TaskCreateRequest request, Long teacherId) {
         User teacher = userRepository.findActiveById(teacherId)

@@ -25,4 +25,10 @@ export class TasksBankService {
     static async deleteTask(id: number): Promise<void> {
         await api.delete<void>(`${TASKS_PATH}/${id}`);
     }
+
+    /** GET /api/tasks/by-public-id/{publicId} -> TaskResponse — страница просмотра задания. */
+    static async getTaskByPublicId(publicId: string): Promise<TaskResponseDto> {
+        const response = await api.get<TaskResponseDto>(`${TASKS_PATH}/by-public-id/${encodeURIComponent(publicId)}`);
+        return response.data;
+    }
 }
