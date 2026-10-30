@@ -10,5 +10,7 @@ export const Route = createFileRoute('/tasks-bank/$publicId')({
             throw redirect({ to: '/auth/login' });
         }
     },
-    component: ({ params }) => <TaskDetailView publicId={params.publicId} />,
+    // Параметры роута передаются компоненту только через Route.useParams():
+    // деструктуризация props ({ params }) даёт undefined и краш «reading 'publicId'».
+    component: () => <TaskDetailView publicId={Route.useParams().publicId} />,
 });
