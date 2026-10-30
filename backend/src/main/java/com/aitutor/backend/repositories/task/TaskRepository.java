@@ -21,6 +21,10 @@ public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificat
     @EntityGraph(attributePaths = {"topics", "taskTypes", "items"})
     Optional<Task> findWithRelationsById(Long id);
 
+    /** Тот же полный граф по публичному id (T-000123) — для страницы детального просмотра. */
+    @EntityGraph(attributePaths = {"topics", "taskTypes", "items"})
+    Optional<Task> findWithRelationsByPublicId(String publicId);
+
     /**
      * Пересчёт флага is_mixed после изменений в справочнике типов (деактивация/удаление типа).
      * Смешанным считается задание с 2+ АКТИВНЫМИ типами (неактивные/soft-deleted не считаются):

@@ -1,5 +1,6 @@
 package com.aitutor.backend.controllers;
 
+import com.aitutor.backend.dto.course.CourseByTaskResponse;
 import com.aitutor.backend.dto.course.CourseRequest;
 import com.aitutor.backend.dto.course.CourseResponse;
 import com.aitutor.backend.dto.course.CourseSummaryResponse;
@@ -30,6 +31,16 @@ public class CourseController {
     @GetMapping
     public List<CourseSummaryResponse> getAll(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return courseService.getAll(userDetails.getId());
+    }
+
+    /**
+     * Мои курсы с флагом «задание уже в курсе» — для попапа выбора курса
+     * на странице просмотра задания (Добавить/Удалить из курса).
+     */
+    @GetMapping(params = "taskId")
+    public List<CourseByTaskResponse> getAllWithTaskFlag(@RequestParam Long taskId,
+                                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return courseService.getAllWithTaskFlag(taskId, userDetails.getId());
     }
 
     /** Детали курса: состав заданий в порядке position. */
