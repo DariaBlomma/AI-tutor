@@ -29,6 +29,13 @@ interface UseTaskSubmitResult {
     error: string | null;
 }
 
+/** Результат useUpdateTask: submit принимает id задания (PUT /api/tasks/{id}). */
+interface UseTaskUpdateSubmitResult {
+    submit: (id: number, form: CreateTaskFormState) => Promise<boolean>;
+    isSubmitting: boolean;
+    error: string | null;
+}
+
 // Отправка POST /api/tasks: сначала локальная валидация (зеркалит бэка),
 // затем запрос; текст 400 от TaskContentValidator показываем как есть.
 export function useCreateTask(onSuccess: () => void): UseTaskSubmitResult {
@@ -67,7 +74,7 @@ export function useCreateTask(onSuccess: () => void): UseTaskSubmitResult {
  * тем же buildTaskPayload (TaskUpdateRequest зеркалит TaskCreateRequest).
  * id передаётся в момент отправки — экран редактирования грузит карточку асинхронно.
  */
-export function useUpdateTask(onSuccess: () => void): UseTaskSubmitResult & { submit: (id: number, form: CreateTaskFormState) => Promise<boolean> } {
+export function useUpdateTask(onSuccess: () => void): UseTaskUpdateSubmitResult {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 

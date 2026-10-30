@@ -382,7 +382,7 @@ function collectTopics(tasks: TaskSummary[]) {
 // Дизайн: чекбокс слева (только учителю — bulk-выбор); в шапке название (заглушка «Без названия», если пустое)
 // и справа сверху publicId как ссылка на детальную страницу; ниже — превью, затем общий ряд чипов
 // (грамматические типы → темы → механики → Mixed), в футере количество позиций жирным.
-// Пункт «Редактировать» временно не делаем (edit-режим формы — отдельная задача).
+// Кнопка «Редактировать» ведёт на страницу редактирования (роут /tasks-bank/$publicId/edit, общий виджет TaskForm в edit-режиме).
 function TaskCard({
     task,
     selectable,
@@ -453,14 +453,14 @@ function TaskCard({
                     </span>
                     {canManage && (
                         <div className={styles.actions}>
-                            <button
-                                type="button"
+                            {/* Ссылка-кнопка на страницу редактирования (роут /tasks-bank/$publicId/edit). */}
+                            <Link
+                                to="/tasks-bank/$publicId/edit"
+                                params={{ publicId: task.publicId }}
                                 className={styles.actionBtn}
-                                disabled
-                                title="Редактирование будет доступно позже"
                             >
                                 Редактировать
-                            </button>
+                            </Link>
                             <button
                                 ref={registerDeleteBtn(task.id)}
                                 type="button"
