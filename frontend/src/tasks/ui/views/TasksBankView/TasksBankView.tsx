@@ -4,6 +4,7 @@ import { AuthService } from '@/auth/services/AuthService.ts';
 import { TasksBankService } from '@/tasks/services/TasksBankService';
 import { useTasksBank } from '@/tasks/hooks/useTasksBank';
 import { useTaskRefs } from '@/tasks/hooks/useTaskRefs';
+import { Pagination } from '@/shared/ui-kit/Pagination/Pagination';
 import { ChipsMultiselect } from '@/tasks/ui/widgets/ChipsMultiselect/ChipsMultiselect';
 import { BulkActionsBar } from '@/tasks/ui/widgets/BulkActionsBar/BulkActionsBar';
 import { TaskDeletePopup } from '@/tasks/ui/widgets/TaskDeletePopup/TaskDeletePopup';
@@ -281,44 +282,6 @@ export function TasksBankView() {
                 />
             )}
         </div>
-    );
-}
-
-// Типичная пагинация: в начало / назад / номера страниц / вперёд / в конец.
-function Pagination({ page, totalPages, onPageChange }: { page: number; totalPages: number; onPageChange: (p: number) => void }) {
-    const pages = Array.from({ length: totalPages }, (_, i) => i);
-
-    return (
-        <nav className={styles.pagination} aria-label="Пагинация">
-            <button type="button" className={styles.pageBtn} onClick={() => onPageChange(0)} disabled={page === 0} title="В начало">
-                ⇤
-            </button>
-            <button type="button" className={styles.pageBtn} onClick={() => onPageChange(page - 1)} disabled={page === 0}>
-                ←
-            </button>
-            {pages.map((p) => (
-                <button
-                    key={p}
-                    type="button"
-                    className={`${styles.pageBtn} ${p === page ? styles.pageBtnActive : ''}`}
-                    onClick={() => onPageChange(p)}
-                >
-                    {p + 1}
-                </button>
-            ))}
-            <button type="button" className={styles.pageBtn} onClick={() => onPageChange(page + 1)} disabled={page >= totalPages - 1}>
-                →
-            </button>
-            <button
-                type="button"
-                className={styles.pageBtn}
-                onClick={() => onPageChange(totalPages - 1)}
-                disabled={page >= totalPages - 1}
-                title="В конец"
-            >
-                ⇥
-            </button>
-        </nav>
     );
 }
 
