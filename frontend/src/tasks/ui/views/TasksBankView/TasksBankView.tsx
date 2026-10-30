@@ -107,9 +107,10 @@ export function TasksBankView() {
     // бэкенда (TaskController: includeMixed=false). Разница состояний теперь видна сразу.
     const [includeMixed, setIncludeMixed] = useState(false);
 
-    // Смена фильтра возвращает на первую страницу (сбрасывает и скролл-позицию списка):
-    // иначе при галочке/фильтре остаётся старый page, а новых страниц может не быть —
-    // бэк отдаёт пустую страницу, UI выглядит сломанным.
+    // Смена фильтра возвращает на первую страницу: иначе при галочке/фильтре остаётся
+    // старый page, а новых страниц может не быть — бэк отдаёт пустую страницу, UI выглядит сломанным.
+    // Скролл при этом НЕ трогаем: пользователь кликнул чип/галочку там, где ему удобно
+    // (обычно в блоке фильтров или у пагинации внизу) — прыжок в начало только мешает.
     const applyFilter = <T,>(setter: (value: T) => void) => (value: T) => {
         setter(value);
         setPage(0);
@@ -126,6 +127,9 @@ export function TasksBankView() {
         setPage(0);
         window.setTimeout(() => setDebouncedSearch(value), SEARCH_DEBOUNCE_MS);
     };
+
+    // Позиция скролла на момент смены состояния загрузки (для возврата после загрузки новой страницы).
+    const scrollPosOnPageChange = useRef<number | null>(null);
 
     const fetcher = useCallback(
         (page: number, size: number) =>
@@ -144,20 +148,31 @@ export function TasksBankView() {
 
     const { pageItems, totalCount, totalPages, page, setPage, isLoading, isError, error, reload } = useTasksBank(fetcher);
 
-    // Смена страницы: всегда запрашиваем данные и поднимаем список в начало (пагинация — под списком).
+    // Смена страницы (пагинация): сохраняем позицию скролла — кнопки остаются под
+    // списком там же, куда пользователь уже дотянулся; прыжок в верх только мешает.
     const changePage = useCallback(
         (nextPage: number) => {
             if (nextPage === page || nextPage < 0 || nextPage > totalPages - 1) return;
             setPage(nextPage);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
         },
         [page, setPage, totalPages],
     );
 
-    // Плавный подъём к началу списка при смене фильтра/галочки.
+    // Если загрузка новой страницы/фильтра всё же сместила страницу (изменилась высота
+    // списка) — мгновенно возвращаем позицию. Значение запоминаем на каждом изменении
+    // isLoading: при смене фильтра запрос стартует в том же рендере, что и клик, поэтому
+    // отдельный capture по page тут не сработал бы.
     useEffect(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, [debouncedSearch, grammarTypeId, itemType, level, examType, includeMixed]);
+        if (isLoading) {
+            scrollPosOnPageChange.current = window.scrollY;
+            return;
+        }
+        const target = scrollPosOnPageChange.current;
+        scrollPosOnPageChange.current = null;
+        if (target != null && Math.abs(target - window.scrollY) > 4) {
+            window.scrollTo({ top: target, behavior: 'instant' });
+        }
+    }, [isLoading]);
 
     // Удаление задания (только владелец): подтверждение в попапе у кнопки -> DELETE /api/tasks/{id} -> перезагрузка страницы.
     const confirmDelete = useCallback(async () => {
