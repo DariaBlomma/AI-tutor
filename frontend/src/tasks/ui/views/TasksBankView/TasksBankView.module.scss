@@ -155,6 +155,11 @@
   font-family: inherit;
   cursor: pointer;
   transition: all 0.15s;
+  // Стиль применяется и к <button>, и к <Link> (кнопка «Редактировать» — ссылка роутера).
+  display: inline-block;
+  text-decoration: none;
+  line-height: 1.4;
+  text-align: center;
 
   &:disabled {
     opacity: 0.45;
