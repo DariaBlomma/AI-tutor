@@ -45,12 +45,9 @@
   color: var(--p);
 }
 
-// Выпадающая панель с календарём.
+// Панель календаря (Radix Popover, рендерится через portal).
 .panel {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  z-index: 10;
+  z-index: 1000;
   width: 268px;
   padding: 12px;
   border: 1px solid var(--p);
@@ -58,6 +55,22 @@
   background: $bg;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   color: var(--c1);
+
+  // Мягкое появление панели.
+  &[data-state='open'] {
+    animation: dtp-content-in 140ms ease-out;
+  }
+}
+
+@keyframes dtp-content-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .header {
@@ -151,26 +164,34 @@
 
 .timeLabel {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 4px;
   font-size: 12px;
   color: var(--c3);
 }
 
-.timeInput {
+.timeSelect {
   border: 1px solid rgba(157, 124, 242, 0.4);
   border-radius: 6px;
-  padding: 5px 8px;
+  padding: 5px 6px;
   font-size: 13px;
-  background: transparent;
+  background: $bg;
   color: var(--c1);
-  // Тёмная тема для нативных контролов time (иконки в Chrome).
+  cursor: pointer;
+  // Тёмная тема для нативных контролов (стрелки/опции в Chrome).
   color-scheme: dark;
 
   &:focus {
     outline: none;
     border-color: var(--p);
   }
+}
+
+.timeColon {
+  align-self: center;
+  margin: 0 -2px;
+  color: var(--c1);
+  font-weight: 600;
 }
 
 .timeActions {
