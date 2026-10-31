@@ -359,7 +359,12 @@ export function TasksBankView() {
                 <BulkActionsBar selectedCount={selectedIds.size} onAction={setBulkAction} />
             )}
             {isTeacher && (
-                <TasksBulkPopup action={bulkAction} selectedCount={selectedIds.size} onClose={closeBulkPopup} />
+                <TasksBulkPopup
+                    action={bulkAction}
+                    selectedTasks={selectedTasks}
+                    onClose={closeBulkPopup}
+                    onAssigned={closeBulkPopup}
+                />
             )}
 
             {/* Попап подтверждения удаления — рядом с кнопкой «Удалить» (без полноэкранного затемнения). */}
