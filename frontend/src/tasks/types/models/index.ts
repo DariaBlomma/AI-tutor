@@ -184,6 +184,14 @@ export interface TaskUpdateRequestDto {
     taskTypeIds: number[];
 }
 
+/** GET /api/tasks/by-public-id/{publicId}/usage -> TaskUsageResponse (факт использования задания учениками). */
+export interface TaskUsageDto {
+    /** Есть незавершённые назначения (ASSIGNED / IN_PROGRESS). */
+    hasActiveAssignments: boolean;
+    /** Есть сдачи (COMPLETED), в том числе по ранее удалённым назначениям. */
+    hasSubmissions: boolean;
+}
+
 /** POST/PUT /api/topics -> TopicRequest. */
 export interface RefNameRequestDto {
     name: string;

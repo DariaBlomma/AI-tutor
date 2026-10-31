@@ -5,6 +5,7 @@ import { TaskForm } from '@/tasks/ui/widgets/TaskForm/TaskForm';
 import { useUpdateTask } from '@/tasks/hooks/useCreateTask';
 import type { CreateTaskFormState } from '@/tasks/hooks/useCreateTask';
 import { useTaskDetail } from '@/tasks/hooks/useTaskDetail';
+import { useTaskUsage } from '@/tasks/hooks/useTaskUsage';
 import { taskToFormState } from '@/tasks/lib/taskFormHydration';
 import styles from './TaskEditView.module.scss';
 
@@ -22,6 +23,11 @@ export function TaskEditView({ publicId }: TaskEditViewProps) {
     const goBack = useCallback(() => {
         void navigate({ to: '/tasks-bank/$publicId', params: { publicId } });
     }, [navigate, publicId]);
+
+    // Факт использования задания (назначено/решено) — блокирует содержательные поля формы.
+    // Ошибку загрузки не считаем блокировкой: сервер всё равно проверит контент на PUT (400).
+    const { usage } = useTaskUsage(publicId);
+    const contentLocked = Boolean(usage && (usage.hasActiveAssignments || usage.hasSubmissions));
 
     const { submit, isSubmitting, error: saveError } = useUpdateTask(goBack);
 
@@ -69,6 +75,7 @@ export function TaskEditView({ publicId }: TaskEditViewProps) {
                 key={task.id}
                 initial={initial}
                 editMode
+                contentLocked={contentLocked}
                 submitLabel="Сохранить изменения"
                 submittingLabel="Сохранение…"
                 isSubmitting={isSubmitting}

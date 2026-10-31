@@ -5,18 +5,21 @@ import com.aitutor.backend.dto.task.TaskItemRequest;
 import com.aitutor.backend.dto.task.TaskResponse;
 import com.aitutor.backend.dto.task.TaskSummaryResponse;
 import com.aitutor.backend.dto.task.TaskUpdateRequest;
+import com.aitutor.backend.dto.task.TaskUsageResponse;
 import com.aitutor.backend.entities.Task;
 import com.aitutor.backend.entities.TaskItem;
 import com.aitutor.backend.entities.TaskType;
 import com.aitutor.backend.enums.CefrLevel;
 import com.aitutor.backend.enums.ExamType;
 import com.aitutor.backend.enums.ItemType;
+import com.aitutor.backend.enums.WorkStatus;
 import com.aitutor.backend.entities.Topic;
 import com.aitutor.backend.entities.User;
 import com.aitutor.backend.exceptions.InvalidRequestException;
 import com.aitutor.backend.exceptions.ResourceNotFoundException;
 import com.aitutor.backend.helpers.PublicIdGenerator;
 import com.aitutor.backend.mappers.TaskMapper;
+import com.aitutor.backend.repositories.StudentWorkRepository;
 import com.aitutor.backend.repositories.TopicRepository;
 import com.aitutor.backend.repositories.UserRepository;
 import com.aitutor.backend.repositories.task.TaskRepository;
@@ -49,6 +52,7 @@ public class TaskService {
     private final TopicRepository topicRepository;
     private final TaskTypeRepository taskTypeRepository;
     private final UserRepository userRepository;
+    private final StudentWorkRepository studentWorkRepository;
     private final TaskMapper taskMapper;
     private final TaskPreviewBuilder previewBuilder;
     private final TaskContentValidator contentValidator;
@@ -142,6 +146,22 @@ public class TaskService {
         return taskMapper.toResponse(task);
     }
 
+    /**
+     * Факт использования задания учениками (назначено/решено) — страница редактирования
+     * блокирует по нему содержательные поля. Право на редактирование (владение) проверяет PUT.
+     */
+    @Transactional(readOnly = true)
+    public TaskUsageResponse getUsageByPublicId(String publicId) {
+        Task task = taskRepository.findWithRelationsByPublicId(publicId)
+                .orElseThrow(() -> new ResourceNotFoundException("Задание не найдено: publicId=" + publicId));
+        if (task.getDeletedAt() != null) {
+            throw new ResourceNotFoundException("Задание удалено: publicId=" + publicId);
+        }
+        return TaskUsageResponse.builder()
+                .hasActiveAssignments(isContentLocked(task.getId()))
+                .build();
+    }
+
     @Transactional
     public TaskResponse create(TaskCreateRequest request, Long teacherId) {
         User teacher = userRepository.findActiveById(teacherId)
@@ -190,9 +210,26 @@ public class TaskService {
         Set<Topic> topics = resolveTopics(request.getTopicIds());
         Set<TaskType> taskTypes = resolveTaskTypes(request.getTaskTypeIds());
 
-        task.setName(request.getName());
-        task.setInstruction(request.getInstruction());
-        task.setContext(request.getContext());
+        // Контент задания (текст задания/инструкция/материал/пункты/ответы) нельзя менять,
+        // если задание кому-то назначено или уже кем-то решено: ученик видел именно эти
+        // формулировки и ответы. Разрешаем только метаданные (теги). Механику менять нельзя всегда.
+        boolean contentLocked = isContentLocked(task.getId());
+        if (contentLocked) {
+            assertContentUnchanged(task, request);
+        } else {
+            task.setName(request.getName());
+            task.setInstruction(request.getInstruction());
+            task.setContext(request.getContext());
+
+            // Полная замена списка пунктов: отсутствующие в запросе удаляются через orphanRemoval
+            task.getItems().clear();
+            List<TaskItem> newItems = mapItems(request.getItems());
+            // Явная двусторонняя связь: task_id в БД NOT NULL; на managed-сущности cascade её не проставит сам
+            newItems.forEach(i -> i.setTask(task));
+            task.getItems().addAll(newItems);
+            task.setPreviewText(previewBuilder.build(task.getItems()));
+        }
+
         task.setTopics(topics);
         task.setTaskTypes(taskTypes);
         // Состав типов в запросе заведомо активный (resolveTaskTypes), поэтому is_mixed
@@ -202,14 +239,6 @@ public class TaskService {
         // тип экзамена — необязательное поле: null в запросе очищает значение (edit in place).
         task.setLevels(request.getLevels() == null ? Set.of() : request.getLevels());
         task.setExamType(request.getExamType());
-
-        // Полная замена списка пунктов: отсутствующие в запросе удаляются через orphanRemoval
-        task.getItems().clear();
-        List<TaskItem> newItems = mapItems(request.getItems());
-        // Явная двусторонняя связь: task_id в БД NOT NULL; на managed-сущности cascade её не проставит сам
-        newItems.forEach(i -> i.setTask(task));
-        task.getItems().addAll(newItems);
-        task.setPreviewText(previewBuilder.build(task.getItems()));
 
         return taskMapper.toResponse(task);
     }
@@ -242,6 +271,89 @@ public class TaskService {
         }
         return task;
     }
+
+    /** Есть ли у задания незавершённые назначения (ASSIGNED / IN_PROGRESS), без удалённых. */
+    private boolean isAssigned(Long taskId) {
+        return studentWorkRepository.existsByTaskIdAndDeletedAtIsNullAndStatusIn(
+                taskId, Set.of(WorkStatus.ASSIGNED, WorkStatus.IN_PROGRESS));
+    }
+
+    /** Есть ли у задания сдачи (COMPLETED); удалённое назначение не отменяет факта решения. */
+    private boolean isSolved(Long taskId) {
+        return studentWorkRepository.existsByTaskIdAndStatus(taskId, WorkStatus.COMPLETED);
+    }
+
+    /** Контент защищён, если задание кому-то назначено или уже кем-то решено. */
+    private boolean isContentLocked(Long taskId) {
+        return isAssigned(taskId) || isSolved(taskId);
+    }
+
+    /**
+     * Сравнение «содержательных» полей запроса с текущим состоянием задания при заблокированном
+     * контенте (задание назначено/решено): любое отличие — 400. Метаданные (теги) менять разрешаем.
+     * Пустая строка и null эквивалентны (фронт шлёт orNull).
+     */
+    private void assertContentUnchanged(Task task, TaskUpdateRequest request) {
+        String violation = null;
+        if (!sameText(task.getName(), request.getName())) {
+            violation = "название";
+        } else if (!sameText(task.getInstruction(), request.getInstruction())) {
+            violation = "инструкцию";
+        } else if (!sameText(task.getContext(), request.getContext())) {
+            violation = "текст задания";
+        } else if (!sameItems(task.getItems(), request.getItems())) {
+            violation = "пункты и ответы задания";
+        }
+        if (violation != null) {
+            throw new InvalidRequestException(
+                    "Задание уже назначено ученикам или решено — нельзя менять " + violation + ".");
+        }
+    }
+
+    private static boolean sameText(String stored, String incoming) {
+        String a = stored == null ? "" : stored.trim();
+        String b = incoming == null ? "" : incoming.trim();
+        return a.equals(b);
+    }
+
+    /** Сопоставление пунктов по позиции: состав, механика, prompt, ответ и content должны совпадать. */
+    private static boolean sameItems(List<TaskItem> stored, List<TaskItemRequest> incoming) {
+        if (stored.size() != incoming.size()) {
+            return false;
+        }
+        for (int i = 0; i < stored.size(); i++) {
+            TaskItem current = stored.get(i);
+            TaskItemRequest next = incoming.get(i);
+            if (current.getItemType() != next.getItemType()
+                    || !sameText(current.getPrompt(), next.getPrompt())
+                    || !sameText(current.getCorrectAnswer(), next.getCorrectAnswer())
+                    || !sameJson(current.getContent(), next.getContent())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * content — JSONB-строка: сравниваем как JSON (порядок ключей и пробелы не значимы),
+     * некорректный JSON сравниваем как текст (валидатор к этому моменту уже прошёл).
+     */
+    private static boolean sameJson(String stored, String incoming) {
+        String a = stored == null ? "" : stored.trim();
+        String b = incoming == null ? "" : incoming.trim();
+        if (a.equals(b)) {
+            return true;
+        }
+        try {
+            return CONTENT_MAPPER.readTree(a.isEmpty() ? "null" : a)
+                    .equals(CONTENT_MAPPER.readTree(b.isEmpty() ? "null" : b));
+        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+            return false;
+        }
+    }
+
+    private static final com.fasterxml.jackson.databind.ObjectMapper CONTENT_MAPPER =
+            new com.fasterxml.jackson.databind.ObjectMapper();
 
     /**
      * Валидация JSONB-контента до записи в БД (InvalidRequestException → 400 Bad Request).

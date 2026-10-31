@@ -11,4 +11,6 @@ export interface TaskItemCardProps {
     onMoveUp: (index: number) => void;
     onMoveDown: (index: number) => void;
     onRemove: (index: number) => void;
+    /** Блокировка правки пункта (текст/ответы), если задание уже назначено/решено учениками. */
+    disabled?: boolean;
 }
