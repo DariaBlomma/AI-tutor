@@ -148,6 +148,13 @@ export function TasksBankView() {
 
     const { pageItems, totalCount, totalPages, page, setPage, isLoading, isError, error, reload } = useTasksBank(fetcher);
 
+    // Карточки выбранных заданий (для bulk-попапа): selectedIds сохраняются между страницами
+    // и фильтрами, но объекты берём из текущей страницы — вне её карточек у нас нет.
+    const selectedTasks = useMemo(
+        () => pageItems.filter((task) => selectedIds.has(task.id)),
+        [pageItems, selectedIds],
+    );
+
     // Актуальность списка после возврата со страницы редактирования/удаления: fetcher стабилен
     // при неизменных фильтрах, effect выполнится один раз на монтирование экрана.
     // ВАЖНО: reload обязан быть стабильной ссылкой (в хуке — useCallback), иначе этот эффект

@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { BaseModal } from '@/shared/ui-kit/BaseModal/BaseModal';
+import { DateTimePicker } from '@/shared/ui-kit/DateTimePicker/DateTimePicker';
 import { Loader } from '@/shared/ui-kit/Loader/Loader';
 import { studentDisplayName } from '@/shared/utils/studentDisplayName';
 import { useAssignTaskToStudents } from '@/teacher/hooks/useAssignTaskToStudents';
@@ -79,15 +80,10 @@ export function TaskAssignPopup({ open, onClose, tasks }: TaskAssignPopupProps) 
                     </ul>
                 )}
 
-                <label className={styles.field}>
+                <div className={styles.field}>
                     <span className={styles.fieldLabel}>Актуально до (необязательно)</span>
-                    <input
-                        type="datetime-local"
-                        className={styles.deadlineInput}
-                        value={deadline}
-                        onChange={(e) => setDeadline(e.target.value)}
-                    />
-                </label>
+                    <DateTimePicker value={deadline} onChange={setDeadline} placeholder="Выберите дату и время" />
+                </div>
 
                 <div className={styles.buttons}>
                     <button type="button" className={styles.cancelBtn} onClick={onClose}>

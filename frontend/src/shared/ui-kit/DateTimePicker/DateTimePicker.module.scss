@@ -1,0 +1,205 @@
+@use '../../styles/variables' as *;
+
+.root {
+  position: relative;
+}
+
+// Поле-триггер: выглядит как обычный инпут формы, открывает панель по клику.
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  border: 1px solid rgba(157, 124, 242, 0.4);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 14px;
+  background: transparent;
+  color: var(--c1);
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+
+  &:hover {
+    border-color: var(--p);
+  }
+}
+
+.triggerOpen {
+  border-color: var(--p);
+}
+
+.triggerText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.placeholder {
+  color: var(--c3);
+}
+
+.icon {
+  flex-shrink: 0;
+  color: var(--p);
+}
+
+// Выпадающая панель с календарём.
+.panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 10;
+  width: 268px;
+  padding: 12px;
+  border: 1px solid var(--p);
+  border-radius: 10px;
+  background: $bg;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  color: var(--c1);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.monthTitle {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.navBtn {
+  border: none;
+  background: none;
+  color: var(--p);
+  font-size: 18px;
+  line-height: 1;
+  padding: 4px 8px;
+  cursor: pointer;
+  border-radius: 6px;
+
+  &:hover {
+    background: rgba(157, 124, 242, 0.15);
+  }
+}
+
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 4px;
+}
+
+.weekday {
+  text-align: center;
+  font-size: 11px;
+  color: var(--c3);
+  padding: 2px 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.day {
+  border: none;
+  background: none;
+  color: var(--c1);
+  font-size: 13px;
+  height: 30px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.12s ease;
+
+  &:hover {
+    background: rgba(157, 124, 242, 0.2);
+  }
+}
+
+.dayMuted {
+  color: rgba(155, 155, 155, 0.45);
+}
+
+.dayToday {
+  border: 1px solid var(--p);
+}
+
+.daySelected {
+  background: var(--p);
+  color: #fff;
+  font-weight: 600;
+
+  &:hover {
+    background: var(--pd);
+  }
+}
+
+.timeRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(157, 124, 242, 0.25);
+}
+
+.timeLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--c3);
+}
+
+.timeInput {
+  border: 1px solid rgba(157, 124, 242, 0.4);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 13px;
+  background: transparent;
+  color: var(--c1);
+  // Тёмная тема для нативных контролов time (иконки в Chrome).
+  color-scheme: dark;
+
+  &:focus {
+    outline: none;
+    border-color: var(--p);
+  }
+}
+
+.timeActions {
+  display: flex;
+  gap: 6px;
+}
+
+.clearBtn,
+.todayBtn {
+  border: 1px solid rgba(157, 124, 242, 0.4);
+  background: none;
+  color: var(--c1);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--p);
+    background: rgba(157, 124, 242, 0.12);
+  }
+}
+
+.todayBtn {
+  border-color: var(--p);
+  background: var(--p);
+  color: #fff;
+
+  &:hover {
+    background: var(--pd);
+  }
+}
