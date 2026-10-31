@@ -1,11 +1,8 @@
-import { ClipLoader } from 'react-spinners';
-
+import { Spinner, type SpinnerProps } from './Spinner.tsx';
 import { useDelayedVisible } from './useDelayedVisible.ts';
 import styles from './Loader.module.scss';
 
 export interface LoaderProps {
-    /** Текст-подпись под спиннером; null — без подписи. По умолчанию «Загрузка…». */
-    label?: string | null;
     /**
      * Управление видимостью извне: `true` — идёт загрузка. Компонент сам решает,
      * показывать ли спиннер (см. `showDelayMs`) и плавно проигрывает появление/исчезновение.
@@ -14,20 +11,19 @@ export interface LoaderProps {
     active?: boolean;
     /** Пауза перед показом спиннера, мс (только в авто-режиме). */
     showDelayMs?: number;
+    /** Параметры кольца-спиннера (size, thickness). */
+    spinner?: SpinnerProps;
 }
 
-const DEFAULT_LABEL = 'Загрузка…';
-
-// Единый лоадер приложения: спиннер react-spinners (ClipLoader) + подпись.
-// Цвет задаём через cssOverride значением CSS-переменной темы --p: react-spinners
-// кладёт его в inline-стиль border-color, браузер сам разрешает var() из каскада,
-// поэтому компонент наследует палитру страницы и не требует цветовых пропсов.
+// Единый лоадер приложения: чистый CSS-спиннер (вращающееся кольцо).
+// Без текста-подписи и без пульсации — само вращение показывает состояние загрузки.
+// Для покрытия всей загружаемой области используйте <LoadingWidget mode="overlay">.
 //
 // Режимы работы:
 //  - <Loader active={isLoading} /> — авто-режим: быстрая загрузка не показывает спиннер
 //    вовсе, длинная — показывает с плавным fade-in/fade-out (без «мигания» списка);
 //  - <Loader /> — условное рендерение ({isLoading && <Loader/>}), виден сразу и всегда.
-export function Loader({ label = DEFAULT_LABEL, active, showDelayMs }: LoaderProps) {
+export function Loader({ active, showDelayMs, spinner }: LoaderProps) {
     const auto = active !== undefined;
     const delayedActive = useDelayedVisible(auto ? active : true, showDelayMs ?? 150);
     // В авто-режиме контейнер остаётся в DOM — transition opacity отыгрывает и на
@@ -41,8 +37,7 @@ export function Loader({ label = DEFAULT_LABEL, active, showDelayMs }: LoaderPro
             aria-live="polite"
             aria-hidden={auto && !visible}
         >
-            <ClipLoader size={22} speedMultiplier={1.2} cssOverride={{ borderColor: 'var(--p)' }} />
-            {label !== null && <span className={styles.label}>{label}</span>}
+            <Spinner size={spinner?.size ?? 24} thickness={spinner?.thickness ?? 3} />
         </div>
     );
 }

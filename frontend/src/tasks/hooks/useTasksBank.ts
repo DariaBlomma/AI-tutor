@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { extractErrorMessage } from '@/core/api/utils/errors';
 import type { PageDto, TaskSummary } from '@/tasks/types';
 
@@ -34,18 +34,33 @@ export function useTasksBank(fetcher: (page: number, size: number) => Promise<Pa
     const [isLoading, setIsLoading] = useState(true);
     const [isError, setIsError] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [page, setPage] = useState(0);
+    const [page, setPageState] = useState(0);
     // Счётчик перезагрузок: инкремент заставляет effect ниже запросить текущую страницу заново.
+    // useCallback — ссылка стабильна: потребители держат reload в deps эффектов, и нестабильная
+    // функция вызывала бы у них бесконечный цикл «reload → rerender → эффект → reload».
     const [reloadToken, setReloadToken] = useState(0);
-    const reload = () => setReloadToken((t) => t + 1);
+    const reload = useCallback(() => setReloadToken((t) => t + 1), []);
+
+    // Смена страницы (в т.ч. возврат на первую при смене фильтров). Отдельный stable-колбэк,
+    // чтобы setPage в результате хука не менялся каждый рендер (иначе эффекты-зависимые
+    // от него у потребителей перезапускались бы бесконечно).
+    const setPage = useCallback((nextPage: number) => setPageState(nextPage), []);
 
     // Смена фильтров перезагружает список — возвращаемся на первую страницу.
+    // Условие «только если не на первой» обязательно: setPageState(0) при page===0, хотя и
+    // не меняет состояние, но помечает компонент как «update scheduled» и мешает bail-out'у
+    // React — вместе с эффектом reload у потребителя это давало бесконечный каскад рендеров
+    // (страница залипала на вечной загрузке).
+    const prevFetcher = useRef(fetcher);
     useEffect(() => {
-        setPage(0);
-    }, [fetcher]);
+        const changed = prevFetcher.current !== fetcher;
+        prevFetcher.current = fetcher;
+        if (changed && page !== 0) setPageState(0);
+    }, [fetcher, page]);
 
     useEffect(() => {
         let active = true;
+        const timers: number[] = [];
 
         setIsLoading(true);
         const startedAt = Date.now();
@@ -53,7 +68,8 @@ export function useTasksBank(fetcher: (page: number, size: number) => Promise<Pa
         // кадр «появился спиннер → пропал», и список визуально мигает. Сглаживаем переход,
         // не показывая лоадер дольше самого запроса при медленной сети.
         const finish = (fn: () => void) => {
-            window.setTimeout(fn, Math.max(0, MIN_LOADING_MS - (Date.now() - startedAt)));
+            const id = window.setTimeout(fn, Math.max(0, MIN_LOADING_MS - (Date.now() - startedAt)));
+            timers.push(id);
         };
         fetcher(page, TASKS_PAGE_SIZE)
             .then((data) => {
@@ -83,6 +99,10 @@ export function useTasksBank(fetcher: (page: number, size: number) => Promise<Pa
 
         return () => {
             active = false;
+            // Отменяем отложенные «finish»-таймеры: иначе после размонтирования/перезапуска
+            // effect'а (StrictMode, быстрая смена фильтров) в старом замыкании остался бы
+            // pending setIsLoading(false) и состояние загрузки залипло.
+            timers.forEach((id) => window.clearTimeout(id));
         };
     }, [fetcher, page, reloadToken]);
 
