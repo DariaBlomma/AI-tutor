@@ -42,6 +42,21 @@ export interface CourseTaskAddRequestDto {
     position?: number | null;
 }
 
+// GET /api/courses (без taskId) -> CourseSummaryResponse — строка списка «Мои курсы»
+// (фильтр по курсам на странице банка заданий).
+export interface CourseSummary {
+    id: number;
+    name: string;
+    taskCount: number;
+    createdAt: string;
+    updatedAt: string;
+}
+
+// POST /api/courses -> CourseResponse (создание/переименование — только name).
+export interface CourseRequestDto {
+    name: string;
+}
+
 // GET /api/teacher/students -> StudentBriefResponse (ученик в списке назначения).
 export interface StudentBrief {
     id: number;

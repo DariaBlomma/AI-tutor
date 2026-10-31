@@ -1,5 +1,7 @@
 package com.aitutor.backend.services.task;
 
+import com.aitutor.backend.entities.Course;
+import com.aitutor.backend.entities.CourseTask;
 import com.aitutor.backend.entities.Task;
 import com.aitutor.backend.entities.TaskItem;
 import com.aitutor.backend.enums.ItemType;
@@ -8,6 +10,8 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
 import org.springframework.data.jpa.domain.Specification;
+
+import java.util.List;
 
 /**
  * Фильтры банка заданий. Всегда добавляют условие soft-delete (deleted_at IS NULL).
@@ -86,6 +90,29 @@ public final class TaskSpecifications {
         return (root, query, cb) -> examType == null
                 ? cb.conjunction()
                 : cb.equal(root.get("examType"), examType);
+    }
+
+    /**
+     * Фильтр по курсам (мультиселект на странице банка заданий): оставляем задания,
+     * которые входят хотя бы в один из выбранных активных (не удалённых) курсов.
+     * EXISTS + correlated join вместо count-подзапроса — без дублей строк на пагинации.
+     */
+    public static Specification<Task> byCourses(List<Long> courseIds) {
+        return (root, query, cb) -> {
+            if (courseIds == null || courseIds.isEmpty()) {
+                return cb.conjunction();
+            }
+            Subquery<Long> sub = query.subquery(Long.class);
+            Root<CourseTask> ct = sub.from(CourseTask.class);
+            Join<CourseTask, Course> course = ct.join("course");
+            sub.select(cb.literal(1L))
+                    .where(cb.and(
+                            cb.equal(ct.get("task"), root),
+                            course.get("id").in(courseIds),
+                            cb.isNull(course.get("deletedAt"))
+                    ));
+            return cb.exists(sub);
+        };
     }
 
     /** Поиск по названию или публичному id (TSK-1), регистронезависимо. */

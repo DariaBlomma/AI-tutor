@@ -11,7 +11,12 @@ export class TasksBankService {
      * Серверная пагинация: page/size; фильтры: search, taskTypeId, includeMixed.
      */
     static async getTasks(params?: TasksQueryParams): Promise<PageDto<TaskSummary>> {
-        const response = await api.get<PageDto<TaskSummary>>(TASKS_PATH, { params });
+        // courseIds — массив: сериализуем в повторяющиеся параметры (courseIds=1&courseIds=2),
+        // так их ждёт Spring (@RequestParam List<Long>). Дефолтный сериализатор axios добавил бы [] в имя.
+        const response = await api.get<PageDto<TaskSummary>>(TASKS_PATH, {
+            params,
+            paramsSerializer: { indexes: null },
+        });
         return response.data;
     }
 
