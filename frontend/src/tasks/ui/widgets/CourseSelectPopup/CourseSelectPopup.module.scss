@@ -1,0 +1,127 @@
+@use '@/shared/styles/variables' as *;
+
+.modal {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: var(--c1);
+}
+
+.title {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.hint {
+  margin: 0;
+  font-size: 13px;
+  color: var(--c3);
+}
+
+.empty {
+  font-size: 13px;
+  color: var(--c3);
+}
+
+.error {
+  background: rgba(255, 107, 107, 0.12);
+  border: 1px solid $err;
+  color: $err;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.success {
+  background: rgba(107, 255, 160, 0.1);
+  border: 1px solid #4caf7d;
+  color: #6fdf9f;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fieldLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--c3);
+}
+
+// Строка создания курса: инпут названия + кнопка «Создать курс».
+.createRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.createBtn {
+  flex-shrink: 0;
+  border: 1px solid var(--p);
+  background: transparent;
+  color: var(--p);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: var(--p);
+    color: #fff;
+  }
+
+  &:active:not(:disabled) {
+    opacity: 0.85;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}
+
+.buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.cancelBtn {
+  border: none;
+  background: none;
+  color: var(--c3);
+  font-size: 13px;
+  cursor: pointer;
+
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.submitBtn {
+  border: none;
+  border-radius: 6px;
+  background: var(--p);
+  color: #fff;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}

@@ -1,11 +1,9 @@
 // Базовый мультивыбор (react-select isMulti) в стиле проекта — пара к BaseSelectSingle:
 // та же библиотека и те же CSS-классы темы (тёмная фиолетовая гамма).
 // Стандартный подход для кликабельных элементов: hover/active меняют цвет, не размер.
-import Select, { type GroupBase, type MultiValue, type OptionsOrGroups } from 'react-select';
+import Select from 'react-select';
 import type { BaseSelectMultiProps } from './types';
 import styles from './BaseSelectMulti.module.scss';
-
-type Option = { value: string; label: string };
 
 export function BaseSelectMulti<TValue extends string = string>({
     options,
@@ -16,17 +14,19 @@ export function BaseSelectMulti<TValue extends string = string>({
     className,
     ariaLabel,
 }: BaseSelectMultiProps<TValue>) {
-    const selected: Option[] = value
+    type RSType = { readonly value: string; readonly label: string };
+    const rsOptions: ReadonlyArray<RSType> = options;
+    const selected: RSType[] = value
         .map((v) => options.find((o) => o.value === v))
-        .filter((o): o is Option => o != null);
+        .filter((o): o is { value: TValue; label: string } => o != null);
 
     return (
         <div className={className} style={{ width: '100%' }}>
-            <Select<Option, true>
+            <Select<RSType, true>
                 isMulti
-                options={options as unknown as OptionsOrGroups<Option, GroupBase<Option>>}
+                options={rsOptions}
                 value={selected}
-                onChange={(next: MultiValue<Option>) => onChange(next.map((o) => o.value as TValue))}
+                onChange={(next) => onChange(next.map((o) => o.value as TValue))}
                 placeholder={placeholder}
                 isDisabled={isDisabled}
                 isClearable={false}

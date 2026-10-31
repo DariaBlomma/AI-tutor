@@ -6,6 +6,8 @@ import { useTasksBank } from '@/tasks/hooks/useTasksBank';
 import { useTaskRefs } from '@/tasks/hooks/useTaskRefs';
 import { Pagination } from '@/shared/ui-kit/Pagination/Pagination';
 import { LoadingWidget } from '@/shared/ui-kit/Loader/LoadingWidget';
+import { BaseSelectMulti } from '@/shared/ui-kit/BaseSelectMulti/BaseSelectMulti';
+import { useTeacherCourses } from '@/teacher/hooks/useTeacherCourses';
 import { ChipsMultiselect } from '@/tasks/ui/widgets/ChipsMultiselect/ChipsMultiselect';
 import { BulkActionsBar } from '@/tasks/ui/widgets/BulkActionsBar/BulkActionsBar';
 import { TaskDeletePopup } from '@/tasks/ui/widgets/TaskDeletePopup/TaskDeletePopup';
@@ -103,6 +105,9 @@ export function TasksBankView() {
     const [level, setLevel] = useState<CefrLevel | null>(null);
     const [examType, setExamType] = useState<ExamType | null>(null);
     const [topicId, setTopicId] = useState<number | null>(null);
+    // Фильтр по курсам (мультиселект BaseSelectMulti — та же react-select, что сингл-селекты).
+    // Значение храним строками (value селекта), в запрос конвертируем в number[].
+    const [courseIdsFilter, setCourseIdsFilter] = useState<string[]>([]);
     // Галочка «Включать смешанные задания»: по умолчанию выключена — совпадает с дефолтом
     // бэкенда (TaskController: includeMixed=false). Разница состояний теперь видна сразу.
     const [includeMixed, setIncludeMixed] = useState(false);
@@ -121,6 +126,8 @@ export function TasksBankView() {
     const changeExamType = applyFilter(setExamType);
     const changeTopic = applyFilter(setTopicId);
     const changeIncludeMixed = applyFilter(setIncludeMixed);
+    // Мультиселект курсов: тот же сброс на первую страницу, что у остальных фильтров.
+    const changeCourseIds = applyFilter(setCourseIdsFilter);
 
     const applySearch = (value: string) => {
         setSearchInput(value);
@@ -139,11 +146,13 @@ export function TasksBankView() {
                 itemType: itemType ?? undefined,
                 levels: level ?? undefined,
                 examType: examType ?? undefined,
+                // Фильтр по курсам: пустой мультиселект = не применять (undefined), иначе number[].
+                courseIds: courseIdsFilter.length ? courseIdsFilter.map(Number) : undefined,
                 includeMixed,
                 page,
                 size,
             }),
-        [debouncedSearch, grammarTypeId, itemType, level, examType, includeMixed],
+        [debouncedSearch, grammarTypeId, itemType, level, examType, courseIdsFilter, includeMixed],
     );
 
     const { pageItems, totalCount, totalPages, page, setPage, isLoading, isError, error, reload } = useTasksBank(fetcher);
@@ -220,6 +229,13 @@ export function TasksBankView() {
     const topicsForFilter = useMemo(
         () => (isTeacher ? refs.topics : collectTopics(pageItems)),
         [isTeacher, refs.topics, pageItems],
+    );
+
+    // Курсы учителя для фильтра-мультиселекта (GET /api/courses) — только учителю.
+    const teacherCourses = useTeacherCourses(isTeacher);
+    const courseOptions = useMemo(
+        () => teacherCourses.courses.map((c) => ({ value: String(c.id), label: c.name })),
+        [teacherCourses.courses],
     );
 
     // Клиентский добор по теме (серверного фильтра topicId нет).
@@ -318,6 +334,22 @@ export function TasksBankView() {
                 />
             </div>
 
+            {/* Фильтр по курсам (серверный, GET /api/tasks?courseIds=…) — мультиселект на той же
+                react-select, что сингл-селекты (BaseSelectMulti). Курсы — только учителю. */}
+            {isTeacher && (
+                <div className={styles.filterBlock}>
+                    <div className={styles.filterLabel}>Курсы</div>
+                    <BaseSelectMulti
+                        options={courseOptions}
+                        value={courseIdsFilter}
+                        onChange={changeCourseIds}
+                        placeholder="Все курсы"
+                        isDisabled={teacherCourses.isLoading}
+                        ariaLabel="Фильтр по курсам"
+                    />
+                </div>
+            )}
+
             {/* Смешанные задания: включена — в выдачу попадают задания с 2+ грамматическими типами,
                 выключена — только «чистые» (один тип). Фильтр серверный (includeMixed). */}
             <label className={styles.mixedToggle}>
@@ -371,6 +403,7 @@ export function TasksBankView() {
                     selectedTasks={selectedTasks}
                     onClose={closeBulkPopup}
                     onAssigned={closeBulkPopup}
+                    onAddedToCourse={closeBulkPopup}
                 />
             )}
 
