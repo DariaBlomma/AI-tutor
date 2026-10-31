@@ -5,7 +5,7 @@ import { TasksBankService } from '@/tasks/services/TasksBankService';
 import { useTasksBank } from '@/tasks/hooks/useTasksBank';
 import { useTaskRefs } from '@/tasks/hooks/useTaskRefs';
 import { Pagination } from '@/shared/ui-kit/Pagination/Pagination';
-import { Loader } from '@/shared/ui-kit/Loader/Loader';
+import { LoadingWidget } from '@/shared/ui-kit/Loader/LoadingWidget';
 import { ChipsMultiselect } from '@/tasks/ui/widgets/ChipsMultiselect/ChipsMultiselect';
 import { BulkActionsBar } from '@/tasks/ui/widgets/BulkActionsBar/BulkActionsBar';
 import { TaskDeletePopup } from '@/tasks/ui/widgets/TaskDeletePopup/TaskDeletePopup';
@@ -321,34 +321,32 @@ export function TasksBankView() {
             {(isError || error) && <div className={styles.error}>{error ?? 'Не удалось загрузить банк заданий.'}</div>}
             {actionError && <div className={styles.error}>{actionError}</div>}
 
-            {/* Загрузка: спиннер над уже отрисованными карточками (список не исчезает целиком —
-                иначе страница «прыгает» высотой на каждый запрос). Авто-режим лоадера: короткий
-                ответ (<150 мс) спиннер не показывает вовсе, длинный — плавно fade-in/fade-out. */}
-            <Loader active={isLoading} />
-
             {!isError && !isLoading && !visibleTasks.length && (
                 <div className={styles.notice}>Заданий по выбранным фильтрам нет.</div>
             )}
 
+            {/* Загрузка: спиннер-оверлей поверх всего списка (LoadingWidget mode="overlay") —
+                карточки остаются на месте, страница не «прыгает» высотой; затемнение и блокировка
+                кликов живут в подложке оверлея (раньше — opacity у .list). Короткие ответы
+                (<150 мс) спиннер не показывают вовсе. */}
             {!isError && (
-                <div
-                    className={`${styles.list} ${isLoading ? styles.listLoading : ''}`}
-                    aria-busy={isLoading}
-                >
-                    {visibleTasks.map((task) => (
-                        <TaskCard
-                            key={task.id}
-                            task={task}
-                            selectable={isTeacher}
-                            selected={selectedIds.has(task.id)}
-                            canManage={isTeacher && task.createdById != null && task.createdById === currentUserId}
-                            deleting={deletingId === task.id}
-                            onToggleSelect={toggleSelect}
-                            onDelete={openDeletePopup}
-                            registerDeleteBtn={setDeleteBtnRef}
-                        />
-                    ))}
-                </div>
+                <LoadingWidget active={isLoading} mode="overlay" dimContent>
+                    <div className={styles.list} aria-busy={isLoading}>
+                        {visibleTasks.map((task) => (
+                            <TaskCard
+                                key={task.id}
+                                task={task}
+                                selectable={isTeacher}
+                                selected={selectedIds.has(task.id)}
+                                canManage={isTeacher && task.createdById != null && task.createdById === currentUserId}
+                                deleting={deletingId === task.id}
+                                onToggleSelect={toggleSelect}
+                                onDelete={openDeletePopup}
+                                registerDeleteBtn={setDeleteBtnRef}
+                            />
+                        ))}
+                    </div>
+                </LoadingWidget>
             )}
 
             {/* Постраничная навигация (серверная пагинация — GET /api/tasks?page&size) */}

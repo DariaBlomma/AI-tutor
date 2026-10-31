@@ -1,0 +1,64 @@
+.widget {
+  position: relative;
+}
+
+// Подложка спиннера. В block-режиме — обычный flex-блок над контентом;
+// в overlay-режиме — абсолютно позиционирована поверх всего родителя
+// (весь виджет, который грузится), центр спиннера = центр области.
+.scrim {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  pointer-events: none;
+}
+
+.overlay .scrim {
+  position: absolute;
+  inset: 0;
+  min-height: 0;
+  z-index: 2;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.2s ease,
+    visibility 0s linear 0.2s;
+
+  // Лёгкая подложка: контент под ней различим, но клики по нему перехватываются.
+  // Тема в приложении тёмная (--bg), поэтому затемняем, а не осветляем.
+  background: color-mix(in srgb, var(--bg, #0f0f0f) 45%, transparent);
+
+  &.visible {
+    opacity: 1;
+    visibility: visible;
+    transition:
+      opacity 0.2s ease,
+      visibility 0s linear 0s;
+  }
+}
+
+// Затемнение контента под оверлеем (dimContent) — вместо старого opacity у списка.
+.dim.visible {
+  background: color-mix(in srgb, var(--bg, #0f0f0f) 65%, transparent);
+}
+
+.center {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.label {
+  font-size: 13px;
+  color: var(--c3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay .scrim {
+    transition: none;
+
+    &.visible {
+      transition: none;
+    }
+  }
+}
