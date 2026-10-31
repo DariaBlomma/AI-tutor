@@ -45,6 +45,11 @@ export interface TasksQueryParams {
     /** Тип экзамена (enum ExamType: OGE/EGE) — серверный фильтр. */
     examType?: ExamType;
     includeMixed?: boolean;
+    /**
+     * Фильтр по курсам (мультиселект банка заданий): GET /api/tasks?courseIds=1&courseIds=2 —
+     * задания, входящие хотя бы в один выбранный курс. Серверный фильтр.
+     */
+    courseIds?: number[];
     page?: number;
     size?: number;
 }

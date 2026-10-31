@@ -117,7 +117,7 @@ export function TaskDetailView({ publicId }: TaskDetailViewProps) {
                 <TaskCoursePopup open onClose={() => setCoursePopupOpen(false)} taskId={task.id} />
             )}
             {isTeacher && assignPopupOpen && (
-                <TaskAssignPopup open onClose={() => setAssignPopupOpen(false)} taskId={task.id} />
+                <TaskAssignPopup open onClose={() => setAssignPopupOpen(false)} tasks={[{ id: task.id, name: task.name }]} />
             )}
         </div>
     );

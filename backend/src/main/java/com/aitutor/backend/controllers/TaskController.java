@@ -37,9 +37,11 @@ public class TaskController {
             @RequestParam(required = false) com.aitutor.backend.enums.CefrLevel level,
             // Тип экзамена (OGE / EGE) — nullable
             @RequestParam(required = false) com.aitutor.backend.enums.ExamType examType,
+            // Фильтр по курсам (мультиселект банка заданий): задания, входящие хотя бы в один выбранный курс.
+            @RequestParam(required = false) java.util.List<Long> courseIds,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return taskService.getAllPaged(taskTypeId, includeMixed, search, itemType, level, examType, page, size);
+        return taskService.getAllPaged(taskTypeId, includeMixed, search, itemType, level, examType, courseIds, page, size);
     }
 
     /** Детальная карточка: полный контент (topics, taskTypes, items). */
