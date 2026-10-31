@@ -4,4 +4,6 @@ export interface InstructionSectionProps {
     maxLength: number;
     onChange: (value: string) => void;
     error?: string;
+    /** true, если задание уже назначено/решено — содержательные поля блокируются на странице редактирования. */
+    disabled?: boolean;
 }

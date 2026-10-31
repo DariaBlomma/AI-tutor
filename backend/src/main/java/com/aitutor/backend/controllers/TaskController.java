@@ -4,6 +4,7 @@ import com.aitutor.backend.dto.task.TaskCreateRequest;
 import com.aitutor.backend.dto.task.TaskResponse;
 import com.aitutor.backend.dto.task.TaskSummaryResponse;
 import com.aitutor.backend.dto.task.TaskUpdateRequest;
+import com.aitutor.backend.dto.task.TaskUsageResponse;
 import com.aitutor.backend.security.CustomUserDetails;
 import com.aitutor.backend.services.task.TaskService;
 import jakarta.validation.Valid;
@@ -51,6 +52,15 @@ public class TaskController {
     @GetMapping("/by-public-id/{publicId}")
     public TaskResponse getByPublicId(@PathVariable String publicId) {
         return taskService.getByPublicId(publicId);
+    }
+
+    /**
+     * Использование задания учениками (назначено/решено) — страница редактирования блокирует
+     * по нему содержательные поля; бэк дополнительно проверяет это же при PUT.
+     */
+    @GetMapping("/by-public-id/{publicId}/usage")
+    public TaskUsageResponse getUsageByPublicId(@PathVariable String publicId) {
+        return taskService.getUsageByPublicId(publicId);
     }
 
     @PostMapping

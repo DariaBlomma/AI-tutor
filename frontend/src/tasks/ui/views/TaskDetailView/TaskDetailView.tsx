@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { AuthService } from '@/auth/services/AuthService.ts';
 import { useTaskDetail } from '@/tasks/hooks/useTaskDetail';
@@ -27,7 +27,13 @@ interface TaskDetailViewProps {
 // Быстрые действия учителя: курсы (добавить через попап выбора курса) и назначение ученику.
 export function TaskDetailView({ publicId }: TaskDetailViewProps) {
     const isTeacher = AuthService.getUserRole() === 'TEACHER';
-    const { task, isLoading, isError, error } = useTaskDetail(publicId);
+    const { task, isLoading, isError, error, reload } = useTaskDetail(publicId);
+
+    // Перезагрузка при каждом входе на экран: после сохранения на странице редактирования
+    // просмотр обязан показать свежие данные (useTaskDetail кэша не имеет — это локальный state).
+    useEffect(() => {
+        reload();
+    }, [reload]);
     const [coursePopupOpen, setCoursePopupOpen] = useState(false);
     const [assignPopupOpen, setAssignPopupOpen] = useState(false);
 
@@ -73,6 +79,10 @@ export function TaskDetailView({ publicId }: TaskDetailViewProps) {
                     <button type="button" className={styles.actionBtn} onClick={() => setAssignPopupOpen(true)}>
                         Назначить ученику
                     </button>
+                    {/* Переход на страницу редактирования (роут /tasks-bank/edit/$publicId). */}
+                    <Link to="/tasks-bank/edit/$publicId" params={{ publicId: task.publicId }} className={styles.actionBtn}>
+                        Редактировать
+                    </Link>
                 </div>
             )}
 

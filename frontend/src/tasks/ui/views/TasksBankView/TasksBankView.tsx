@@ -148,6 +148,12 @@ export function TasksBankView() {
 
     const { pageItems, totalCount, totalPages, page, setPage, isLoading, isError, error, reload } = useTasksBank(fetcher);
 
+    // Актуальность списка после возврата со страницы редактирования/удаления: fetcher стабилен
+    // при неизменных фильтрах, effect выполнится один раз на монтирование экрана.
+    useEffect(() => {
+        reload();
+    }, [reload, fetcher]);
+
     // Смена страницы (пагинация): сохраняем позицию скролла — кнопки остаются под
     // списком там же, куда пользователь уже дотянулся; прыжок в верх только мешает.
     const changePage = useCallback(
@@ -382,7 +388,7 @@ function collectTopics(tasks: TaskSummary[]) {
 // Дизайн: чекбокс слева (только учителю — bulk-выбор); в шапке название (заглушка «Без названия», если пустое)
 // и справа сверху publicId как ссылка на детальную страницу; ниже — превью, затем общий ряд чипов
 // (грамматические типы → темы → механики → Mixed), в футере количество позиций жирным.
-// Кнопка «Редактировать» ведёт на страницу редактирования (роут /tasks-bank/$publicId/edit, общий виджет TaskForm в edit-режиме).
+// Кнопка «Редактировать» ведёт на страницу редактирования (роут /tasks-bank/edit/$publicId, общий виджет TaskForm в edit-режиме).
 function TaskCard({
     task,
     selectable,
@@ -453,9 +459,10 @@ function TaskCard({
                     </span>
                     {canManage && (
                         <div className={styles.actions}>
-                            {/* Ссылка-кнопка на страницу редактирования (роут /tasks-bank/$publicId/edit). */}
+                            {/* Ссылка-кнопка на страницу редактирования (роут /tasks-bank/edit/$publicId —
+                                плоский роут: $publicId/edit матчился бы жадным $publicId и открывал просмотр). */}
                             <Link
-                                to="/tasks-bank/$publicId/edit"
+                                to="/tasks-bank/edit/$publicId"
                                 params={{ publicId: task.publicId }}
                                 className={styles.actionBtn}
                             >

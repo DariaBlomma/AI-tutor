@@ -53,6 +53,8 @@
   padding: 8px 12px;
   font-size: 13px;
   cursor: pointer;
+  // Стиль применяется и к кнопкам, и к ссылке «Редактировать» (Link) — сбрасываем подчёркивание.
+  text-decoration: none;
 
   &:active {
     opacity: 0.8;

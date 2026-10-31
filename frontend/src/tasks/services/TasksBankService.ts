@@ -1,5 +1,5 @@
 import { api } from '@/core/api/AxiosInstance';
-import type { PageDto, TaskCreateRequestDto, TaskResponseDto, TaskUpdateRequestDto, TasksQueryParams, TaskSummary } from '@/tasks/types';
+import type { PageDto, TaskCreateRequestDto, TaskResponseDto, TaskUpdateRequestDto, TaskUsageDto, TasksQueryParams, TaskSummary } from '@/tasks/types';
 
 // Базовый путь контроллера заданий (TaskController, context-path /api уже в baseURL).
 const TASKS_PATH = '/tasks';
@@ -35,6 +35,15 @@ export class TasksBankService {
     /** GET /api/tasks/by-public-id/{publicId} -> TaskResponse — страница просмотра задания. */
     static async getTaskByPublicId(publicId: string): Promise<TaskResponseDto> {
         const response = await api.get<TaskResponseDto>(`${TASKS_PATH}/by-public-id/${encodeURIComponent(publicId)}`);
+        return response.data;
+    }
+
+    /**
+     * GET /api/tasks/by-public-id/{publicId}/usage -> TaskUsageResponse — назначено/решено ли задание.
+     * Страница редактирования блокирует по нему содержательные поля (бэк проверяет это же при PUT — 400).
+     */
+    static async getTaskUsage(publicId: string): Promise<TaskUsageDto> {
+        const response = await api.get<TaskUsageDto>(`${TASKS_PATH}/by-public-id/${encodeURIComponent(publicId)}/usage`);
         return response.data;
     }
 }

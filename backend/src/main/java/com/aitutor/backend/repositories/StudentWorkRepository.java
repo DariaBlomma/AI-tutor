@@ -54,6 +54,18 @@ public interface StudentWorkRepository extends JpaRepository<StudentWork, Long> 
     List<StudentWork> findActiveByStudentAndTask(@Param("studentId") Long studentId,
                                                  @Param("taskId") Long taskId);
 
+    /**
+     * Есть ли у задания незавершённые назначения (ASSIGNED / IN_PROGRESS) — блокировка
+     * содержательных полей при редактировании (TaskService#update). Удалённые (CANCELLED-soft) не считаем.
+     */
+    boolean existsByTaskIdAndDeletedAtIsNullAndStatusIn(Long taskId, Set<WorkStatus> statuses);
+
+    /**
+     * Есть ли у задания сдачи (COMPLETED). deletedAt НЕ фильтруем: удалённое назначение
+     * не отменяет того, что ученик уже решал задание и видел его текст и ответы.
+     */
+    boolean existsByTaskIdAndStatus(Long taskId, WorkStatus status);
+
     /** Множество task_id с активным назначением — пакетная проверка дублей при назначении. */
     @Query("""
             SELECT sw.task.id FROM StudentWork sw
