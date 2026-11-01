@@ -1,4 +1,4 @@
-import type { ReactElement, FocusEvent, MouseEvent } from 'react';
+import type { ReactElement } from 'react';
 import { useMemo, useState } from 'react';
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
@@ -9,11 +9,8 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateTimePicker as DateTimePickerMui } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import type { PickersLayoutProps } from '@mui/x-date-pickers/PickersLayout';
-// PickerValue — тип значения пикера; usePickerPrivateContext — хук приватного
-// контекста пикера (dismissViews/rootRefObject/triggerElement), экспортируется
-// из internals (см. internals/index.d.ts) — нужен для блокировки автозакрытия.
+// PickerValue — тип значения пикера (нужен для типизации слота layout).
 import type { PickerValue } from '@mui/x-date-pickers/internals';
-import { usePickerPrivateContext } from '@mui/x-date-pickers/internals';
 import { ThemeProvider } from '@mui/material/styles';
 import { dateTimePickerTheme } from './muiTheme';
 import styles from './DateTimePicker.module.scss';
@@ -65,9 +62,13 @@ function AnchoredPopper(popperProps: PopperProps) {
             transition
             placement="bottom-start"
             container={typeof window !== 'undefined' ? document.body : undefined}
-            // Маркер-класс на корне поппера: BaseModal по нему определяет, что клик
-            // «снаружи» модалки пришёл в панель пикера, и не закрывает её.
-            className={[styles.panelRoot, popperProps.className].filter(Boolean).join(' ')}
+            // Глобальный маркер-класс на корне поппера: BaseModal по нему определяет,
+            // что клик «снаружи» модалки (pointerdown/interact/focus) пришёл в панель
+            // пикера и НЕ закрывает модалку задачи. Класс именно глобальный (не CSS
+            // module), т.к. на него смотрит код вне этого модуля — см. isInsidePopupLayer.
+            className={['picker-panel-root', styles.panelRoot, popperProps.className]
+                .filter(Boolean)
+                .join(' ')}
             // z-index: MUI Popper сам по себе его не задаёт, а наш слот подменяет
             // дефолтный PickerPopperRoot (styled-компонент с zIndex из темы).
             // Инлайн-стили мёржатся со style из slotProps.popper (mergeSlotProps),
@@ -88,37 +89,6 @@ function AnchoredPopper(popperProps: PopperProps) {
 }
 
 /**
- * Блокировка ВСЕХ штатных автозакрытий панели пикера. Проверено по исходникам
- * @mui/x-date-pickers v9.17 (internals/hooks/usePicker/*):
- *  - выбор значения: useValueAndOpenStates.js -> setValue(...); при
- *    closeOnSelect={false} changeImportance='set' и shouldClose=false — панель
- *    НЕ закрывается, но на всякий случай держим и этот флаг (см. проп);
- *  - клик «снаружи» / Escape: internals/components/PickerPopper вешает
- *    document-слушатель click и keydown('Escape'), оба зовут dismissViews() из
- *    приватного контекста. При контролируемом open dismissViews не трогает наше
- *    состояние, но вызывает setValue -> onAccept/onCancel -> перерисовку
- *    родителя; Radix Dialog ловит focus/focusout вокруг портала поппера и
- *    закрывает модалку Задачи — это и был баг.
- * Решение: PickerGuards рендерится ВНУТРИ дерева пикера (как дочерний компонент
- * слота layout — под PickerProvider) и подменяет privateCtx.dismissViews на
- * no-op. Дочерний компонент — обычный createElement, поэтому хуки в нём
- * разрешены (в отличие от самого слота layout, который MUI вызывает как
- * функцию — см. комментарий у PickerLayout).
- */
-function PickerGuards({ closeOnSelectDisabled }: { closeOnSelectDisabled: boolean }) {
-    const privateCtx = usePickerPrivateContext();
-
-    // dismissViews вызывается через useEventCallback — актуальная ссылка на
-    // функцию читается из ref в момент клика, поэтому мутация контекста во
-    // время рендера безопасна и не требует useEffect.
-    if (closeOnSelectDisabled) {
-        privateCtx.dismissViews = () => {};
-    }
-
-    return null;
-}
-
-/**
  * Поле выбора даты и времени на @mui/x-date-pickers v9: обычный календарь для
  * даты и циферблат для времени (сначала выбираем часы, затем минуты — штатное
  * поведение TimeView в Desktop-пикере MUI). Акцентный цвет переопределён на наш
@@ -126,8 +96,18 @@ function PickerGuards({ closeOnSelectDisabled }: { closeOnSelectDisabled: boolea
  * в глобальные стили приложения (см. CODE_STYLE.md про чужие UI-киты).
  * Панель рендерится в body через портал с фиксированным позиционированием —
  * см. комментарий у AnchoredPopper.
- * ПОПАВ ЗАКРЫВАЕТСЯ ТОЛЬКО КНОПКАМИ (крестик / «Применить») — все варианты
- * автозакрытия MUI заблокированы (см. PickerGuards и closeOnSelect={false}).
+ *
+ * ПОВЕДЕНИЕ ЗАКРЫТИЯ: панель пикера живёт по ШТАТНЫМ правилам MUI (открылась по
+ * клику на иконку — закрылась по клику мимо/Esc/выбору времени). Мы НЕ боремся
+ * с автозакрытием самой панели: все прежние попытки (перехваты onClose/Esc на
+ * document-capture, мутации приватного контекста, preventDefault на поле) либо
+ * не срабатывали из-за deferPointerDownOutside в Radix, либо ломали выделение
+ * секций поля и вызывали re-render штормы (Maximum call stack size exceeded).
+ * Крестик и «Применить» оставлены как явные способы закрыть панель.
+ *
+ * ГЛАВНОЕ: клики внутри панели НЕ закрывают модалку задачи — это обеспечивает
+ * BaseModal (isInsidePopupLayer + onEscapeKeyDown), т.к. панель рендерится в
+ * body вне DOM-дерева Dialog.Content и Radix считает её «кликом снаружи».
  * Внешний API прежний: значение — строка datetime-local, '' означает «не выбрано».
  */
 export function DateTimePicker({ value, onChange }: DateTimePickerProps) {
@@ -138,17 +118,12 @@ export function DateTimePicker({ value, onChange }: DateTimePickerProps) {
         onChange(next ? next.format(VALUE_FORMAT) : '');
     };
 
-    // Свой layout панели: сверху — крестик «закрыть без применения», снизу —
-    // кнопка «Применить». Оба клика закрывают только попап пикера (setOpen(false)),
-    // модалку не трогают. Это ЕДИНСТВЕННЫЕ способы закрыть панель: автозакрытие
-    // заблокировано (closeOnSelect={false} + PickerGuards).
-    // ВАЖНО 1: MUI вызывает слот layout КАК ФУНКЦИЮ (jsx(Layout, props) без
-    // createElement-размонтирования между рендерами), поэтому PickerLayout обязан
-    // быть СТАБИЛЬНЫМ по ссылке: новое определение функции на каждый рендер =
-    // размонтирование/перемонтирование всего поддерева панели при каждом клике
-    // (отсюда «Maximum call stack size exceeded» и закрытие модалки). Хранится
-    // в useState с пустым массивом зависимостей; актуальные setOpen/onChange
-    // берутся через функциональный setState — он стабилен.
+    // Свой layout панели: сверху — крестик, снизу — кнопка «Применить»; оба просто
+    // закрывают попап пикера (setOpen(false)) и не трогают модалку.
+    // ВАЖНО 1: MUI вызывает слот layout КАК ФУНКЦИЮ без remount-а между рендерами,
+    // поэтому ссылка на компонент обязана быть СТАБИЛЬНОЙ: новое определение функции
+    // на каждый рендер = размонтирование/перемонтирование всего поддерева панели при
+    // каждом клике (отсюда «Maximum call stack size exceeded»). Храним в useState.
     // ВАЖНО 2: собственные DOM-пропсы в корневой div передавать НЕЛЬЗЯ —
     // PickersLayoutProps содержит slotProps/slots/className и т.п., которые
     // уходят прямо в <div> (warning «React does not recognize the `slotProps`
@@ -156,33 +131,30 @@ export function DateTimePicker({ value, onChange }: DateTimePickerProps) {
     const [PickerLayout] = useState<{
         (props: PickersLayoutProps<PickerValue>): ReactElement;
         displayName?: string;
-    }>(
-        () =>
-            // eslint-disable-next-line react/display-name -- слот layout: MUI вызывает его как функцию, ссылка обязана быть стабильной (см. комментарий выше)
-            function PickerLayoutPanel({ children }: PickersLayoutProps<PickerValue>) {
-                return (
-                    <div className={styles.layoutRoot}>
-                        {/* Гарды живут внутри дерева пикера (под PickerProvider) —
-                            отсюда доступен приватный контекст с dismissViews. */}
-                        <PickerGuards closeOnSelectDisabled />
-                        <button
-                            type="button"
-                            className={styles.dismissBtn}
-                            aria-label="Закрыть без сохранения"
-                            onClick={() => setOpen(false)}
-                        >
-                            ×
-                        </button>
-                        {children}
-                        <div className={styles.layoutFooter}>
-                            <Button variant="contained" size="small" onClick={() => setOpen(false)}>
-                                Применить
-                            </Button>
-                        </div>
+    }>(() => {
+        function PickerLayoutPanel({ children }: PickersLayoutProps<PickerValue>) {
+            return (
+                <div className={styles.layoutRoot}>
+                    <button
+                        type="button"
+                        className={styles.dismissBtn}
+                        aria-label="Закрыть"
+                        onClick={() => setOpen(false)}
+                    >
+                        ×
+                    </button>
+                    {children}
+                    <div className={styles.layoutFooter}>
+                        <Button variant="contained" size="small" onClick={() => setOpen(false)}>
+                            Применить
+                        </Button>
                     </div>
-                );
-            },
-    );
+                </div>
+            );
+        }
+        PickerLayoutPanel.displayName = 'PickerLayout';
+        return PickerLayoutPanel;
+    });
 
     return (
         <ThemeProvider theme={dateTimePickerTheme}>
@@ -194,28 +166,11 @@ export function DateTimePicker({ value, onChange }: DateTimePickerProps) {
                         open={open}
                         onOpen={() => setOpen(true)}
                         onClose={() => setOpen(false)}
-                        // Панель НЕ закрывается сама после выбора даты/времени — только
-                        // по крестику или «Применить» (см. PickerLayout). Без этого MUI при
-                        // завершении выбора вызывал onClose, клик «уходил» наружу и Radix
-                        // закрывал модалку задачи вместе с пикером.
+                        // Не закрывать панель сразу после выбора даты: пользователю
+                        // ещё нужно выбрать время (штатная настройка MUI, ничего не
+                        // перехватываем — только стандартный проп).
                         closeOnSelect={false}
-                        // ВАЖНО: НЕ используем keepOpenDuringFieldFocus — в v9 он навешивает
-                        // onFocus/onMouseDown на корень поля и сам открывает панель при любом
-                        // фокусе/клике (календарь появлялся сразу при открытии попапа). В v9
-                        // слот `field` принимает плоские пропсы, которые мёржатся с внутренними
-                        // обработчиками поля (см. DateTimeFieldSlots): наши onFocus/onMouseDown
-                        // вызываются раньше штатных и через preventDefault блокируют автооткрытие
-                        // MUI. При этом клик по инпуту продолжает работать как обычно (фокус/
-                        // выделение секции), а панель открывается только кнопкой-иконкой (onOpen).
                         slotProps={{
-                            field: {
-                                onFocus: (event: FocusEvent<HTMLDivElement>) => {
-                                    event.preventDefault();
-                                },
-                                onMouseDown: (event: MouseEvent<HTMLDivElement>) => {
-                                    event.preventDefault();
-                                },
-                            },
                             textField: {
                                 fullWidth: true,
                                 size: 'small',
