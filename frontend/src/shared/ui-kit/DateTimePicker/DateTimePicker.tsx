@@ -1,3 +1,4 @@
+import type { ReactElement, FocusEvent, MouseEvent } from 'react';
 import { useMemo, useState } from 'react';
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
@@ -8,8 +9,11 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateTimePicker as DateTimePickerMui } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import type { PickersLayoutProps } from '@mui/x-date-pickers/PickersLayout';
-// PickerValue — тип значения пикера (экспортируется из internals, см. internals/index.d.ts).
+// PickerValue — тип значения пикера; usePickerPrivateContext — хук приватного
+// контекста пикера (dismissViews/rootRefObject/triggerElement), экспортируется
+// из internals (см. internals/index.d.ts) — нужен для блокировки автозакрытия.
 import type { PickerValue } from '@mui/x-date-pickers/internals';
+import { usePickerPrivateContext } from '@mui/x-date-pickers/internals';
 import { ThemeProvider } from '@mui/material/styles';
 import { dateTimePickerTheme } from './muiTheme';
 import styles from './DateTimePicker.module.scss';
@@ -84,6 +88,37 @@ function AnchoredPopper(popperProps: PopperProps) {
 }
 
 /**
+ * Блокировка ВСЕХ штатных автозакрытий панели пикера. Проверено по исходникам
+ * @mui/x-date-pickers v9.17 (internals/hooks/usePicker/*):
+ *  - выбор значения: useValueAndOpenStates.js -> setValue(...); при
+ *    closeOnSelect={false} changeImportance='set' и shouldClose=false — панель
+ *    НЕ закрывается, но на всякий случай держим и этот флаг (см. проп);
+ *  - клик «снаружи» / Escape: internals/components/PickerPopper вешает
+ *    document-слушатель click и keydown('Escape'), оба зовут dismissViews() из
+ *    приватного контекста. При контролируемом open dismissViews не трогает наше
+ *    состояние, но вызывает setValue -> onAccept/onCancel -> перерисовку
+ *    родителя; Radix Dialog ловит focus/focusout вокруг портала поппера и
+ *    закрывает модалку Задачи — это и был баг.
+ * Решение: PickerGuards рендерится ВНУТРИ дерева пикера (как дочерний компонент
+ * слота layout — под PickerProvider) и подменяет privateCtx.dismissViews на
+ * no-op. Дочерний компонент — обычный createElement, поэтому хуки в нём
+ * разрешены (в отличие от самого слота layout, который MUI вызывает как
+ * функцию — см. комментарий у PickerLayout).
+ */
+function PickerGuards({ closeOnSelectDisabled }: { closeOnSelectDisabled: boolean }) {
+    const privateCtx = usePickerPrivateContext();
+
+    // dismissViews вызывается через useEventCallback — актуальная ссылка на
+    // функцию читается из ref в момент клика, поэтому мутация контекста во
+    // время рендера безопасна и не требует useEffect.
+    if (closeOnSelectDisabled) {
+        privateCtx.dismissViews = () => {};
+    }
+
+    return null;
+}
+
+/**
  * Поле выбора даты и времени на @mui/x-date-pickers v9: обычный календарь для
  * даты и циферблат для времени (сначала выбираем часы, затем минуты — штатное
  * поведение TimeView в Desktop-пикере MUI). Акцентный цвет переопределён на наш
@@ -91,8 +126,8 @@ function AnchoredPopper(popperProps: PopperProps) {
  * в глобальные стили приложения (см. CODE_STYLE.md про чужие UI-киты).
  * Панель рендерится в body через портал с фиксированным позиционированием —
  * см. комментарий у AnchoredPopper.
- * Контроль открытия в v9 — через open + onOpen/onClose (onOpenChange удалён из
- * API): закрытие по клику вне/Esc/выборе значения MUI сам вызывает onClose.
+ * ПОПАВ ЗАКРЫВАЕТСЯ ТОЛЬКО КНОПКАМИ (крестик / «Применить») — все варианты
+ * автозакрытия MUI заблокированы (см. PickerGuards и closeOnSelect={false}).
  * Внешний API прежний: значение — строка datetime-local, '' означает «не выбрано».
  */
 export function DateTimePicker({ value, onChange }: DateTimePickerProps) {
@@ -105,27 +140,48 @@ export function DateTimePicker({ value, onChange }: DateTimePickerProps) {
 
     // Свой layout панели: сверху — крестик «закрыть без применения», снизу —
     // кнопка «Применить». Оба клика закрывают только попап пикера (setOpen(false)),
-    // модалку не трогают. В связке с closeOnSelect={false} это даёт единственные
-    // штатные способы закрыть панель: крестик / Применить / клик вне / Esc.
-    // children — стандартный контент PickersLayout (toolbar + tabs + вьюхи +
-    // actionBar), поэтому рендерим его внутри обёртки и пробрасываем свои классы.
-    const PickerLayout = ({ children, className, ...other }: PickersLayoutProps<PickerValue>) => (
-        <div {...other} className={[styles.layoutRoot, className].filter(Boolean).join(' ')}>
-            <button
-                type="button"
-                className={styles.dismissBtn}
-                aria-label="Закрыть без сохранения"
-                onClick={() => setOpen(false)}
-            >
-                ×
-            </button>
-            {children}
-            <div className={styles.layoutFooter}>
-                <Button variant="contained" size="small" onClick={() => setOpen(false)}>
-                    Применить
-                </Button>
-            </div>
-        </div>
+    // модалку не трогают. Это ЕДИНСТВЕННЫЕ способы закрыть панель: автозакрытие
+    // заблокировано (closeOnSelect={false} + PickerGuards).
+    // ВАЖНО 1: MUI вызывает слот layout КАК ФУНКЦИЮ (jsx(Layout, props) без
+    // createElement-размонтирования между рендерами), поэтому PickerLayout обязан
+    // быть СТАБИЛЬНЫМ по ссылке: новое определение функции на каждый рендер =
+    // размонтирование/перемонтирование всего поддерева панели при каждом клике
+    // (отсюда «Maximum call stack size exceeded» и закрытие модалки). Хранится
+    // в useState с пустым массивом зависимостей; актуальные setOpen/onChange
+    // берутся через функциональный setState — он стабилен.
+    // ВАЖНО 2: собственные DOM-пропсы в корневой div передавать НЕЛЬЗЯ —
+    // PickersLayoutProps содержит slotProps/slots/className и т.п., которые
+    // уходят прямо в <div> (warning «React does not recognize the `slotProps`
+    // prop on a DOM element»). Рендерим только children + свои кнопки.
+    const [PickerLayout] = useState<{
+        (props: PickersLayoutProps<PickerValue>): ReactElement;
+        displayName?: string;
+    }>(
+        () =>
+            // eslint-disable-next-line react/display-name -- слот layout: MUI вызывает его как функцию, ссылка обязана быть стабильной (см. комментарий выше)
+            function PickerLayoutPanel({ children }: PickersLayoutProps<PickerValue>) {
+                return (
+                    <div className={styles.layoutRoot}>
+                        {/* Гарды живут внутри дерева пикера (под PickerProvider) —
+                            отсюда доступен приватный контекст с dismissViews. */}
+                        <PickerGuards closeOnSelectDisabled />
+                        <button
+                            type="button"
+                            className={styles.dismissBtn}
+                            aria-label="Закрыть без сохранения"
+                            onClick={() => setOpen(false)}
+                        >
+                            ×
+                        </button>
+                        {children}
+                        <div className={styles.layoutFooter}>
+                            <Button variant="contained" size="small" onClick={() => setOpen(false)}>
+                                Применить
+                            </Button>
+                        </div>
+                    </div>
+                );
+            },
     );
 
     return (
@@ -153,10 +209,10 @@ export function DateTimePicker({ value, onChange }: DateTimePickerProps) {
                         // выделение секции), а панель открывается только кнопкой-иконкой (onOpen).
                         slotProps={{
                             field: {
-                                onFocus: (event: React.FocusEvent<HTMLDivElement>) => {
+                                onFocus: (event: FocusEvent<HTMLDivElement>) => {
                                     event.preventDefault();
                                 },
-                                onMouseDown: (event: React.MouseEvent<HTMLDivElement>) => {
+                                onMouseDown: (event: MouseEvent<HTMLDivElement>) => {
                                     event.preventDefault();
                                 },
                             },
