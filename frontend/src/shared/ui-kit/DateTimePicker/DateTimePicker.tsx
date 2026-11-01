@@ -13,6 +13,11 @@ import styles from './DateTimePicker.module.scss';
 const VALUE_FORMAT = 'YYYY-MM-DDTHH:mm'; // формат datetime-local (совместим с API и бэкендом)
 const DISPLAY_FORMAT = 'DD.MM.YYYY HH:mm';
 
+// z-index панели пикера: должен быть выше Radix-модалки (overlay 200 / content 201
+// у BaseModal), иначе календарь рисуется под модалкой. Единый источник правды —
+// здесь; используется инлайном в slotProps.popper и в CSS-оверрайде scss.
+export const PICKER_POPPER_Z_INDEX = 10000;
+
 interface DateTimePickerProps {
     /** Значение в формате datetime-local ('YYYY-MM-DDTHH:mm') или '' (не выбрано). */
     value: string;
@@ -52,6 +57,11 @@ function AnchoredPopper(popperProps: PopperProps) {
             transition
             placement="bottom-start"
             container={typeof window !== 'undefined' ? document.body : undefined}
+            // z-index: MUI Popper сам по себе его не задаёт, а наш слот подменяет
+            // дефолтный PickerPopperRoot (styled-компонент с zIndex из темы).
+            // Инлайн-стили мёржатся со style из slotProps.popper (mergeSlotProps),
+            // поэтому z-index проставляем здесь — надёжнее, чем CSS-классами.
+            style={{ ...popperProps.style, zIndex: PICKER_POPPER_Z_INDEX }}
             popperOptions={{
                 ...popperProps.popperOptions,
                 strategy: 'fixed',
@@ -116,6 +126,15 @@ export function DateTimePicker({ value, onChange }: DateTimePickerProps) {
                             textField: {
                                 fullWidth: true,
                                 size: 'small',
+                            },
+                            // z-index панели: наш слот AnchoredPopper заменяет дефолтный
+                            // PickerPopperRoot (берёт zIndex из theme.zIndex.modal) на голый
+                            // MUI Popper без z-index, поэтому поднимаем панель над Radix-модалкой
+                            // (overlay 200 / content 201 у BaseModal) инлайном — popperProps
+                            // мёржатся с внутренними пропсами поппера (useSlotProps в v9).
+                            // Дублирующий CSS-оверрайд (.MuiPickerPopper-root) — в scss.
+                            popper: {
+                                style: { zIndex: PICKER_POPPER_Z_INDEX },
                             },
                         }}
                         format={DISPLAY_FORMAT}
