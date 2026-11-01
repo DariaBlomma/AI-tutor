@@ -9,11 +9,12 @@ import { LoadingWidget } from '@/shared/ui-kit/Loader/LoadingWidget';
 import { BaseSelectMulti } from '@/shared/ui-kit/BaseSelectMulti/BaseSelectMulti';
 import { useTeacherCourses } from '@/teacher/hooks/useTeacherCourses';
 import { ChipsMultiselect } from '@/tasks/ui/widgets/ChipsMultiselect/ChipsMultiselect';
-import { BulkActionsBar } from '@/tasks/ui/widgets/BulkActionsBar/BulkActionsBar';
+import { TasksBulkActionsBar } from '@/tasks/ui/widgets/TasksBulkActionsBar/TasksBulkActionsBar';
 import { TaskDeletePopup } from '@/tasks/ui/widgets/TaskDeletePopup/TaskDeletePopup';
-import { TasksBulkPopup } from '@/tasks/ui/widgets/TasksBulkPopup/TasksBulkPopup';
+import { TaskAssignPopup } from '@/tasks/ui/widgets/TaskAssignPopup/TaskAssignPopup';
+import { CourseSelectPopup } from '@/tasks/ui/widgets/CourseSelectPopup/CourseSelectPopup';
 import { TaskPreviewChips } from '@/tasks/ui/widgets/TaskPreviewChips/TaskPreviewChips';
-import type { BulkAction } from '@/tasks/ui/widgets/TasksBulkPopup/types';
+import type { TasksBulkAction } from '@/tasks/types';
 import { CEFR_LEVEL_OPTIONS, EXAM_TYPE_OPTIONS, ITEM_TYPE_OPTIONS } from '@/tasks/types';
 import type { ChipItem } from '@/tasks/ui/widgets/ChipsMultiselect/types';
 import type { CefrLevel, ExamType, ItemType, TaskSummary } from '@/tasks/types';
@@ -45,7 +46,7 @@ export function TasksBankView() {
     // Множественный выбор карточек (чекбоксы — только учителю) для bulk-действий.
     // Выбор сохраняется между страницами и фильтрами; очистка — при закрытии модалки или удалении задания.
     const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
-    const [bulkAction, setBulkAction] = useState<BulkAction | null>(null);
+    const [bulkAction, setBulkAction] = useState<TasksBulkAction | null>(null);
     const [deletingId, setDeletingId] = useState<number | null>(null);
     const [actionError, setActionError] = useState<string | null>(null);
 
@@ -91,8 +92,8 @@ export function TasksBankView() {
 
     const clearSelection = useCallback(() => setSelectedIds(new Set()), []);
 
-    // Закрытие модалки снимает выбор (панель исчезает вместе с ним).
-    const closeBulkPopup = useCallback(() => {
+    // Закрытие любой bulk-модалки (Esc / клик вне / «Отмена» / успех) снимает выбор — панель исчезает вместе с ним.
+    const closeBulkAction = useCallback(() => {
         setBulkAction(null);
         clearSelection();
     }, [clearSelection]);
@@ -157,12 +158,19 @@ export function TasksBankView() {
 
     const { pageItems, totalCount, totalPages, page, setPage, isLoading, isError, error, reload } = useTasksBank(fetcher);
 
-    // Карточки выбранных заданий (для bulk-попапа): selectedIds сохраняются между страницами
+    // Карточки выбранных заданий (для bulk-модалок): selectedIds сохраняются между страницами
     // и фильтрами, но объекты берём из текущей страницы — вне её карточек у нас нет.
     const selectedTasks = useMemo(
         () => pageItems.filter((task) => selectedIds.has(task.id)),
         [pageItems, selectedIds],
     );
+
+    // Данные для финальных bulk-модалок: назначение (id + name) и добавление в курс (только id).
+    const bulkAssignTargets = useMemo(
+        () => selectedTasks.map((task) => ({ id: task.id, name: task.name })),
+        [selectedTasks],
+    );
+    const bulkTaskIds = useMemo(() => selectedTasks.map((task) => task.id), [selectedTasks]);
 
     // Актуальность списка после возврата со страницы редактирования/удаления: fetcher стабилен
     // при неизменных фильтрах, effect выполнится один раз на монтирование экрана.
@@ -395,15 +403,22 @@ export function TasksBankView() {
 
             {/* Панель массовых действий — только учителю и только при выбранном > 0. */}
             {isTeacher && selectedIds.size > 0 && (
-                <BulkActionsBar selectedCount={selectedIds.size} onAction={setBulkAction} />
+                <TasksBulkActionsBar selectedCount={selectedIds.size} onAction={setBulkAction} />
             )}
-            {isTeacher && (
-                <TasksBulkPopup
-                    action={bulkAction}
-                    selectedTasks={selectedTasks}
-                    onClose={closeBulkPopup}
-                    onAssigned={closeBulkPopup}
-                    onAddedToCourse={closeBulkPopup}
+
+            {/* Bulk-действия: без промежуточного подтверждения — кнопка панели сразу открывает
+                финальную модалку (назначение ученикам / добавление в курс). Любое закрытие
+                (Esc, клик вне, «Отмена», успех) снимает выбор через closeBulkAction. */}
+            {isTeacher && bulkAction === 'assign' && (
+                <TaskAssignPopup open onClose={closeBulkAction} tasks={bulkAssignTargets} />
+            )}
+            {isTeacher && bulkAction === 'to-course' && (
+                <CourseSelectPopup
+                    open
+                    onClose={closeBulkAction}
+                    taskIds={bulkTaskIds}
+                    tasksHint={`Выбрано заданий: ${bulkTaskIds.length}`}
+                    onAdded={closeBulkAction}
                 />
             )}
 

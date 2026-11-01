@@ -1,5 +1,8 @@
 import type { ItemType } from '../models';
 
+/** Действие, открываемое кнопками bulk-панели банка заданий (TasksBulkActionsBar). */
+export type TasksBulkAction = 'to-course' | 'assign';
+
 /** Метаданные механики пункта для селекта типов. */
 export interface ItemTypeInfo {
     value: ItemType;

@@ -1,15 +1,15 @@
-import type { BulkAction } from '@/tasks/ui/widgets/TasksBulkPopup/types';
+import type { TasksBulkAction } from '@/tasks/types';
 
-import styles from './BulkActionsBar.module.scss';
+import styles from './TasksBulkActionsBar.module.scss';
 
-interface BulkActionsBarProps {
+interface TasksBulkActionsBarProps {
     selectedCount: number;
-    onAction: (action: BulkAction) => void;
+    onAction: (action: TasksBulkAction) => void;
 }
 
 // Нижняя панель массовых действий банка заданий (дизайн: fixed над нижним меню,
 // по центру, max-width 480). Рендерится виджетом только при выбранном > 0.
-export function BulkActionsBar({ selectedCount, onAction }: BulkActionsBarProps) {
+export function TasksBulkActionsBar({ selectedCount, onAction }: TasksBulkActionsBarProps) {
     return (
         <div className={styles.bar}>
             <div className={styles.count}>
