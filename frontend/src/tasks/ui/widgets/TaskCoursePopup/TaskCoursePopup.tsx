@@ -29,42 +29,47 @@ export function TaskCoursePopup({ open, onClose, taskId }: TaskCoursePopupProps)
     };
 
     return (
-        <BaseModal open={open} onClose={onClose} title="Курсы">
-            <div className={styles.modal}>
-                <div className={styles.title}>Курсы</div>
-                <p className={styles.hint}>Добавьте задание в курс или уберите из курса.</p>
+        <BaseModal
+            open={open}
+            onClose={onClose}
+            title="Курсы"
+            content={
+                <>
+                    <p className={styles.hint}>Добавьте задание в курс или уберите из курса.</p>
 
-                {(error || actionError) && <div className={styles.error}>{actionError ?? error}</div>}
+                    {(error || actionError) && <div className={styles.error}>{actionError ?? error}</div>}
 
-                {isLoading && <Loader />}
-                {!isLoading && !courses.length && <div className={styles.empty}>Курсов пока нет.</div>}
+                    {isLoading && <Loader />}
+                    {!isLoading && !courses.length && <div className={styles.empty}>Курсов пока нет.</div>}
 
-                {!isLoading && (
-                    <ul className={styles.list}>
-                        {courses.map((course) => (
-                            <li key={course.id} className={styles.item}>
-                                <span className={styles.itemName}>{course.name}</span>
-                                <button
-                                    type="button"
-                                    className={`${styles.actionBtn} ${course.hasTask ? styles.dangerBtn : ''}`}
-                                    disabled={busyCourseId === course.id}
-                                    onClick={() => void handleToggle(course.id, course.hasTask)}
-                                >
-                                    {busyCourseId === course.id
-                                        ? '…'
-                                        : course.hasTask
-                                          ? 'Убрать из курса'
-                                          : 'Добавить в курс'}
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
-                )}
-
+                    {!isLoading && (
+                        <ul className={styles.list}>
+                            {courses.map((course) => (
+                                <li key={course.id} className={styles.item}>
+                                    <span className={styles.itemName}>{course.name}</span>
+                                    <button
+                                        type="button"
+                                        className={`${styles.actionBtn} ${course.hasTask ? styles.dangerBtn : ''}`}
+                                        disabled={busyCourseId === course.id}
+                                        onClick={() => void handleToggle(course.id, course.hasTask)}
+                                    >
+                                        {busyCourseId === course.id
+                                            ? '…'
+                                            : course.hasTask
+                                              ? 'Убрать из курса'
+                                              : 'Добавить в курс'}
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </>
+            }
+            footer={
                 <button type="button" className={styles.closeBtn} onClick={onClose}>
                     Закрыть
                 </button>
-            </div>
-        </BaseModal>
+            }
+        />
     );
 }

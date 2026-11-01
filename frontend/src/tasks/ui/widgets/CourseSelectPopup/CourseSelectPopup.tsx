@@ -89,53 +89,56 @@ export function CourseSelectPopup({ open, onClose, taskIds, tasksHint, onAdded }
     }, [selectedCourseIds, isAdding, taskIds, onAdded]);
 
     return (
-        <BaseModal open={open} onClose={onClose} title="Добавить в курс">
-            <div className={styles.modal}>
-                <div className={styles.title}>Добавить в курс</div>
-                <p className={styles.hint}>{tasksHint}. Выберите курсы, в которые нужно добавить задание.</p>
+        <BaseModal
+            open={open}
+            onClose={onClose}
+            title="Добавить в курс"
+            content={
+                <>
+                    <p className={styles.hint}>{tasksHint}. Выберите курсы, в которые нужно добавить задание.</p>
 
-                {(error || actionError) && <div className={styles.error}>{actionError ?? error}</div>}
-                {addResult !== null && (
-                    <div className={styles.success}>
-                        Добавлено в курсы: {addResult}.
-                    </div>
-                )}
+                    {(error || actionError) && <div className={styles.error}>{actionError ?? error}</div>}
+                    {addResult !== null && (
+                        <div className={styles.success}>Добавлено в курсы: {addResult}.</div>
+                    )}
 
-                <LoadingWidget active={isLoading} mode="block">
-                    <div className={styles.field}>
-                        <span className={styles.fieldLabel}>Курсы</span>
-                        <BaseSelectMulti
-                            options={options}
-                            value={selectedCourseIds}
-                            onChange={changeCourses}
-                            placeholder={courses.length ? 'Выберите курсы' : 'Сначала создайте курс'}
-                            ariaLabel="Курсы для добавления задания"
+                    <LoadingWidget active={isLoading} mode="block">
+                        <div className={styles.field}>
+                            <span className={styles.fieldLabel}>Курсы</span>
+                            <BaseSelectMulti
+                                options={options}
+                                value={selectedCourseIds}
+                                onChange={changeCourses}
+                                placeholder={courses.length ? 'Выберите курсы' : 'Сначала создайте курс'}
+                                ariaLabel="Курсы для добавления задания"
+                            />
+                            {!courses.length && !isLoading && (
+                                <div className={styles.empty}>Курсов пока нет — создайте первый ниже.</div>
+                            )}
+                        </div>
+                    </LoadingWidget>
+
+                    {/* Создание курса: нужен только текстовый инпут названия. */}
+                    <div className={styles.createRow}>
+                        <BaseInputText
+                            value={newCourseName}
+                            onChange={(e) => setNewCourseName(e.target.value)}
+                            placeholder="Название нового курса"
+                            aria-label="Название нового курса"
+                            maxLength={120}
                         />
-                        {!courses.length && !isLoading && (
-                            <div className={styles.empty}>Курсов пока нет — создайте первый ниже.</div>
-                        )}
+                        <button
+                            type="button"
+                            className={styles.createBtn}
+                            disabled={!newCourseName.trim() || isCreating}
+                            onClick={() => void handleCreateCourse()}
+                        >
+                            {isCreating ? 'Создание…' : 'Создать курс'}
+                        </button>
                     </div>
-                </LoadingWidget>
-
-                {/* Создание курса: нужен только текстовый инпут названия. */}
-                <div className={styles.createRow}>
-                    <BaseInputText
-                        value={newCourseName}
-                        onChange={(e) => setNewCourseName(e.target.value)}
-                        placeholder="Название нового курса"
-                        aria-label="Название нового курса"
-                        maxLength={120}
-                    />
-                    <button
-                        type="button"
-                        className={styles.createBtn}
-                        disabled={!newCourseName.trim() || isCreating}
-                        onClick={() => void handleCreateCourse()}
-                    >
-                        {isCreating ? 'Создание…' : 'Создать курс'}
-                    </button>
-                </div>
-
+                </>
+            }
+            footer={
                 <div className={styles.buttons}>
                     <button type="button" className={styles.cancelBtn} onClick={onClose}>
                         Отмена
@@ -149,7 +152,7 @@ export function CourseSelectPopup({ open, onClose, taskIds, tasksHint, onAdded }
                         {isAdding ? 'Добавление…' : 'Добавить'}
                     </button>
                 </div>
-            </div>
-        </BaseModal>
+            }
+        />
     );
 }

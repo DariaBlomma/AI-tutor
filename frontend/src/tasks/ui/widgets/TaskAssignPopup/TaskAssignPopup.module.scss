@@ -1,21 +1,3 @@
-.modal {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  color: var(--c1);
-}
-
-// Контент модалки внутри Radix Dialog — базовый stacking-контекст,
-// чтобы выпадающий календарь DateTimePicker рисовался поверх соседних блоков формы.
-.modal > * {
-  position: relative;
-}
-
-.title {
-  font-size: 17px;
-  font-weight: 700;
-}
-
 .hint {
   margin: 0;
   font-size: 13px;
