@@ -19,6 +19,8 @@ interface BaseModalProps {
 // event.detail.originalEvent — нативный PointerEvent/MouseEvent/FocusEvent клика.
 type OutsideEventLike = CustomEvent<{ originalEvent: MouseEvent | FocusEvent }>;
 
+const POPUP_LAYER_SELECTOR = '.picker-panel-root, .MuiPopover-root, .MuiMenu-root';
+
 const isInsidePopupLayer = (event: OutsideEventLike): boolean => {
     const target = event.detail?.originalEvent?.target;
     if (!(target instanceof Element)) return false;
@@ -26,12 +28,33 @@ const isInsidePopupLayer = (event: OutsideEventLike): boolean => {
     // Маркер .picker-panel-root навешивает DateTimePicker (AnchoredPopper) на корень
     // своего поппера; MuiPopover-root/MuiMenu-root — на случай других всплывающих
     // MUI-виджетов внутри модалок.
-    return !!target.closest('.picker-panel-root, .MuiPopover-root, .MuiMenu-root');
+    return !!target.closest(POPUP_LAYER_SELECTOR);
+};
+
+// Надёжная проверка «событие касается всплывающей панели»: работает и для
+// кастомных Radix-событий (outside), и для нативных (keydown). Проверяем и
+// target, и текущий активный элемент — focusin иногда приходит с target=body.
+const eventTouchesPopupLayer = (event: Event): boolean => {
+    const candidates = [event.target, typeof document !== 'undefined' ? document.activeElement : null];
+    return candidates.some(
+        (node) => node instanceof Element && !!node.closest(POPUP_LAYER_SELECTOR),
+    );
 };
 
 // Переиспользуемая модалка на Radix UI Dialog: портал, блокировка скролла body,
 // ловушка фокуса, закрытие по Esc/оверлею, aria-доступность — из коробки библиотеки.
 // Содержимое (заголовок/контент/кнопки) рисует вызывающая сторона через children.
+//
+// ЗАЩИТА ОТ «ЗАКРЫТИЯ МОДАЛКИ КЛИКОМ ПО ПАНЕЛИ ПИКЕРА».
+// Панель MUI-пикера рендерится в document.body (портал), поэтому для Radix она
+// находится СНАРУЖИ Dialog.Content и любое взаимодействие с ней штатно трактуется
+// как клик по оверлею -> onDismiss -> onClose() -> модалка Задачи закрывается.
+// Перехватываем ВСЕ каналы dismiss именно для всплывающих панелей:
+//  - onPointerDownOutside / onInteractOutside — сам клик;
+//  - onFocusOutside — перенос фокуса внутрь поппера (срабатывает даже когда клик
+//    уже «засчитан» как outside: deferPointerDownOutside + hasPointerDownOutsideRef
+//    в DialogContentModal, см. исходники @radix-ui/react-dialog);
+//  - onEscapeKeyDown — Esc при активном элементе внутри панели относится к панели.
 export function BaseModal({ open, onClose, title, children }: BaseModalProps) {
     return (
         <DialogPrimitive.Root open={open} onOpenChange={(next) => !next && onClose()}>
@@ -45,6 +68,12 @@ export function BaseModal({ open, onClose, title, children }: BaseModalProps) {
                     }}
                     onInteractOutside={(event) => {
                         if (isInsidePopupLayer(event)) event.preventDefault();
+                    }}
+                    onFocusOutside={(event) => {
+                        if (isInsidePopupLayer(event)) event.preventDefault();
+                    }}
+                    onEscapeKeyDown={(event) => {
+                        if (eventTouchesPopupLayer(event)) event.preventDefault();
                     }}
                 >
                     {/* Доступно только для скринридеров (aria-label) — визуально заголовок рисует children. */}
