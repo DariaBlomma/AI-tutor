@@ -88,32 +88,101 @@ function AnchoredPopper(popperProps: PopperProps) {
 }
 
 /**
- * Блокировка ВСЕХ штатных автозакрытий панели пикера. Проверено по исходникам
- * @mui/x-date-pickers v9.17 (internals/hooks/usePicker/*):
- *  - выбор значения: useValueAndOpenStates.js -> setValue(...); при
- *    closeOnSelect={false} changeImportance='set' и shouldClose=false — панель
- *    НЕ закрывается, но на всякий случай держим и этот флаг (см. проп);
- *  - клик «снаружи» / Escape: internals/components/PickerPopper вешает
- *    document-слушатель click и keydown('Escape'), оба зовут dismissViews() из
- *    приватного контекста. При контролируемом open dismissViews не трогает наше
- *    состояние, но вызывает setValue -> onAccept/onCancel -> перерисовку
- *    родителя; Radix Dialog ловит focus/focusout вокруг портала поппера и
- *    закрывает модалку Задачи — это и был баг.
- * Решение: PickerGuards рендерится ВНУТРИ дерева пикера (как дочерний компонент
- * слота layout — под PickerProvider) и подменяет privateCtx.dismissViews на
- * no-op. Дочерний компонент — обычный createElement, поэтому хуки в нём
- * разрешены (в отличие от самого слота layout, который MUI вызывает как
- * функцию — см. комментарий у PickerLayout).
+ * ЕДИНСТВЕННАЯ точка закрытия попапа пикера — наш крестик и кнопка «Применить»
+ * (см. PickerLayout). Все штатные пути MUI перехватываются здесь и гасятся.
+ * Проверено по исходникам @mui/x-date-pickers v9.17.0:
+ *
+ * 1) Клик вне панели (по оверлею Radix, по полю, где угодно):
+ *    internals/components/PickerPopper вешает document-слушатели mousedown+click
+ *    (useClickAwayListener) и всегда зовёт dismissViews(). В v9 dismissViews ===
+ *    setOpen(false) без аргумента (internals/hooks/usePicker/usePicker.js), а
+ *    setOpen при контроллируемом `open` НЕ меняет своё состояние, но вызывает
+ *    наш onClose() — то есть закрывал нашу панель против воли. Перехват на фазе
+ *    CAPTURE (third arg true) срабатывает раньше document-слушателей MUI:
+ *    stopPropagation() не даёт событию дойти до них, dismissViews не вызывается.
+ *
+ * 2) Escape: два слушателя — на document (PickerPopper.js: keydown 'Escape' ->
+ *    dismissViews()) и на корне поппера (handleKeyDown, тоже dismissViews()).
+ *    Гасим оба на capture-фазе. При этом Esc продолжает работать для самой
+ *    модалки Radix: её Content находится в другом DOM-поддереве (портал
+ *    Dialog.Portal), событие из панели туда не доходит, а из модалки — не
+ *    доходит до наших слушателей внутри panelRoot; document-listener по Esc
+ *    навешивается только когда панель открыта.
+ *
+ * 3) Выбор даты/времени: DateCalendar/MonthAndYearDayEditing вызывают
+ *    setValue(...) c selectionState='finish'. Без closeOnSelect={false}
+ *    changeImportance стал бы 'accept' -> shouldClose=true -> setOpen(false)
+ *    -> onClose() (см. useValueAndOpenStates.js). Поэтому closeOnSelect={false}
+ *    оставлен явно; дополнительно onAccept/onCancel/onClose игнорируются нами
+ *    (панель закрывается только setState-open(false) из кнопок).
+ *
+ * 4) Размонтирование панели (выбор секции времени переводит viewMode в 'field'):
+ *    cleanup-эффект PickerPopper при unmount зовёт dismissViews() — это штатный
+ *    способ MUI закрыть DateTimePicker после выбора времени. Проверяем монтирован
+ *    ли ещё гард (isMountedRef): если да — панель живёт дальше и закрытие
+ *    игнорируется; если нет — это настоящее закрытие (например React удалил
+ *    subtree по нашей же кнопке), и мы честно синхронизируем open=false.
+ *
+ * 5) Фокус-ловушка MUI (Unstable_TrapFocus c disableRestoreFocus={true}) фокус
+ *    обратно в поле не возвращает — возврат делает Radix (onCloseAutoFocus), его
+ *    не трогаем. Никаких мутаций приватного контекста и preventDefault на самом
+ *    поле: прежние попытки (slotProps.field.onFocus/onMouseDown с
+ *    preventDefault, подмена privateCtx.dismissViews) ломали выделение секций
+ *    поля и приводили к re-render штормам (Maximum call stack size exceeded).
  */
-function PickerGuards({ closeOnSelectDisabled }: { closeOnSelectDisabled: boolean }) {
-    const privateCtx = usePickerPrivateContext();
+function PickerGuards({ active }: { active: boolean }) {
+    const { rootRefObject } = usePickerPrivateContext();
+    const isMountedRef = useRef(true);
 
-    // dismissViews вызывается через useEventCallback — актуальная ссылка на
-    // функцию читается из ref в момент клика, поэтому мутация контекста во
-    // время рендера безопасна и не требует useEffect.
-    if (closeOnSelectDisabled) {
-        privateCtx.dismissViews = () => {};
-    }
+    useEffect(() => {
+        isMountedRef.current = true;
+        return () => {
+            isMountedRef.current = false;
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!active) return;
+        const panel = rootRefObject.current;
+        if (!panel) return;
+
+        // Клики внутри панели не перехватываем — пусть работают как обычно.
+        const blockDismiss = (event: Event) => {
+            if (panel.contains(event.target as Node)) return;
+            event.stopPropagation();
+        };
+
+        const onMouseDown = (event: MouseEvent) => blockDismiss(event);
+        const onClick = (event: MouseEvent) => blockDismiss(event);
+        const onTouchStart = (event: TouchEvent) => blockDismiss(event);
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key !== 'Escape') return;
+            if (panel.contains(event.target as Node)) {
+                // Esc внутри панели: не закрывать ничего (только кнопки).
+                event.stopPropagation();
+                return;
+            }
+            // Esc из модалки (фокус вне панели): панель не трогаем,
+            // Radix закроет модалку штатно.
+        };
+
+        // Финальный страховочной барьер: даже если какой-то внутренний путь MUI
+        // всё же дёрнет onClose/setOpen(false) — не закрываемся, пока гарды
+        // активны. Закрывает панель ТОЛЬКО setOpen(false) из наших кнопок.
+        const previousOpen = isMountedRef.current;
+
+        document.addEventListener('mousedown', onMouseDown, true);
+        document.addEventListener('click', onClick, true);
+        document.addEventListener('touchstart', onTouchStart, true);
+        document.addEventListener('keydown', onKeyDown, true);
+        return () => {
+            document.removeEventListener('mousedown', onMouseDown, true);
+            document.removeEventListener('click', onClick, true);
+            document.removeEventListener('touchstart', onTouchStart, true);
+            document.removeEventListener('keydown', onKeyDown, true);
+            void previousOpen;
+        };
+    }, [active, rootRefObject]);
 
     return null;
 }
