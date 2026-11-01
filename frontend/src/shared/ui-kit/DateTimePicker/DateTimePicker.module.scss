@@ -65,10 +65,8 @@
 
 // Маркер-класс корня панели пикера (навешивается в AnchoredPopper). Также служит
 // контейнером для стилей кастомного layout (см. PickerLayout в DateTimePicker.tsx):
-// BaseModal использует ГЛОБАЛЬНЫЙ маркер .picker-panel-root как селектор «клик
-// пришёл в панель пикера, модалку не закрывать» (isInsidePopupLayer), а классы
-// layoutRoot/dismissBtn/layoutFooter генерируются CSS-модулем и рендерятся внутри
-// поппера — вложенность работает.
+// классы layoutRoot/dismissBtn/layoutFooter генерируются CSS-модулем и рендерятся
+// внутри поппера — вложенность работает.
 .panelRoot {
   .layoutRoot {
     position: relative;

@@ -1,17 +1,5 @@
 @use '@/shared/styles/variables' as *;
 
-.modal {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  color: var(--c1);
-}
-
-.title {
-  font-size: 17px;
-  font-weight: 700;
-}
-
 .hint {
   margin: 0;
   font-size: 13px;

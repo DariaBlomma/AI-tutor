@@ -45,46 +45,53 @@ export function TaskAssignPopup({ open, onClose, tasks }: TaskAssignPopupProps) 
             : `Выбрано заданий: ${tasks.length}`;
 
     return (
-        <BaseModal open={open} onClose={onClose} title="Назначить ученику">
-            <div className={styles.modal}>
-                <div className={styles.title}>Назначить ученику</div>
-                <p className={styles.hint}>{tasksHint}. Выберите учеников и время, до которого задание актуально.</p>
+        <BaseModal
+            open={open}
+            onClose={onClose}
+            title="Назначить ученику"
+            content={
+                <>
+                    <p className={styles.hint}>
+                        {tasksHint}. Выберите учеников и время, до которого задание актуально.
+                    </p>
 
-                {error && <div className={styles.notice}>{error}</div>}
-                {lastResult && !error && (
-                    <div className={styles.success}>
-                        Назначено: {lastResult.createdCount}, пропущено дублей: {lastResult.skippedDuplicateCount}.
+                    {error && <div className={styles.notice}>{error}</div>}
+                    {lastResult && !error && (
+                        <div className={styles.success}>
+                            Назначено: {lastResult.createdCount}, пропущено дублей: {lastResult.skippedDuplicateCount}.
+                        </div>
+                    )}
+
+                    {isLoadingStudents && <Loader />}
+                    {!isLoadingStudents && !students.length && (
+                        <div className={styles.empty}>У вас пока нет учеников.</div>
+                    )}
+
+                    {!isLoadingStudents && (
+                        <ul className={styles.list}>
+                            {students.map((student) => (
+                                <li key={student.id} className={styles.item}>
+                                    <label className={styles.studentLabel}>
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedIds.includes(student.id)}
+                                            onChange={() => toggleStudent(student.id)}
+                                        />
+                                        <span>{studentDisplayName(student)}</span>
+                                    </label>
+                                    <span className={styles.email}>{student.email}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+
+                    <div className={styles.field}>
+                        <span className={styles.fieldLabel}>Актуально до (необязательно)</span>
+                        <DateTimePicker value={deadline} onChange={setDeadline} />
                     </div>
-                )}
-
-                {isLoadingStudents && <Loader />}
-                {!isLoadingStudents && !students.length && (
-                    <div className={styles.empty}>У вас пока нет учеников.</div>
-                )}
-
-                {!isLoadingStudents && (
-                    <ul className={styles.list}>
-                        {students.map((student) => (
-                            <li key={student.id} className={styles.item}>
-                                <label className={styles.studentLabel}>
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedIds.includes(student.id)}
-                                        onChange={() => toggleStudent(student.id)}
-                                    />
-                                    <span>{studentDisplayName(student)}</span>
-                                </label>
-                                <span className={styles.email}>{student.email}</span>
-                            </li>
-                        ))}
-                    </ul>
-                )}
-
-                <div className={styles.field}>
-                    <span className={styles.fieldLabel}>Актуально до (необязательно)</span>
-                    <DateTimePicker value={deadline} onChange={setDeadline} />
-                </div>
-
+                </>
+            }
+            footer={
                 <div className={styles.buttons}>
                     <button type="button" className={styles.cancelBtn} onClick={onClose}>
                         Отмена
@@ -98,7 +105,7 @@ export function TaskAssignPopup({ open, onClose, tasks }: TaskAssignPopupProps) 
                         {isAssigning ? 'Назначение…' : 'Назначить'}
                     </button>
                 </div>
-            </div>
-        </BaseModal>
+            }
+        />
     );
 }

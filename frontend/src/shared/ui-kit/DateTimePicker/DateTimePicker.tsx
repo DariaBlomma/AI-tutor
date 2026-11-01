@@ -62,10 +62,11 @@ function AnchoredPopper(popperProps: PopperProps) {
             transition
             placement="bottom-start"
             container={typeof window !== 'undefined' ? document.body : undefined}
-            // Глобальный маркер-класс на корне поппера: BaseModal по нему определяет,
-            // что клик «снаружи» модалки (pointerdown/interact/focus) пришёл в панель
-            // пикера и НЕ закрывает модалку задачи. Класс именно глобальный (не CSS
-            // module), т.к. на него смотрит код вне этого модуля — см. isInsidePopupLayer.
+            // Класс именно глобальный (не CSS module), т.к. на него смотрит код вне
+            // этого модуля. Примечание: раньше BaseModal использовал его как селектор
+            // «клик пришёл в панель пикера — модалку не закрывать»; этот перехват из
+            // BaseModal удалён, защита взаимодействия панели с открытой модалкой —
+            // отдельная задача (известный баг).
             className={['picker-panel-root', styles.panelRoot, popperProps.className]
                 .filter(Boolean)
                 .join(' ')}
@@ -105,9 +106,10 @@ function AnchoredPopper(popperProps: PopperProps) {
  * секций поля и вызывали re-render штормы (Maximum call stack size exceeded).
  * Крестик и «Применить» оставлены как явные способы закрыть панель.
  *
- * ГЛАВНОЕ: клики внутри панели НЕ закрывают модалку задачи — это обеспечивает
- * BaseModal (isInsidePopupLayer + onEscapeKeyDown), т.к. панель рендерится в
- * body вне DOM-дерева Dialog.Content и Radix считает её «кликом снаружи».
+ * ГЛАВНОЕ: панель рендерится в body вне DOM-дерева Dialog.Content, и Radix
+ * считает клики по ней «кликами снаружи» — модалка задачи при этом закрывается
+ * (известный баг; прежний перехват isInsidePopupLayer из BaseModal удалён при
+ * его рефакторинге, штатная защита слоя — отдельная задача).
  * Внешний API прежний: значение — строка datetime-local, '' означает «не выбрано».
  */
 export function DateTimePicker({ value, onChange }: DateTimePickerProps) {
