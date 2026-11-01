@@ -96,17 +96,30 @@ export function DateTimePicker({ value, onChange }: DateTimePickerProps) {
                         open={open}
                         onOpen={() => setOpen(true)}
                         onClose={() => setOpen(false)}
-                        // не даём панели закрываться при фокусе/вводе в поле —
-                        // иначе клик по input «съедает» открытие (мигание)
-                        keepOpenDuringFieldFocus
-                        format={DISPLAY_FORMAT}
-                        slots={{ popper: AnchoredPopper }}
+                        // ВАЖНО: НЕ используем keepOpenDuringFieldFocus — в v9 он навешивает
+                        // onFocus/onMouseDown на корень поля и сам открывает панель при любом
+                        // фокусе/клике (календарь появлялся сразу при открытии попапа). В v9
+                        // слот `field` принимает плоские пропсы, которые мёржатся с внутренними
+                        // обработчиками поля (см. DateTimeFieldSlots): наши onFocus/onMouseDown
+                        // вызываются раньше штатных и через preventDefault блокируют автооткрытие
+                        // MUI. При этом клик по инпуту продолжает работать как обычно (фокус/
+                        // выделение секции), а панель открывается только кнопкой-иконкой (onOpen).
                         slotProps={{
+                            field: {
+                                onFocus: (event: React.FocusEvent<HTMLDivElement>) => {
+                                    event.preventDefault();
+                                },
+                                onMouseDown: (event: React.MouseEvent<HTMLDivElement>) => {
+                                    event.preventDefault();
+                                },
+                            },
                             textField: {
                                 fullWidth: true,
                                 size: 'small',
                             },
                         }}
+                        format={DISPLAY_FORMAT}
+                        slots={{ popper: AnchoredPopper }}
                     />
                 </div>
             </LocalizationProvider>
