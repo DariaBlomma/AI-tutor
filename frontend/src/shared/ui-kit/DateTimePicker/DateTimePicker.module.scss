@@ -37,13 +37,28 @@
     color: var(--p);
   }
 
-  // Панель календаря/циферблата рендерится в body (см. AnchoredPopper), поэтому
-  // стилизуем её отсюда глобально: корень поппера v9 имеет класс
-  // MuiPickerPopper-root, сам лист (Paper) — MuiPickerPopper-paper.
-  // z-index поднимаем поверх Radix-модалок (z-index 201 у BaseModal): без этого
-  // панель уходит под overlay модалки и «не видна» при клике на календарь.
-  :global(.MuiPickerPopper-root),
-  :global(.MuiPickerPopper-paper) {
-    z-index: 10000 !important;
-  }
+}
+
+// Панель календаря/циферблата рендерится в body (см. AnchoredPopper), а не внутри
+// .root, поэтому правила для неё вынесены в отдельный верхнеуровневый :global
+// блок — вложенные селекторы с :global() в CSS-модулях не гарантированно
+// компилируются в чистые глобальные селекторы.
+//
+// Как контролируется z-index в @mui/x-date-pickers v9 (проверено по исходникам
+// internals/components/PickerPopper/PickerPopper.mjs):
+//   - корень панели (styled MuiPopper, класс MuiPickerPopper-root) получает
+//     `zIndex: theme.zIndex.modal` из ТЕМАТИЧЕСКОЙ переменной, а не из классов;
+//   - наш слот slots.popper заменяет этот styled-компонент на голый MUI Popper
+//     (без z-index вообще), так что единственный надёжный способ поднять панель
+//     над Radix-модалкой (overlay 200 / content 201 у BaseModal) — задать
+//     zIndex инлайном через slotProps.popper (см. DateTimePicker.tsx);
+//   - CSS-оверрайд ниже — страховка на случай, если панель рендерится дефолтным
+//     PickerPopperRoot (например, при dev-сборке без нашего слота).
+//
+// ВАЖНО: MUI-панели (Modal/Popper) используют z-index 1300 из стандартной темы.
+// Если в локальной теме (muiTheme.ts) z-index модалки останется >= 1300, панель
+// пикера будет рисоваться ПОД Radix-модалкой. Синхронизировано с zIndex.modal
+// в muiTheme.ts; держим оба значения ниже Radix (201) — см. там же комментарий.
+:global(.MuiPickerPopper-root) {
+  z-index: 10000 !important;
 }
