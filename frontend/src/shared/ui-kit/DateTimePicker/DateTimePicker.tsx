@@ -1,11 +1,15 @@
 import { useMemo, useState } from 'react';
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
+import Button from '@mui/material/Button';
 import MuiPopper from '@mui/material/Popper';
 import type { PopperProps } from '@mui/material/Popper';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateTimePicker as DateTimePickerMui } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import type { PickersLayoutProps } from '@mui/x-date-pickers/PickersLayout';
+// PickerValue — тип значения пикера (экспортируется из internals, см. internals/index.d.ts).
+import type { PickerValue } from '@mui/x-date-pickers/internals';
 import { ThemeProvider } from '@mui/material/styles';
 import { dateTimePickerTheme } from './muiTheme';
 import styles from './DateTimePicker.module.scss';
@@ -99,6 +103,31 @@ export function DateTimePicker({ value, onChange }: DateTimePickerProps) {
         onChange(next ? next.format(VALUE_FORMAT) : '');
     };
 
+    // Свой layout панели: сверху — крестик «закрыть без применения», снизу —
+    // кнопка «Применить». Оба клика закрывают только попап пикера (setOpen(false)),
+    // модалку не трогают. В связке с closeOnSelect={false} это даёт единственные
+    // штатные способы закрыть панель: крестик / Применить / клик вне / Esc.
+    // children — стандартный контент PickersLayout (toolbar + tabs + вьюхи +
+    // actionBar), поэтому рендерим его внутри обёртки и пробрасываем свои классы.
+    const PickerLayout = ({ children, className, ...other }: PickersLayoutProps<PickerValue>) => (
+        <div {...other} className={[styles.layoutRoot, className].filter(Boolean).join(' ')}>
+            <button
+                type="button"
+                className={styles.dismissBtn}
+                aria-label="Закрыть без сохранения"
+                onClick={() => setOpen(false)}
+            >
+                ×
+            </button>
+            {children}
+            <div className={styles.layoutFooter}>
+                <Button variant="contained" size="small" onClick={() => setOpen(false)}>
+                    Применить
+                </Button>
+            </div>
+        </div>
+    );
+
     return (
         <ThemeProvider theme={dateTimePickerTheme}>
             <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ru">
@@ -109,6 +138,11 @@ export function DateTimePicker({ value, onChange }: DateTimePickerProps) {
                         open={open}
                         onOpen={() => setOpen(true)}
                         onClose={() => setOpen(false)}
+                        // Панель НЕ закрывается сама после выбора даты/времени — только
+                        // по крестику или «Применить» (см. PickerLayout). Без этого MUI при
+                        // завершении выбора вызывал onClose, клик «уходил» наружу и Radix
+                        // закрывал модалку задачи вместе с пикером.
+                        closeOnSelect={false}
                         // ВАЖНО: НЕ используем keepOpenDuringFieldFocus — в v9 он навешивает
                         // onFocus/onMouseDown на корень поля и сам открывает панель при любом
                         // фокусе/клике (календарь появлялся сразу при открытии попапа). В v9
@@ -141,7 +175,7 @@ export function DateTimePicker({ value, onChange }: DateTimePickerProps) {
                             },
                         }}
                         format={DISPLAY_FORMAT}
-                        slots={{ popper: AnchoredPopper }}
+                        slots={{ popper: AnchoredPopper, layout: PickerLayout }}
                     />
                 </div>
             </LocalizationProvider>
