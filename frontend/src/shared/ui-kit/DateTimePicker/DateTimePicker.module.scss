@@ -63,9 +63,39 @@
   z-index: 10000 !important;
 }
 
-// Маркер-класс корня панели пикера (навешивается в AnchoredPopper). Стилей не
-// задаёт — BaseModal использует его как селектор «клик пришёл в панель пикера,
-// модалку не закрывать» (см. isInsidePopupLayer в BaseModal.tsx).
+// Маркер-класс корня панели пикера (навешивается в AnchoredPopper). Также служит
+// контейнером для стилей кастомного layout (см. PickerLayout в DateTimePicker.tsx):
+// BaseModal использует его как селектор «клик пришёл в панель пикера, модалку не
+// закрывать» (isInsidePopupLayer), а классы layoutRoot/dismissBtn/layoutFooter
+// генерируются CSS-модулем и рендерятся внутри поппера — вложенность работает.
 .panelRoot {
-  // пустой блок нужен только чтобы CSS-модуль сгенерировал класс
+  .layoutRoot {
+    position: relative;
+  }
+
+  // Крестик в правом верхнем углу панели: закрывает попап пикера без применения.
+  .dismissBtn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    z-index: 1;
+    border: none;
+    background: transparent;
+    color: var(--c3);
+    font-size: 20px;
+    line-height: 1;
+    padding: 4px 8px;
+    cursor: pointer;
+
+    &:hover {
+      color: var(--c1);
+    }
+  }
+
+  // Нижняя панель с кнопкой «Применить».
+  .layoutFooter {
+    display: flex;
+    justify-content: flex-end;
+    padding: 8px;
+  }
 }
