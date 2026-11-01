@@ -82,7 +82,7 @@ export function TaskAssignPopup({ open, onClose, tasks }: TaskAssignPopupProps) 
 
                 <div className={styles.field}>
                     <span className={styles.fieldLabel}>Актуально до (необязательно)</span>
-                    <DateTimePicker value={deadline} onChange={setDeadline} placeholder="Выберите дату и время" />
+                    <DateTimePicker value={deadline} onChange={setDeadline} />
                 </div>
 
                 <div className={styles.buttons}>
