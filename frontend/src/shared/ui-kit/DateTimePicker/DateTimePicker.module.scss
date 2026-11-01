@@ -62,3 +62,10 @@
 :global(.MuiPickerPopper-root) {
   z-index: 10000 !important;
 }
+
+// Маркер-класс корня панели пикера (навешивается в AnchoredPopper). Стилей не
+// задаёт — BaseModal использует его как селектор «клик пришёл в панель пикера,
+// модалку не закрывать» (см. isInsidePopupLayer в BaseModal.tsx).
+.panelRoot {
+  // пустой блок нужен только чтобы CSS-модуль сгенерировал класс
+}

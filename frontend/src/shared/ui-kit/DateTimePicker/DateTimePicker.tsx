@@ -57,6 +57,9 @@ function AnchoredPopper(popperProps: PopperProps) {
             transition
             placement="bottom-start"
             container={typeof window !== 'undefined' ? document.body : undefined}
+            // Маркер-класс на корне поппера: BaseModal по нему определяет, что клик
+            // «снаружи» модалки пришёл в панель пикера, и не закрывает её.
+            className={[styles.panelRoot, popperProps.className].filter(Boolean).join(' ')}
             // z-index: MUI Popper сам по себе его не задаёт, а наш слот подменяет
             // дефолтный PickerPopperRoot (styled-компонент с zIndex из темы).
             // Инлайн-стили мёржатся со style из slotProps.popper (mergeSlotProps),
