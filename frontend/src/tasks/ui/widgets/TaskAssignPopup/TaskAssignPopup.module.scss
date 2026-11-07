@@ -63,12 +63,20 @@
 }
 
 .field {
-  // Поле дедлайна — последний stacking-контекст в форме, чтобы панель календаря
-  // перекрывала нижние кнопки модалки.
   z-index: 5;
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.datetimeRow {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+
+  > * {
+    flex: 1;
+  }
 }
 
 .fieldLabel {
