@@ -1,0 +1,40 @@
+@use '../../styles/variables' as *;
+
+.wrapper {
+  width: 100%;
+  color-scheme: dark;
+}
+
+.input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid rgba($p, 0.4);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--c1);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+
+  &:focus {
+    border-color: var(--p);
+  }
+
+  &:hover:not(:focus) {
+    border-color: var(--p);
+  }
+
+  // Стили для стрелок в Chrome
+  &::-webkit-time-picker-dropdown {
+    background: var(--bg);
+    color: var(--c1);
+    border: 1px solid rgba($p, 0.4);
+    border-radius: 6px;
+  }
+
+  // Стили для стрелок в Firefox
+  &::-moz-focus-outer {
+    border: 0;
+  }
+}
