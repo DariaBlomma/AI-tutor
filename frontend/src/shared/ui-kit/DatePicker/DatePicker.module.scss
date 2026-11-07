@@ -37,7 +37,6 @@
       color: var(--c1);
     }
 
-    // Скрываем иконки-стрелки, используем текст
     svg {
       display: none;
     }
@@ -90,18 +89,6 @@
   .rdp-table {
     width: 100%;
     border-collapse: collapse;
-  }
-
-  // Заголовки дней недели
-  .rdp-head {
-    .rdp-head_cell {
-      font-weight: 600;
-      color: var(--c3);
-      font-size: 11px;
-      text-transform: uppercase;
-      padding: 8px 0;
-      text-align: center;
-    }
   }
 
   // Строки дней
@@ -175,7 +162,7 @@
     border-radius: 6px 0 0 6px;
   }
 
-  .rdp_range_end {
+  .rdp-range_end {
     border-radius: 0 6px 6px 0;
   }
 }

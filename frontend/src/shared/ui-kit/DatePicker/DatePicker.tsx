@@ -1,10 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { DayPicker } from 'react-day-picker';
 import { ru } from 'date-fns/locale';
-import type { DateRange } from 'react-day-picker';
 import styles from './DatePicker.module.scss';
-
-const DISPLAY_FORMAT = 'dd.MM.yyyy'; // формат отображения (заглушка, реальный формат задаётся CSS)
 
 interface DatePickerProps {
     /** Значение в формате datetime-local ('YYYY-MM-DDTHH:mm') или '' (не выбрано). */
@@ -57,10 +54,7 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
                     nav: styles.nav,
                     button_previous: styles.navButton,
                     button_next: styles.navButton,
-                    head: styles.head,
-                    head_row: styles.headRow,
-                    head_cell: styles.headCell,
-                    row: styles.row,
+                    dropdown: styles.dropdown,
                     day: styles.day,
                     day_button: styles.dayButton,
                     range_start: styles.dayRangeStart,
@@ -69,14 +63,7 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
                     selected: styles.daySelected,
                     today: styles.dayToday,
                     outside: styles.dayOutside,
-                    dropdown: styles.dropdown,
                 }}
-                formatters={{ formatWeekday: (_day, locale) => {
-                    // Короткие названия дней недели (3 буквы)
-                    const days = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
-                    const d = new Date(day);
-                    return String(days[d.getDay()]);
-                }}}
             />
         </div>
     );
