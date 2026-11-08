@@ -15,7 +15,7 @@ interface DateTimePickerProps {
 }
 
 // todo: refactor into separate datePicker and TimePicker.
-//  todo: Reactor native TimePikcer into customizable one, ,maybe with 2 selects
+//  Reactor native TimePikcer into customizable one, ,maybe with 2 selects
 function CalendarIcon() {
     return (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -95,20 +95,21 @@ export function DateTimePicker({ value, onChange }: DateTimePickerProps) {
                             classNames={{
                                 months: styles.months,
                                 month: styles.month,
-                                month_caption: styles.monthCaption, // ← изменил с caption на month_caption
+                                month_caption: styles.monthCaption,
                                 caption_label: styles.captionLabel,
                                 nav: styles.nav,
-                                button_previous: styles.navButtonPrevious, // ← изменил
-                                button_next: styles.navButtonNext, // ← изменил
+                                button_previous: styles.navButtonPrevious,
+                                button_next: styles.navButtonNext,
                                 dropdowns: styles.dropdowns,
                                 dropdown: styles.dropdown,
-                                table: styles.table,
-                                head_row: styles.headRow,
-                                head_cell: styles.headCell,
-                                row: styles.row,
-                                cell: styles.cell,
-                                day: styles.day,
-                                day_button: styles.dayButton,
+                                // 🔥 Сетка календаря
+                                month_grid: styles.table,       // было 'table'
+                                weekdays: styles.headRow,       // было 'head_row' (контейнер заголовков Пн-Вс)
+                                weekday: styles.headCell,       // было 'head_cell' (отдельный заголовок дня)
+                                week: styles.row,               // было 'row' (строка с числами)
+                                day: styles.cell,               // было 'cell' (ячейка числа)
+                                day_button: styles.dayButton,   // сама кнопка с числом
+                                // 🔥 Состояния дней
                                 selected: styles.daySelected,
                                 today: styles.dayToday,
                                 outside: styles.dayOutside,
