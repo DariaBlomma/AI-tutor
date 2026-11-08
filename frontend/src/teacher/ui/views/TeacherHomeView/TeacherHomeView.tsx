@@ -1,3 +1,5 @@
+import { useCallback } from 'react';
+import { useNavigate } from '@tanstack/react-router';
 import styles from './TeacherHomeView.module.scss';
 import { useTeacherName } from '@/teacher/hooks/useTeacherName';
 import { MOCK_TEACHER_LESSONS, MOCK_TEACHER_STATS } from '@/teacher/data';
@@ -9,6 +11,11 @@ const SHOW_TMP_DATA = false;
 export function TeacherHomeView() {
     // Имя учителя — с бэкенда (логика вынесена в хук teacher/hooks/useTeacherName).
     const teacherName = useTeacherName();
+    const navigate = useNavigate();
+
+    const goToTasksBank = useCallback(() => {
+        void navigate({ to: '/tasks-bank' });
+    }, [navigate]);
 
     return (
         <div className={styles.page}>
@@ -40,8 +47,9 @@ export function TeacherHomeView() {
             <div className={styles.section}>
                 <div className={styles.sectionTitle}>Быстрые действия</div>
                 <div className={styles.btnRow}>
-                    {/* Экран назначения ДЗ ещё не реализован — обработчика пока нет. */}
-                    <button type="button" className={styles.btn}>Назначить ДЗ</button>
+                    <button type="button" className={styles.btn} onClick={goToTasksBank}>
+                        Назначить ДЗ
+                    </button>
                 </div>
             </div>
 
