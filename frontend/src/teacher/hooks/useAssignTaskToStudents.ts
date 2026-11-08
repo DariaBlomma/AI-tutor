@@ -56,6 +56,7 @@ export function useAssignTaskToStudents(enabled: boolean): UseAssignTaskToStuden
 
         return () => {
             active = false;
+            setIsLoadingStudents(false);
         };
     }, [enabled]);
 

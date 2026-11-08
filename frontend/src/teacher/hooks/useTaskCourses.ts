@@ -44,6 +44,7 @@ export function useTaskCourses(taskId: number | null, enabled: boolean): UseTask
 
         return () => {
             active = false;
+            setIsLoading(false);
         };
     }, [taskId, enabled]);
 

@@ -19,13 +19,13 @@ export interface UseTeacherCoursesResult {
  * на странице банка заданий и создания курса прямо из попапа «Добавить в курс».
  * Эндпоинт закрыт для ученика (403) — загрузку включает только учитель (enabled).
  */
-export function useTeacherCourses(enabled: boolean): UseTeacherCoursesResult {
+export function useTeacherCourses(shouldLoadCourses: boolean): UseTeacherCoursesResult {
     const [courses, setCourses] = useState<CourseSummary[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!enabled) return;
+        if (!shouldLoadCourses) return;
         let active = true;
 
         setIsLoading(true);
@@ -45,8 +45,9 @@ export function useTeacherCourses(enabled: boolean): UseTeacherCoursesResult {
 
         return () => {
             active = false;
+            setIsLoading(false);
         };
-    }, [enabled]);
+    }, [shouldLoadCourses]);
 
     const createCourse = useCallback(async (name: string): Promise<string | null> => {
         const trimmed = name.trim();

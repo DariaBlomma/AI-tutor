@@ -240,7 +240,7 @@ export function TasksBankView() {
     );
 
     // Курсы учителя для фильтра-мультиселекта (GET /api/courses) — только учителю.
-    const teacherCourses = useTeacherCourses(isTeacher);
+    const teacherCourses = useTeacherCourses(true);
     const courseOptions = useMemo(
         () => teacherCourses.courses.map((c) => ({ value: String(c.id), label: c.name })),
         [teacherCourses.courses],
