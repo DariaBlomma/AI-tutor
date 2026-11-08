@@ -1,7 +1,8 @@
 import { useCallback, useState } from 'react';
 import { BaseModal } from '@/shared/ui-kit/BaseModal/BaseModal';
-import { DateTimePicker } from '@/shared/ui-kit/DateTimePicker/DateTimePicker'; // <-- Единый компонент
+import { DateTimePicker } from '@/shared/ui-kit/DateTimePicker/DateTimePicker';
 import { Loader } from '@/shared/ui-kit/Loader/Loader';
+import { IconAlert } from '@/shared/icons/IconAlert';
 import { studentDisplayName } from '@/shared/utils/studentDisplayName';
 import { useAssignTaskToStudents } from '@/teacher/hooks/useAssignTaskToStudents';
 import type { AssignTaskTarget } from './TaskAssignPopup.types';
@@ -37,22 +38,17 @@ export function TaskAssignPopup({ open, onClose, tasks }: TaskAssignPopupProps) 
         }
     };
 
-    // Подсказка в шапке: одно задание — его название; несколько — счётчик bulk-выбора.
-    const tasksHint =
-        tasks.length === 1
-            ? `Задание: ${tasks[0].name?.trim() || 'Без названия'}`
-            : `Выбрано заданий: ${tasks.length}`;
-
     return (
         <BaseModal
             open={open}
             onClose={onClose}
-            title="Назначить ученику"
+            title="Назначить задания"
             content={
                 <>
-                    <p className={styles.hint}>
-                        {tasksHint}. Выберите учеников и время, до которого задание актуально.
-                    </p>
+                    <div className={styles.alert}>
+                        <IconAlert className={styles.alertIcon} />
+                        <span>Выберите учеников и время, до которого задание актуально.</span>
+                    </div>
 
                     {error && <div className={styles.notice}>{error}</div>}
                     {lastResult && !error && (

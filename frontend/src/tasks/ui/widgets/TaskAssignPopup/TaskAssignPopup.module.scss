@@ -1,7 +1,22 @@
-.hint {
-  margin: 0;
-  font-size: 13px;
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(255, 166, 60, 0.12);
+  border: 1px solid rgba(255, 166, 60, 0.35);
   color: var(--c3);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.alertIcon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+  color: rgba(255, 140, 50, 0.75);
 }
 
 .notice {
