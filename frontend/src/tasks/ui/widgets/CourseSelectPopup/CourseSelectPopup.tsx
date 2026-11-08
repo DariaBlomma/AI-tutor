@@ -23,7 +23,7 @@ interface CourseSelectPopupProps {
 // react-select через BaseSelectMulti) + создание курса прямо здесь (нужно только название).
 // Добавление — POST /api/courses/{courseId}/tasks для каждой пары (курс × задание);
 // повторное добавление бэк молча игнорирует, поэтому «пропущено» = уже было в курсе.
-export function CourseSelectPopup({ open, onClose, taskIds, tasksHint, onAdded }: CourseSelectPopupProps) {
+export function CourseSelectPopup({ open, onClose, taskIds, onAdded }: CourseSelectPopupProps) {
     // Список курсов грузится лениво — только при открытом попапе; createCourse обновляет его локально.
     const { courses, isLoading, error, createCourse } = useTeacherCourses(open);
 
@@ -95,8 +95,6 @@ export function CourseSelectPopup({ open, onClose, taskIds, tasksHint, onAdded }
             title="Добавить в курс"
             content={
                 <>
-                    <p className={styles.hint}>{tasksHint}. Выберите курсы, в которые нужно добавить задание.</p>
-
                     {(error || actionError) && <div className={styles.error}>{actionError ?? error}</div>}
                     {addResult !== null && (
                         <div className={styles.success}>Добавлено в курсы: {addResult}.</div>
@@ -124,8 +122,9 @@ export function CourseSelectPopup({ open, onClose, taskIds, tasksHint, onAdded }
                             value={newCourseName}
                             onChange={(e) => setNewCourseName(e.target.value)}
                             placeholder="Название нового курса"
-                            aria-label="Название нового курса"
                             maxLength={120}
+                            variant="full"
+                            aria-label="Название нового курса"
                         />
                         <button
                             type="button"
