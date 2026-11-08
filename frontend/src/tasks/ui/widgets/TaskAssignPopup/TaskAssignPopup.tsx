@@ -1,25 +1,11 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { BaseModal } from '@/shared/ui-kit/BaseModal/BaseModal';
-import { DatePicker } from '@/shared/ui-kit/DatePicker/DatePicker';
-import { TimePicker } from '@/shared/ui-kit/TimePicker/TimePicker';
+import { DateTimePicker } from '@/shared/ui-kit/DateTimePicker/DateTimePicker'; // <-- Единый компонент
 import { Loader } from '@/shared/ui-kit/Loader/Loader';
 import { studentDisplayName } from '@/shared/utils/studentDisplayName';
 import { useAssignTaskToStudents } from '@/teacher/hooks/useAssignTaskToStudents';
 import type { AssignTaskTarget } from './TaskAssignPopup.types';
 import styles from './TaskAssignPopup.module.scss';
-
-/** Разбирает строку datetime-local на дату и время. */
-function splitDeadline(value: string): { date: string; time: string } {
-    if (!value) return { date: '', time: '' };
-    const parts = value.split('T');
-    return { date: parts[0] ?? '', time: parts[1] ?? '00:00' };
-}
-
-/** Объединяет дату и время в строку datetime-local. */
-function mergeDeadline(date: string, time: string): string {
-    if (!date) return '';
-    return `${date}T${time || '00:00'}`;
-}
 
 interface TaskAssignPopupProps {
     open: boolean;
@@ -28,29 +14,21 @@ interface TaskAssignPopupProps {
     tasks: AssignTaskTarget[];
 }
 
-// Попап «Назначить ученику»: выбор одного/нескольких своих учеников + время, до которого
-// задание актуально (deadline, необязательный). Отправка POST /api/teacher/assignments.
-// Общий для страницы просмотра (один taskId) и bulk-панели банка заданий (много taskIds) —
-// поведение кнопки «Назначить» идентично: отправка, блокировка на время запроса,
-// сброс формы и закрытие при успехе.
 export function TaskAssignPopup({ open, onClose, tasks }: TaskAssignPopupProps) {
     const { students, isLoadingStudents, isAssigning, error, lastResult, assign } = useAssignTaskToStudents(open);
-    const [selectedIds, setSelectedIds] = useState<number[]>([]);
-    const [deadline, setDeadline] = useState('');
 
-    // Разделяем deadline на дату и время для DatePicker и TimePicker
-    const { date: deadlineDate, time: deadlineTime } = useMemo(
-        () => splitDeadline(deadline),
-        [deadline],
-    );
+    const [selectedIds, setSelectedIds] = useState<number[]>([]);
+    // Храним deadline как единую строку, как и раньше
+    const [deadline, setDeadline] = useState('');
 
     const toggleStudent = useCallback((id: number) => {
         setSelectedIds((prev) => (prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]));
     }, []);
 
     const handleAssign = async () => {
-        const merged = mergeDeadline(deadlineDate, deadlineTime);
-        const message = await assign(tasks.map((t) => t.id), selectedIds, merged || null);
+        // deadline уже в правильном формате 'YYYY-MM-DDTHH:mm' или ''
+        const message = await assign(tasks.map((t) => t.id), selectedIds, deadline || null);
+
         if (!message) {
             // Успех — закрываем попап и сбрасываем форму для следующего открытия.
             setSelectedIds([]);
@@ -58,16 +36,6 @@ export function TaskAssignPopup({ open, onClose, tasks }: TaskAssignPopupProps) 
             onClose();
         }
     };
-
-    const handleDateChange = useCallback(
-        (date: string) => setDeadline(mergeDeadline(date, deadlineTime)),
-        [deadlineTime],
-    );
-
-    const handleTimeChange = useCallback(
-        (time: string) => setDeadline(mergeDeadline(deadlineDate, time)),
-        [deadlineDate],
-    );
 
     // Подсказка в шапке: одно задание — его название; несколько — счётчик bulk-выбора.
     const tasksHint =
@@ -115,13 +83,9 @@ export function TaskAssignPopup({ open, onClose, tasks }: TaskAssignPopupProps) 
                             ))}
                         </ul>
                     )}
-
                     <div className={styles.field}>
                         <span className={styles.fieldLabel}>Актуально до (необязательно)</span>
-                        <div className={styles.datetimeRow}>
-                            <DatePicker value={deadline} onChange={handleDateChange} />
-                            <TimePicker value={deadlineTime} onChange={handleTimeChange} />
-                        </div>
+                        <DateTimePicker value={deadline} onChange={setDeadline} />
                     </div>
                 </>
             }

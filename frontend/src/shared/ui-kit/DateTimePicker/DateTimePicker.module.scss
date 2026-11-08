@@ -1,0 +1,378 @@
+@use '../../styles/variables' as *;
+
+// --- Триггер (кнопка, открывающая календарь) ---
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 12px;
+  background: rgba($p, 0.05);
+  border: 1px solid rgba($p, 0.3);
+  border-radius: 8px;
+  color: var(--c1);
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  gap: 8px;
+
+  &:hover {
+    border-color: var(--p);
+    background: rgba($p, 0.1);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--p);
+    outline-offset: 2px;
+  }
+
+  svg {
+    color: var(--p);
+    flex-shrink: 0;
+  }
+}
+
+.triggerText {
+  flex: 1;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// --- Поповер (контейнер календаря) ---
+.content {
+  background: #1a1a1a;
+  border: 1px solid rgba($p, 0.3);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  animation: fadeIn 0.15s ease-out;
+
+  .arrow {
+    fill: #1a1a1a;
+    stroke: rgba($p, 0.3);
+    stroke-width: 1px;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+// --- Flex-контейнер: календарь слева, время справа ---
+.pickerBody {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+  min-height: 270px;
+}
+
+// --- Колонка времени (справа от календаря) ---
+.timeColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 40px; // Выравниваем по высоте с календарём (пропускаем шапку)
+  min-width: 100px;
+}
+
+.timeLabel {
+  font-size: 12px;
+  color: var(--c3);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.timeInput {
+  width: 100%;
+  padding: 8px 10px;
+  background: rgba($p, 0.05);
+  border: 1px solid rgba($p, 0.3);
+  border-radius: 6px;
+  color: var(--c1);
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: var(--p);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--p);
+    box-shadow: 0 0 0 3px rgba($p, 0.25);
+  }
+
+  &::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background 0.2s;
+    filter: invert(32%) sepia(91%) saturate(3842%) hue-rotate(252deg) brightness(92%) contrast(93%);
+
+    &:hover {
+      background: rgba($p, 0.15);
+    }
+  }
+}
+
+// --- Календарь (react-day-picker v9) ---
+// CSS-переменные для темизации календаря
+.root {
+  --rdp-accent-color: var(--p);
+  --rdp-background-color: rgba(#{$p}, 0.15);
+  --rdp-accent-background-color: var(--p);
+  --rdp-font-family: inherit;
+}
+
+.months {
+  display: flex;
+  gap: 2rem;
+}
+
+.month {
+  width: 100%;
+  max-width: 280px;
+}
+
+// Шапка месяца: [ < ] Ноябрь 2026 [ > ]
+.monthCaption {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 0 12px;
+  min-height: 40px;
+  max-width: fit-content;
+  margin: 0 auto;
+}
+
+// Название месяца (центрировано)
+.captionLabel {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--c1);
+  text-align: center;
+}
+
+// Контейнер навигации (абсолютно позиционирован поверх шапки)
+.nav {
+  position: absolute;
+  top: 14px;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px;
+  pointer-events: none;
+
+  // Кнопки внутри nav снова кликабельны
+  button {
+    pointer-events: auto;
+  }
+}
+
+// Кнопка "Назад" (влево)
+.navButtonPrevious {
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba($p, 0.4);
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+
+  &:hover:not(:disabled) {
+    border-color: var(--p);
+    background: rgba($p, 0.1);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--p);
+    outline-offset: 2px;
+  }
+
+  // Стилизуем нативную SVG-иконку
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: rgba($p, 0.4);
+    transition: fill 0.2s;
+  }
+
+  &:hover:not(:disabled) svg {
+    fill: var(--p);
+  }
+}
+
+// Кнопка "Вперёд" (вправо)
+.navButtonNext {
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba($p, 0.4);
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+
+  &:hover:not(:disabled) {
+    border-color: var(--p);
+    background: rgba($p, 0.1);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--p);
+    outline-offset: 2px;
+  }
+
+  // Стилизуем нативную SVG-иконку
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: rgba($p, 0.4);
+    transition: fill 0.2s;
+  }
+
+  &:hover:not(:disabled) svg {
+    fill: var(--p);
+  }
+}
+
+// Выпадающие списки (месяц/год)
+.dropdowns {
+  display: flex;
+  gap: 4px;
+}
+
+.dropdown {
+  background: rgba($p, 0.1);
+  border: 1px solid rgba($p, 0.3);
+  border-radius: 4px;
+  color: var(--c1);
+  padding: 2px 6px;
+  font-size: 13px;
+  cursor: pointer;
+  outline: none;
+
+  &:focus {
+    border-color: var(--p);
+  }
+}
+
+// --- Сетка дней ---
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.headRow {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 4px;
+}
+
+.headCell {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--c3);
+  padding: 4px 0;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 2px;
+}
+
+.cell {
+  text-align: center;
+  padding: 2px 0;
+}
+
+.day {
+  width: 100%;
+  height: 100%;
+}
+
+// Кнопка дня
+.dayButton {
+  width: 32px;
+  height: 32px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--c1);
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+
+  &:hover:not(:disabled) {
+    background: rgba($p, 0.15);
+    border-color: var(--p);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--p);
+    outline-offset: 1px;
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+}
+
+// Выбранный день
+.daySelected {
+  .dayButton {
+    background: var(--p) !important;
+    border-color: var(--p) !important;
+    color: #fff !important;
+    font-weight: 600;
+
+    &:hover {
+      background: var(--pd) !important;
+      border-color: var(--pd) !important;
+    }
+  }
+}
+
+// Сегодняшний день (не выбранный)
+.dayToday:not(.daySelected) {
+  .dayButton {
+    color: var(--p);
+    font-weight: 600;
+    border-color: rgba($p, 0.5);
+  }
+}
+
+// День вне текущего месяца
+.dayOutside {
+  .dayButton {
+    color: var(--c3);
+    opacity: 0.5;
+  }
+}
