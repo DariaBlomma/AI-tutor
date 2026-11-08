@@ -27,10 +27,9 @@ export function CourseSelectPopup({ open, onClose, taskIds, onAdded }: CourseSel
     // Список курсов грузится лениво — только при открытом попапе; createCourse обновляет его локально.
     const { courses, isLoading, error, createCourse } = useTeacherCourses(open);
 
+
     const [selectedCourseIds, setSelectedCourseIds] = useState<string[]>([]);
     const [newCourseName, setNewCourseName] = useState('');
-    const [isCreating, setIsCreating] = useState(false);
-    const [isAdding, setIsAdding] = useState(false);
     const [actionError, setActionError] = useState<string | null>(null);
     const [addResult, setAddResult] = useState<number | null>(null);
 
@@ -50,23 +49,20 @@ export function CourseSelectPopup({ open, onClose, taskIds, onAdded }: CourseSel
     // после успеха перезапрашивать список не нужно — курс уже вставлен в начало.
     const handleCreateCourse = useCallback(async () => {
         const name = newCourseName.trim();
-        if (!name || isCreating) return;
-        setIsCreating(true);
+        if (!name) return;
         setActionError(null);
         const message = await createCourse(name);
-        setIsCreating(false);
         if (message) {
             setActionError(message);
             return;
         }
         setNewCourseName('');
-    }, [newCourseName, isCreating, createCourse]);
+    }, [newCourseName, createCourse]);
 
     // Отправка: для каждого выбранного курса — по заданию на каждый taskIds.
     const handleAdd = useCallback(async () => {
         const courseIdNums = selectedCourseIds.map(Number);
-        if (!courseIdNums.length || isAdding) return;
-        setIsAdding(true);
+        if (!courseIdNums.length) return;
         setActionError(null);
         setAddResult(null);
         let added = 0;
@@ -83,10 +79,8 @@ export function CourseSelectPopup({ open, onClose, taskIds, onAdded }: CourseSel
             onAdded?.(taskIds, courseIdNums);
         } catch (e) {
             setActionError(e instanceof Error ? e.message : 'Не удалось добавить задания в курс.');
-        } finally {
-            setIsAdding(false);
         }
-    }, [selectedCourseIds, isAdding, taskIds, onAdded]);
+    }, [selectedCourseIds, taskIds, onAdded]);
 
     return (
         <BaseModal
@@ -100,7 +94,7 @@ export function CourseSelectPopup({ open, onClose, taskIds, onAdded }: CourseSel
                         <div className={styles.success}>Добавлено в курсы: {addResult}.</div>
                     )}
 
-                    <LoadingWidget active={isLoading} mode="block">
+                    <LoadingWidget active={isLoading} mode="overlay" dimContent>
                         <div className={styles.field}>
                             <span className={styles.fieldLabel}>Курсы</span>
                             <BaseSelectMulti
@@ -110,9 +104,7 @@ export function CourseSelectPopup({ open, onClose, taskIds, onAdded }: CourseSel
                                 placeholder={courses.length ? 'Выберите курсы' : 'Сначала создайте курс'}
                                 ariaLabel="Курсы для добавления задания"
                             />
-                            {!courses.length && !isLoading && (
-                                <div className={styles.empty}>Курсов пока нет — создайте первый ниже.</div>
-                            )}
+
                         </div>
                     </LoadingWidget>
 
@@ -129,10 +121,10 @@ export function CourseSelectPopup({ open, onClose, taskIds, onAdded }: CourseSel
                         <button
                             type="button"
                             className={styles.createBtn}
-                            disabled={!newCourseName.trim() || isCreating}
+                            disabled={!newCourseName.trim()}
                             onClick={() => void handleCreateCourse()}
                         >
-                            {isCreating ? 'Создание…' : 'Создать курс'}
+                            Создать курс
                         </button>
                     </div>
                 </>
@@ -145,10 +137,10 @@ export function CourseSelectPopup({ open, onClose, taskIds, onAdded }: CourseSel
                     <button
                         type="button"
                         className={styles.submitBtn}
-                        disabled={isAdding || !selectedCourseIds.length}
+                        disabled={!selectedCourseIds.length}
                         onClick={() => void handleAdd()}
                     >
-                        {isAdding ? 'Добавление…' : 'Добавить'}
+                        Добавить
                     </button>
                 </div>
             }

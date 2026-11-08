@@ -11,6 +11,19 @@
   justify-content: center;
   min-height: 48px;
   pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.2s ease,
+    visibility 0s linear 0.2s;
+
+  &.visible {
+    opacity: 1;
+    visibility: visible;
+    transition:
+      opacity 0.2s ease,
+      visibility 0s linear 0s;
+  }
 }
 
 .overlay .scrim {
@@ -54,6 +67,14 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .scrim {
+    transition: none;
+
+    &.visible {
+      transition: none;
+    }
+  }
+
   .overlay .scrim {
     transition: none;
 
