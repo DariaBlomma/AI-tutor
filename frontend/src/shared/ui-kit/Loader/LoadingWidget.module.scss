@@ -37,8 +37,6 @@
     opacity 0.2s ease,
     visibility 0s linear 0.2s;
 
-  // Лёгкая подложка: контент под ней различим, но клики по нему перехватываются.
-  // Тема в приложении тёмная (--bg), поэтому затемняем, а не осветляем.
   background: color-mix(in srgb, var(--bg, #0f0f0f) 45%, transparent);
 
   &.visible {
@@ -50,7 +48,7 @@
   }
 }
 
-// Затемнение контента под оверлеем (dimContent) — вместо старого opacity у списка.
+// Затемнение контента под оверлеем (dimContent)
 .dim.visible {
   background: color-mix(in srgb, var(--bg, #0f0f0f) 65%, transparent);
 }

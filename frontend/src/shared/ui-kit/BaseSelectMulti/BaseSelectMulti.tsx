@@ -34,7 +34,7 @@ export function BaseSelectMulti<TValue extends string = string>({
                 closeMenuOnSelect={false}
                 hideSelectedOptions={false}
                 unstyled
-                menuPortalTarget={typeof document !== 'undefined' ? document.body : undefined}
+                menuPortalTarget={undefined}
                 menuShouldBlockScroll={false}
                 components={{
                     DropdownIndicator: (props) => (

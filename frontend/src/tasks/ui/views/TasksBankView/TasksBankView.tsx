@@ -343,8 +343,8 @@ export function TasksBankView() {
             </div>
 
             {/* Фильтр по курсам (серверный, GET /api/tasks?courseIds=…) — мультиселект на той же
-                react-select, что сингл-селекты (BaseSelectMulti). Курсы — только учителю. */}
-            {isTeacher && (
+                react-select, что сингл-селекты (BaseSelectMulti).  */}
+            {
                 <div className={styles.filterBlock}>
                     <div className={styles.filterLabel}>Курсы</div>
                     <BaseSelectMulti
@@ -356,7 +356,7 @@ export function TasksBankView() {
                         ariaLabel="Фильтр по курсам"
                     />
                 </div>
-            )}
+            }
 
             {/* Смешанные задания: включена — в выдачу попадают задания с 2+ грамматическими типами,
                 выключена — только «чистые» (один тип). Фильтр серверный (includeMixed). */}
@@ -402,17 +402,17 @@ export function TasksBankView() {
             )}
 
             {/* Панель массовых действий — только учителю и только при выбранном > 0. */}
-            {isTeacher && selectedIds.size > 0 && (
+            {selectedIds.size > 0 && (
                 <TasksBulkActionsBar selectedCount={selectedIds.size} onAction={setBulkAction} />
             )}
 
             {/* Bulk-действия: без промежуточного подтверждения — кнопка панели сразу открывает
                 финальную модалку (назначение ученикам / добавление в курс). Любое закрытие
                 (Esc, клик вне, «Отмена», успех) снимает выбор через closeBulkAction. */}
-            {isTeacher && bulkAction === 'assign' && (
+            {bulkAction === 'assign' && (
                 <TaskAssignPopup open onClose={closeBulkAction} tasks={bulkAssignTargets} />
             )}
-            {isTeacher && bulkAction === 'to-course' && (
+            {bulkAction === 'to-course' && (
                 <CourseSelectPopup
                     open
                     onClose={closeBulkAction}
