@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import CreatableSelect from 'react-select/creatable';
-import type { MultiValue } from 'react-select';
+import type { MultiValue, DropdownIndicatorProps } from 'react-select';
 import type { CourseSelectMultiProps, RSType } from './types';
 import styles from './CourseSelectMulti.module.scss';
 
@@ -72,7 +72,7 @@ export function CourseSelectMulti({
                     );
                 }}
                 components={{
-                    DropdownIndicator: (props: any) => (
+                    DropdownIndicator: (props: DropdownIndicatorProps<RSType, true>) => (
                         <div {...props.innerProps} className={styles.dropdownIndicator}>
                             <span className={styles.arrow} aria-hidden="true">
                                 ▾
@@ -96,9 +96,9 @@ export function CourseSelectMulti({
 
                 }}
                 styles={{
-                    control: (base: any) => ({ ...base, minHeight: 0, width: '100%', cursor: isDisabled ? 'not-allowed' : 'pointer' }),
-                    menuPortal: (base: any) => ({ ...base, zIndex: 300 }),
-                    valueContainer: (base: any) => ({ ...base, padding: '2px 8px' }),
+                    control: (base, { isDisabled: disabled }) => ({ ...base, minHeight: 0, width: '100%', cursor: disabled ? 'not-allowed' : 'pointer' }),
+                    menuPortal: (base) => ({ ...base, zIndex: 300 }),
+                    valueContainer: (base) => ({ ...base, padding: '2px 8px' }),
                 }}
             />
             {error && <div className={styles.errorText}>{error}</div>}
