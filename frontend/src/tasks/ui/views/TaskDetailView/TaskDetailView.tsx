@@ -3,7 +3,7 @@ import { Link } from '@tanstack/react-router';
 import { AuthService } from '@/auth/services/AuthService.ts';
 import { TasksBankService } from '@/tasks/services/TasksBankService';
 import { useTeacherCourses } from '@/teacher/hooks/useTeacherCourses';
-import { BaseSelectMulti } from '@/shared/ui-kit/BaseSelectMulti/BaseSelectMulti';
+import { CourseSelectMulti } from '@/tasks/ui/widgets/CourseSelectMulti/CourseSelectMulti';
 import { useTaskDetail } from '@/tasks/hooks/useTaskDetail';
 import { Loader } from '@/shared/ui-kit/Loader/Loader';
 import { TaskPreviewChips } from '@/tasks/ui/widgets/TaskPreviewChips/TaskPreviewChips';
@@ -42,7 +42,7 @@ export function TaskDetailView({ publicId }: TaskDetailViewProps) {
     const [actionError, setActionError] = useState<string | null>(null);
     const [assignPopupOpen, setAssignPopupOpen] = useState(false);
 
-    const { courses: teacherCourses, isLoading: coursesLoading } = useTeacherCourses(true);
+    const { courses: teacherCourses, isLoading: coursesLoading, createCourse } = useTeacherCourses(true);
 
     const courseNames = useMemo(
         () => (task?.courseIds ?? [])
@@ -128,13 +128,14 @@ export function TaskDetailView({ publicId }: TaskDetailViewProps) {
                     <section className={styles.courseSelect}>
                         <h2 className={styles.sectionTitle}>Курсы</h2>
                         {actionError && <div className={styles.error}>{actionError}</div>}
-                        <BaseSelectMulti
+                        <CourseSelectMulti
                             options={courseOptions}
                             value={selectedCourseIds}
                             onChange={handleCourseChange}
                             placeholder={'Выберите курсы'}
                             isDisabled={coursesLoading}
                             ariaLabel="Курсы для задания"
+                            onCreateCourse={createCourse}
                         />
                     </section>
                 </div>

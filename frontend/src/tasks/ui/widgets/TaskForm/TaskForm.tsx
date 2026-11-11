@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { BaseInputText } from '@/shared/ui-kit/BaseInputText/BaseInputText';
-import { BaseSelectMulti } from '@/shared/ui-kit/BaseSelectMulti/BaseSelectMulti';
+import { CourseSelectMulti } from '@/tasks/ui/widgets/CourseSelectMulti/CourseSelectMulti';
 import { ChipsMultiselect } from '@/tasks/ui/widgets/ChipsMultiselect/ChipsMultiselect';
 import { InstructionSection } from '@/tasks/ui/widgets/InstructionSection/InstructionSection';
 import { ItemTypeSelect } from '@/tasks/ui/widgets/ItemTypeSelect/ItemTypeSelect';
@@ -91,7 +91,7 @@ export function TaskForm({
     // Курсы: мультиселект всех курсов учителя с предвыбранными из initial.courseIds.
     const [selectedCourseIds, setSelectedCourseIds] = useState<string[]>(initial.courseIds.map(String));
 
-    const { courses: teacherCourses, isLoading: coursesLoading } = useTeacherCourses(true);
+    const { courses: teacherCourses, isLoading: coursesLoading, createCourse } = useTeacherCourses(true);
 
     const courseOptions = useMemo(
         () => teacherCourses.map((c) => ({ value: String(c.id), label: c.name })),
@@ -237,16 +237,17 @@ export function TaskForm({
                     )}
                 </div>
 
-                {/* Курсы — мультиселект, обновление при сабмите формы */}
+                {/* Курсы — мультиселект с возможностью создания нового курса */}
                 <div className={styles.field}>
                     <label className={styles.label}>Курсы</label>
-                    <BaseSelectMulti
+                    <CourseSelectMulti
                         options={courseOptions}
                         value={selectedCourseIds}
                         onChange={handleCourseChange}
                         placeholder={teacherCourses.length ? 'Выберите курсы' : 'Сначала создайте курс'}
                         isDisabled={coursesLoading}
                         ariaLabel="Курсы для задания"
+                        onCreateCourse={createCourse}
                     />
                 </div>
             </div>

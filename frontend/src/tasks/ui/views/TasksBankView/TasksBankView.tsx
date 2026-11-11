@@ -6,7 +6,7 @@ import { useTasksBank } from '@/tasks/hooks/useTasksBank';
 import { useTaskRefs } from '@/tasks/hooks/useTaskRefs';
 import { Pagination } from '@/shared/ui-kit/Pagination/Pagination';
 import { LoadingWidget } from '@/shared/ui-kit/Loader/LoadingWidget';
-import { BaseSelectMulti } from '@/shared/ui-kit/BaseSelectMulti/BaseSelectMulti';
+import { CourseSelectMulti } from '@/tasks/ui/widgets/CourseSelectMulti/CourseSelectMulti';
 import { useTeacherCourses } from '@/teacher/hooks/useTeacherCourses';
 import { ChipsMultiselect } from '@/tasks/ui/widgets/ChipsMultiselect/ChipsMultiselect';
 import { TasksBulkActionsBar } from '@/tasks/ui/widgets/TasksBulkActionsBar/TasksBulkActionsBar';
@@ -241,6 +241,7 @@ export function TasksBankView() {
 
     // Курсы учителя для фильтра-мультиселекта (GET /api/courses) — только учителю.
     const teacherCourses = useTeacherCourses(true);
+    const { createCourse } = teacherCourses;
     const courseOptions = useMemo(
         () => teacherCourses.courses.map((c) => ({ value: String(c.id), label: c.name })),
         [teacherCourses.courses],
@@ -353,13 +354,14 @@ export function TasksBankView() {
             {
                 <div className={styles.filterBlock}>
                     <div className={styles.filterLabel}>Курсы</div>
-                    <BaseSelectMulti
+                    <CourseSelectMulti
                         options={courseOptions}
                         value={courseIdsFilter}
                         onChange={changeCourseIds}
                         placeholder="Все курсы"
                         isDisabled={teacherCourses.isLoading}
                         ariaLabel="Фильтр по курсам"
+                        onCreateCourse={createCourse}
                     />
                 </div>
             }

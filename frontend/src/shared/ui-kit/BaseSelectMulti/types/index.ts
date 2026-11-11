@@ -9,4 +9,9 @@ export interface BaseSelectMultiProps<TValue extends string = string> {
     /** Дополнительный класс к контейнеру селекта. */
     className?: string;
     ariaLabel?: string;
+    /** Текст ошибки для отображения под селектом. */
+    error?: string;
+    /** Дополнительные react-select components (переопределяют/дополняют стандартные). */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    components?: Record<string, any>;
 }

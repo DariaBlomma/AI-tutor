@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { BaseModal } from '@/shared/ui-kit/BaseModal/BaseModal';
-import { BaseInputText } from '@/shared/ui-kit/BaseInputText/BaseInputText';
-import { BaseSelectMulti } from '@/shared/ui-kit/BaseSelectMulti/BaseSelectMulti';
+import { CourseSelectMulti } from '@/tasks/ui/widgets/CourseSelectMulti/CourseSelectMulti';
 import { LoadingWidget } from '@/shared/ui-kit/Loader/LoadingWidget';
 import { useTeacherCourses } from '@/teacher/hooks/useTeacherCourses';
 import { CoursesService } from '@/teacher/services/CoursesService';
@@ -28,7 +27,6 @@ export function TaskCoursePopup({ open, onClose, taskIds, onAdded }: TaskCourseP
 
 
     const [selectedCourseIds, setSelectedCourseIds] = useState<string[]>([]);
-    const [newCourseName, setNewCourseName] = useState('');
     const [actionError, setActionError] = useState<string | null>(null);
     const [addResult, setAddResult] = useState<number | null>(null);
 
@@ -42,21 +40,6 @@ export function TaskCoursePopup({ open, onClose, taskIds, onAdded }: TaskCourseP
         setActionError(null);
         setAddResult(null);
     }, []);
-
-    // Создание курса: POST /api/courses (только name) → новый курс появляется в списке.
-    // Хук возвращает текст ошибки или null; id созданного курса хук не отдаёт, поэтому
-    // после успеха перезапрашивать список не нужно — курс уже вставлен в начало.
-    const handleCreateCourse = useCallback(async () => {
-        const name = newCourseName.trim();
-        if (!name) return;
-        setActionError(null);
-        const message = await createCourse(name);
-        if (message) {
-            setActionError(message);
-            return;
-        }
-        setNewCourseName('');
-    }, [newCourseName, createCourse]);
 
     // Bulk-отправка: один POST /api/courses/bulk-add вместо N×M отдельных запросов.
     const handleAdd = useCallback(async () => {
@@ -91,36 +74,16 @@ export function TaskCoursePopup({ open, onClose, taskIds, onAdded }: TaskCourseP
                     <LoadingWidget active={isLoading} mode="overlay" dimContent>
                         <div className={styles.field}>
                             <span className={styles.fieldLabel}>Курсы</span>
-                            <BaseSelectMulti
+                            <CourseSelectMulti
                                 options={options}
                                 value={selectedCourseIds}
                                 onChange={changeCourses}
                                 placeholder={courses.length ? 'Выберите курсы' : 'Сначала создайте курс'}
                                 ariaLabel="Курсы для добавления задания"
+                                onCreateCourse={createCourse}
                             />
-
                         </div>
                     </LoadingWidget>
-
-                    {/* Создание курса: нужен только текстовый инпут названия. */}
-                    <div className={styles.createRow}>
-                        <BaseInputText
-                            value={newCourseName}
-                            onChange={(e) => setNewCourseName(e.target.value)}
-                            placeholder="Название нового курса"
-                            maxLength={120}
-                            variant="full"
-                            aria-label="Название нового курса"
-                        />
-                        <button
-                            type="button"
-                            className={styles.createBtn}
-                            disabled={!newCourseName.trim()}
-                            onClick={() => void handleCreateCourse()}
-                        >
-                            Создать курс
-                        </button>
-                    </div>
                 </>
             }
             footer={

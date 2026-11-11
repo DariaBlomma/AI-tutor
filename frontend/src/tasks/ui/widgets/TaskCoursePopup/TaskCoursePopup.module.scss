@@ -41,39 +41,6 @@
   color: var(--c3);
 }
 
-// Строка создания курса: инпут названия + кнопка «Создать курс».
-.createRow {
-  display: flex;
-  align-items: flex-end;
-  gap: 10px;
-}
-
-.createBtn {
-  flex-shrink: 0;
-  border: 1px solid var(--p);
-  background: transparent;
-  color: var(--p);
-  border-radius: 6px;
-  padding: 8px 12px;
-  font-size: 13px;
-  cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
-
-  &:hover:not(:disabled) {
-    background: var(--p);
-    color: #fff;
-  }
-
-  &:active:not(:disabled) {
-    opacity: 0.85;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: default;
-  }
-}
-
 .buttons {
   display: flex;
   justify-content: flex-end;

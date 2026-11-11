@@ -13,6 +13,8 @@ export function BaseSelectMulti<TValue extends string = string>({
     isDisabled,
     className,
     ariaLabel,
+    error,
+    components: externalComponents,
 }: BaseSelectMultiProps<TValue>) {
     type RSType = { readonly value: string; readonly label: string };
     const rsOptions: ReadonlyArray<RSType> = options;
@@ -45,6 +47,7 @@ export function BaseSelectMulti<TValue extends string = string>({
                         </div>
                     ),
                     IndicatorSeparator: () => null,
+                    ...externalComponents,
                 }}
                 classNames={{
                     control: ({ isFocused }) => `${styles.control} ${isFocused ? styles.controlFocused : ''}`,
@@ -65,6 +68,7 @@ export function BaseSelectMulti<TValue extends string = string>({
                     valueContainer: (base) => ({ ...base, padding: '2px 8px' }),
                 }}
             />
+            {error && <div className={styles.errorText}>{error}</div>}
         </div>
     );
 }
