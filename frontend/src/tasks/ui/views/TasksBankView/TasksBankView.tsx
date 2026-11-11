@@ -509,7 +509,7 @@ function TaskCard({
                         {task.previewText.split('\n').map((line, i) => (
                             // Индекс стабильный (строки превью не меняются на месте) — ключ по номеру строки.
                             <li key={`pv-${i}`} className={styles.previewLine}>
-                                {line.replace(/^\d+\.\s*/, '')}
+                                <span>{line.replace(/^\d+\.\s*/, '')}</span>
                             </li>
                         ))}
                     </ol>
