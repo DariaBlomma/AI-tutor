@@ -1,5 +1,13 @@
 @use 'variables' as *;
 
+:root {
+  --sidebar-width: 240px;
+}
+
+body.sidebar--collapsed {
+  --sidebar-width: 60px;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -23,11 +31,7 @@ textarea {
 // Пример: &:hover { color: var(--pl); border-color: var(--pl); }
 //         &:active { color: var(--pd); border-color: var(--pd); }
 
-// Layout modifier for desktop sidebar
+// Layout modifier for desktop sidebar — без отступа, отступ задаёт .page
 .main--with-sidebar {
-    margin-left: 240px;
-}
-
-body.sidebar--collapsed .main--with-sidebar {
-    margin-left: 60px;
+    margin-left: 0;
 }

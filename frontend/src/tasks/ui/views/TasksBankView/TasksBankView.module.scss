@@ -1,11 +1,131 @@
 .page {
-  max-width: 480px;
-  margin: 0 auto;
-  padding: 20px;
-  padding-bottom: 100px; // безопасная зона под фиксированным нижним меню
   min-height: 100vh;
   position: relative;
   color: var(--c1);
+  padding-bottom: 100px;
+}
+
+// Мобильный layout — центрированный контент.
+@media (max-width: 1023px) {
+  .page {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+}
+
+// Десктопный layout — контент на всю ширину с отступом под сайдбар.
+// Скролл запрещён на странице, скролл только внутри колонок.
+@media (min-width: 1024px) {
+  .page {
+    padding-left: calc(var(--sidebar-width) + 20px);
+    padding-right: 20px;
+    padding-bottom: 0;
+    padding-top: 20px;
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .header {
+    flex-shrink: 0;
+  }
+
+  .searchInput {
+    flex-shrink: 0;
+  }
+}
+
+// Красивый скролл для колонок
+@media (min-width: 1024px) {
+  .filters,
+  .tasksSection {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(157, 124, 242, 0.3) transparent;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(157, 124, 242, 0.3);
+      border-radius: 3px;
+
+      &:hover {
+        background: rgba(157, 124, 242, 0.5);
+      }
+    }
+  }
+}
+
+.content {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+@media (min-width: 1024px) {
+  .content {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    flex: 1;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 24px;
+    min-height: 0;
+
+    .filters {
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+
+    .tasksSection {
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+  }
+}
+
+.filters {
+  display: block;
+}
+
+@media (min-width: 1024px) {
+  .filters {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overflow-y: auto;
+
+    .filterBlock {
+      margin-bottom: 0;
+    }
+
+    .mixedToggle {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.tasksSection {
+  display: block;
+}
+
+@media (min-width: 1024px) {
+  .tasksSection {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+    overflow-y: auto;
+  }
 }
 
 .header {

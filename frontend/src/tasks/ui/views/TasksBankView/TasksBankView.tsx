@@ -6,31 +6,18 @@ import { useTasksBank } from '@/tasks/hooks/useTasksBank';
 import { useTaskRefs } from '@/tasks/hooks/useTaskRefs';
 import { Pagination } from '@/shared/ui-kit/Pagination/Pagination';
 import { LoadingWidget } from '@/shared/ui-kit/Loader/LoadingWidget';
-import { CourseSelectMulti } from '@/tasks/ui/widgets/CourseSelectMulti/CourseSelectMulti';
 import { useTeacherCourses } from '@/teacher/hooks/useTeacherCourses';
-import { ChipsMultiselect } from '@/tasks/ui/widgets/ChipsMultiselect/ChipsMultiselect';
 import { TasksBulkActionsBar } from '@/tasks/ui/widgets/TasksBulkActionsBar/TasksBulkActionsBar';
 import { TaskDeletePopup } from '@/tasks/ui/widgets/TaskDeletePopup/TaskDeletePopup';
 import { TaskAssignPopup } from '@/tasks/ui/widgets/TaskAssignPopup/TaskAssignPopup';
 import { TaskCoursePopup } from '@/tasks/ui/widgets/TaskCoursePopup/TaskCoursePopup';
 import { TaskPreviewChips } from '@/tasks/ui/widgets/TaskPreviewChips/TaskPreviewChips';
 import type { TasksBulkAction } from '@/tasks/types';
-import { CEFR_LEVEL_OPTIONS, EXAM_TYPE_OPTIONS, ITEM_TYPE_OPTIONS } from '@/tasks/types';
-import type { ChipItem } from '@/tasks/ui/widgets/ChipsMultiselect/types';
 import type { CefrLevel, ExamType, ItemType, TaskSummary } from '@/tasks/types';
+import { TasksBankFilters } from './TasksBankFilters';
 import styles from './TasksBankView.module.scss';
 
 const SEARCH_DEBOUNCE_MS = 300;
-
-// Чипы механик (enum ItemType) — фиксированный список, id числовые для общего виджета чипов.
-const MECHANIC_ITEMS: ChipItem[] = ITEM_TYPE_OPTIONS.map((o, i) => ({ id: i + 1, name: o.label }));
-const MECHANIC_BY_ID = new Map(MECHANIC_ITEMS.map((c, i) => [c.id, ITEM_TYPE_OPTIONS[i].value]));
-
-// Чипы уровня CEFR (enum CefrLevel A1..C1) и экзамена (enum ExamType: ОГЭ/ЕГЭ) — тоже фиксированные списки.
-const LEVEL_ITEMS: ChipItem[] = CEFR_LEVEL_OPTIONS.map((o, i) => ({ id: i + 1, name: o.label }));
-const LEVEL_BY_ID = new Map(LEVEL_ITEMS.map((c, i) => [c.id, CEFR_LEVEL_OPTIONS[i].value]));
-const EXAM_ITEMS: ChipItem[] = EXAM_TYPE_OPTIONS.map((o, i) => ({ id: i + 1, name: o.label }));
-const EXAM_BY_ID = new Map(EXAM_ITEMS.map((c, i) => [c.id, EXAM_TYPE_OPTIONS[i].value]));
 
 // Страница «Банк заданий» — общая для учителя и ученика:
 // список и фильтры видят все авторизованные; кнопки создания — только учителю.
@@ -282,133 +269,69 @@ export function TasksBankView() {
                 onChange={(e) => applySearch(e.target.value)}
             />
 
-            {/* Фильтр по грамматическим типам (справочник /task-types) */}
-            <div className={styles.filterBlock}>
-                <div className={styles.filterLabel}>Грамматические типы</div>
-                <ChipsMultiselect
-                    items={refs.grammarTypes}
-                    selectedIds={grammarTypeId == null ? [] : [grammarTypeId]}
-                    single
-                    onChange={(ids) => changeGrammarType(ids[0] ?? null)}
-                    onClear={() => changeGrammarType(null)}
-                    clearLabel="Все типы"
-                    manageTo={isTeacher ? '/tasks-bank/grammar-types' : undefined}
+            <div className={styles.content}>
+                <TasksBankFilters
+                    isTeacher={isTeacher}
+                    grammarTypes={refs.grammarTypes}
+                    topicsForFilter={topicsForFilter}
+                    grammarTypeId={grammarTypeId}
+                    itemType={itemType}
+                    level={level}
+                    examType={examType}
+                    topicId={topicId}
+                    courseIdsFilter={courseIdsFilter}
+                    includeMixed={includeMixed}
+                    courseOptions={courseOptions}
+                    teacherCoursesLoading={teacherCourses.isLoading}
+                    onCreateCourse={createCourse}
+                    onChangeGrammarType={changeGrammarType}
+                    changeItemType={changeItemType}
+                    changeLevel={changeLevel}
+                    changeExamType={changeExamType}
+                    changeTopic={changeTopic}
+                    changeCourseIds={changeCourseIds}
+                    changeIncludeMixed={changeIncludeMixed}
                 />
+
+                <section className={styles.tasksSection}>
+                    {(isError || error) && <div className={styles.error}>{error ?? 'Не удалось загрузить банк заданий.'}</div>}
+                    {actionError && <div className={styles.error}>{actionError}</div>}
+
+                    {!isError && !isLoading && !visibleTasks.length && (
+                        <div className={styles.notice}>Заданий по выбранным фильтрам нет.</div>
+                    )}
+
+                    {/* Загрузка: спиннер-оверлей поверх всего списка (LoadingWidget mode="overlay") —
+                        карточки остаются на месте, страница не «прыгает» высотой; затемнение и блокировка
+                        кликов живут в подложке оверлея (раньше — opacity у .list). Короткие ответы
+                        (<150 мс) спиннер не показывают вовсе. */}
+                    {!isError && (
+                        <LoadingWidget active={isLoading} mode="overlay" dimContent>
+                            <div className={styles.list} aria-busy={isLoading}>
+                                {visibleTasks.map((task) => (
+                                    <TaskCard
+                                        key={task.id}
+                                        task={task}
+                                        selectable={isTeacher}
+                                        selected={selectedIds.has(task.id)}
+                                        canManage={isTeacher && task.createdById != null && task.createdById === currentUserId}
+                                        deleting={deletingId === task.id}
+                                        onToggleSelect={toggleSelect}
+                                        onDelete={openDeletePopup}
+                                        registerDeleteBtn={setDeleteBtnRef}
+                                        courseMap={courseMap}
+                                    />
+                                ))}
+                            </div>
+                        </LoadingWidget>
+                    )}
+
+                    {/* Постраничная навигация (серверная пагинация — GET /api/tasks?page&size) */}
+                    {!isError && totalPages >= 1 && (
+                        <Pagination page={page} totalPages={totalPages} onPageChange={changePage} />
+                    )}
+                </section>
             </div>
-
-            {/* Фильтр по лексическим темам (клиентский — на бэке фильтра нет) */}
-            <div className={styles.filterBlock}>
-                <div className={styles.filterLabel}>Лексические темы</div>
-                <ChipsMultiselect
-                    items={topicsForFilter}
-                    selectedIds={topicId == null ? [] : [topicId]}
-                    single
-                    onChange={(ids) => changeTopic(ids[0] ?? null)}
-                    onClear={() => changeTopic(null)}
-                    clearLabel="Все темы"
-                    manageTo={isTeacher ? '/tasks-bank/topics' : undefined}
-                />
-            </div>
-
-            {/* Фильтр по механике пунктов (enum ItemType) — серверный */}
-            <div className={styles.filterBlock}>
-                <div className={styles.filterLabel}>Механика пунктов</div>
-                <ChipsMultiselect
-                    items={MECHANIC_ITEMS}
-                    selectedIds={itemType == null ? [] : [MECHANIC_ITEMS.findIndex((c) => MECHANIC_BY_ID.get(c.id) === itemType) + 1]}
-                    single
-                    onChange={(ids) => changeItemType(ids.length ? (MECHANIC_BY_ID.get(ids[0]) ?? null) : null)}
-                    onClear={() => changeItemType(null)}
-                    clearLabel="Все"
-                />
-            </div>
-
-            {/* Фильтр по уровню языка (enum CefrLevel A1..C1) — серверный */}
-            <div className={styles.filterBlock}>
-                <div className={styles.filterLabel}>Уровень языка</div>
-                <ChipsMultiselect
-                    items={LEVEL_ITEMS}
-                    selectedIds={level == null ? [] : [LEVEL_ITEMS.findIndex((c) => LEVEL_BY_ID.get(c.id) === level) + 1]}
-                    single
-                    onChange={(ids) => changeLevel(ids.length ? (LEVEL_BY_ID.get(ids[0]) ?? null) : null)}
-                    onClear={() => changeLevel(null)}
-                    clearLabel="Все уровни"
-                />
-            </div>
-
-            {/* Фильтр по типу экзамена (enum ExamType: ОГЭ / ЕГЭ) — серверный */}
-            <div className={styles.filterBlock}>
-                <div className={styles.filterLabel}>Экзамен</div>
-                <ChipsMultiselect
-                    items={EXAM_ITEMS}
-                    selectedIds={examType == null ? [] : [EXAM_ITEMS.findIndex((c) => EXAM_BY_ID.get(c.id) === examType) + 1]}
-                    single
-                    onChange={(ids) => changeExamType(ids.length ? (EXAM_BY_ID.get(ids[0]) ?? null) : null)}
-                    onClear={() => changeExamType(null)}
-                    clearLabel="Все экзамены"
-                />
-            </div>
-
-            {/* Фильтр по курсам (серверный, GET /api/tasks?courseIds=…) — мультиселект на той же
-                react-select, что сингл-селекты (BaseSelectMulti).  */}
-            {
-                <div className={styles.filterBlock}>
-                    <div className={styles.filterLabel}>Курсы</div>
-                    <CourseSelectMulti
-                        options={courseOptions}
-                        value={courseIdsFilter}
-                        onChange={changeCourseIds}
-                        placeholder="Все курсы"
-                        isDisabled={teacherCourses.isLoading}
-                        ariaLabel="Фильтр по курсам"
-                        onCreateCourse={createCourse}
-                    />
-                </div>
-            }
-
-            {/* Смешанные задания: включена — в выдачу попадают задания с 2+ грамматическими типами,
-                выключена — только «чистые» (один тип). Фильтр серверный (includeMixed). */}
-            <label className={styles.mixedToggle}>
-                <input type="checkbox" checked={includeMixed} onChange={(e) => changeIncludeMixed(e.target.checked)} />
-                <span>Включать смешанные задания</span>
-            </label>
-
-            {(isError || error) && <div className={styles.error}>{error ?? 'Не удалось загрузить банк заданий.'}</div>}
-            {actionError && <div className={styles.error}>{actionError}</div>}
-
-            {!isError && !isLoading && !visibleTasks.length && (
-                <div className={styles.notice}>Заданий по выбранным фильтрам нет.</div>
-            )}
-
-            {/* Загрузка: спиннер-оверлей поверх всего списка (LoadingWidget mode="overlay") —
-                карточки остаются на месте, страница не «прыгает» высотой; затемнение и блокировка
-                кликов живут в подложке оверлея (раньше — opacity у .list). Короткие ответы
-                (<150 мс) спиннер не показывают вовсе. */}
-            {!isError && (
-                <LoadingWidget active={isLoading} mode="overlay" dimContent>
-                    <div className={styles.list} aria-busy={isLoading}>
-                        {visibleTasks.map((task) => (
-                            <TaskCard
-                                key={task.id}
-                                task={task}
-                                selectable={isTeacher}
-                                selected={selectedIds.has(task.id)}
-                                canManage={isTeacher && task.createdById != null && task.createdById === currentUserId}
-                                deleting={deletingId === task.id}
-                                onToggleSelect={toggleSelect}
-                                onDelete={openDeletePopup}
-                                registerDeleteBtn={setDeleteBtnRef}
-                                courseMap={courseMap}
-                            />
-                        ))}
-                    </div>
-                </LoadingWidget>
-            )}
-
-            {/* Постраничная навигация (серверная пагинация — GET /api/tasks?page&size) */}
-            {!isError && totalPages >= 1 && (
-                <Pagination page={page} totalPages={totalPages} onPageChange={changePage} />
-            )}
 
             {/* Панель массовых действий — только учителю и только при выбранном > 0. */}
             {selectedIds.size > 0 && (

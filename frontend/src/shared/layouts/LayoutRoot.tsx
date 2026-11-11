@@ -2,6 +2,7 @@ import { Outlet, useLocation } from '@tanstack/react-router';
 import { AuthService } from '@/auth/services/AuthService.ts';
 import { AppBottomNav } from '@/shared/widgets/AppBottomNav/AppBottomNav';
 import { AppSidebar } from '@/shared/widgets/AppSidebar/AppSidebar';
+import { useSidebar } from '@/shared/hooks/useSidebar';
 import type { AppBottomNavActive } from '@/shared/widgets/AppBottomNav/types';
 import { useEffect, useState } from 'react';
 
@@ -34,19 +35,19 @@ function useIsDesktop(): boolean {
 export function LayoutRoot() {
     const pathname = useLocation({ select: (location) => location.pathname });
     const isDesktop = useIsDesktop();
+    const { collapsed } = useSidebar();
     // Дочерние маршруты наследуют активный пункт родителя (уровень 2/3 отчётов -> «Отчёты»).
     const navActive =
         NAV_ACTIVE_BY_PATH[pathname] ??
         Object.entries(NAV_ACTIVE_BY_PATH).find(([path]) => path !== '/' && pathname.startsWith(`${path}/`))?.[1];
 
-    // Устанавливаем класс на body для управления margin через CSS.
+    // Устанавливаем класс на body для управления padding через CSS.
     useEffect(() => {
         if (!isDesktop) return;
         try {
-            const collapsed = localStorage.getItem('app-sidebar-collapsed') === 'true';
             document.body.classList.toggle('sidebar--collapsed', collapsed);
         } catch { /* ignore */ }
-    }, [isDesktop]);
+    }, [isDesktop, collapsed]);
 
     const isTeacher = AuthService.getUserRole() === 'TEACHER';
     const hiddenIds: AppBottomNavActive[] = isTeacher ? [] : ['bank'];
