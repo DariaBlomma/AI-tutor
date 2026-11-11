@@ -1,5 +1,6 @@
 package com.aitutor.backend.services.task;
 
+import com.aitutor.backend.dto.task.TaskCourseIdsRequest;
 import com.aitutor.backend.dto.task.TaskCreateRequest;
 import com.aitutor.backend.dto.task.TaskItemRequest;
 import com.aitutor.backend.dto.task.TaskResponse;
@@ -159,6 +160,18 @@ public class TaskService {
         TaskResponse response = taskMapper.toResponse(task);
         response.setCourseIds(courseService.getCourseIdsForTask(task.getId(), task.getCreatedBy().getId()));
         return response;
+    }
+
+    /**
+     * Обновление только курсовой привязки задания.
+     * Полная синхронизация: удаляет из курсов, которых нет в списке,
+     * добавляет в новые.
+     */
+    @Transactional
+    public TaskResponse updateTaskCourseIds(Long id, TaskCourseIdsRequest request, Long teacherId) {
+        Task task = findOwnedActiveTask(id, teacherId);
+        courseService.syncTaskCourses(id, request.getCourseIds(), teacherId);
+        return taskMapper.toResponse(task);
     }
 
     /**

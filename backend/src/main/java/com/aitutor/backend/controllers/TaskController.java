@@ -1,5 +1,6 @@
 package com.aitutor.backend.controllers;
 
+import com.aitutor.backend.dto.task.TaskCourseIdsRequest;
 import com.aitutor.backend.dto.task.TaskCreateRequest;
 import com.aitutor.backend.dto.task.TaskResponse;
 import com.aitutor.backend.dto.task.TaskSummaryResponse;
@@ -85,5 +86,16 @@ public class TaskController {
     public void delete(@PathVariable Long id,
                        @AuthenticationPrincipal CustomUserDetails userDetails) {
         taskService.delete(id, userDetails.getId());
+    }
+
+    /**
+     * Обновление только курсовой привязки задания.
+     * PUT /api/tasks/{id} с { courseIds: [...] } — полная синхронизация.
+     */
+    @PutMapping("/{id}/courses")
+    public TaskResponse updateTaskCourseIds(@PathVariable Long id,
+                                            @Valid @RequestBody TaskCourseIdsRequest request,
+                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return taskService.updateTaskCourseIds(id, request, userDetails.getId());
     }
 }

@@ -12,7 +12,7 @@ import { ChipsMultiselect } from '@/tasks/ui/widgets/ChipsMultiselect/ChipsMulti
 import { TasksBulkActionsBar } from '@/tasks/ui/widgets/TasksBulkActionsBar/TasksBulkActionsBar';
 import { TaskDeletePopup } from '@/tasks/ui/widgets/TaskDeletePopup/TaskDeletePopup';
 import { TaskAssignPopup } from '@/tasks/ui/widgets/TaskAssignPopup/TaskAssignPopup';
-import { CourseSelectPopup } from '@/tasks/ui/widgets/CourseSelectPopup/CourseSelectPopup';
+import { TaskCoursePopup } from '@/tasks/ui/widgets/TaskCoursePopup/TaskCoursePopup';
 import { TaskPreviewChips } from '@/tasks/ui/widgets/TaskPreviewChips/TaskPreviewChips';
 import type { TasksBulkAction } from '@/tasks/types';
 import { CEFR_LEVEL_OPTIONS, EXAM_TYPE_OPTIONS, ITEM_TYPE_OPTIONS } from '@/tasks/types';
@@ -252,6 +252,12 @@ export function TasksBankView() {
         [pageItems, topicId],
     );
 
+    // Map id → name всех курсов учителя для отображения чипов.
+    const courseMap = useMemo(
+        () => new Map(teacherCourses.courses.map((c) => [c.id, c.name])),
+        [teacherCourses.courses],
+    );
+
     return (
         <div className={styles.page}>
             <div className={styles.header}>
@@ -390,6 +396,7 @@ export function TasksBankView() {
                                 onToggleSelect={toggleSelect}
                                 onDelete={openDeletePopup}
                                 registerDeleteBtn={setDeleteBtnRef}
+                                courseMap={courseMap}
                             />
                         ))}
                     </div>
@@ -413,7 +420,7 @@ export function TasksBankView() {
                 <TaskAssignPopup open onClose={closeBulkAction} tasks={bulkAssignTargets} />
             )}
             {bulkAction === 'to-course' && (
-                <CourseSelectPopup
+                <TaskCoursePopup
                     open
                     onClose={closeBulkAction}
                     taskIds={bulkTaskIds}
@@ -447,7 +454,7 @@ function collectTopics(tasks: TaskSummary[]) {
 // Карточка задания — отображение + действия владельца (удаление через попап-подтверждение).
 // Дизайн: чекбокс слева (только учителю — bulk-выбор); в шапке название (заглушка «Без названия», если пустое)
 // и справа сверху publicId как ссылка на детальную страницу; ниже — превью, затем общий ряд чипов
-// (грамматические типы → темы → механики → Mixed), в футере количество позиций жирным.
+// (грамматические типы → темы → механики → Mixed → курсы), в футере количество позиций жирным.
 // Кнопка «Редактировать» ведёт на страницу редактирования (роут /tasks-bank/edit/$publicId, общий виджет TaskForm в edit-режиме).
 function TaskCard({
     task,
@@ -458,6 +465,7 @@ function TaskCard({
     onToggleSelect,
     onDelete,
     registerDeleteBtn,
+    courseMap,
 }: {
     task: TaskSummary;
     selectable: boolean;
@@ -470,6 +478,8 @@ function TaskCard({
     // координаты именно этой кнопки как якорь (общий ref на все карточки не подходит:
     // в него последовательно записывалась бы всегда кнопка последней отрендеренной карточки).
     registerDeleteBtn: (taskId: number) => (el: HTMLButtonElement | null) => void;
+    // Map id → name всех курсов учителя для отображения чипов.
+    courseMap: Map<number, string>;
 }) {
     return (
         <div className={`${styles.card} ${selected ? styles.cardSelected : ''}`}>
@@ -511,6 +521,10 @@ function TaskCard({
                     topics={task.topics}
                     itemTypes={task.itemTypes ?? []}
                     isMixed={task.isMixed}
+                    courseNames={(task.courseIds ?? [])
+                        .slice(0, 3)
+                        .map((id) => courseMap.get(id))
+                        .filter(Boolean) as string[]}
                 />
 
                 <div className={styles.footer}>

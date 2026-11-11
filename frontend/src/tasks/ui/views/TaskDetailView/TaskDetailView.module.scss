@@ -39,11 +39,18 @@
 }
 
 .actions {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr;
   gap: 10px;
   margin-bottom: 16px;
 }
+
+.courseSelect {
+  grid-column: span 2;
+  width: 100%;
+}
+
 
 .actionBtn {
   border: 1px solid var(--p);
@@ -60,9 +67,6 @@
     opacity: 0.8;
   }
 }
-
-
-
 
 .section {
   margin-bottom: 24px;

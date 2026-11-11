@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { AuthService } from '@/auth/services/AuthService.ts';
+import { TasksBankService } from '@/tasks/services/TasksBankService';
+import { useTeacherCourses } from '@/teacher/hooks/useTeacherCourses';
+import { BaseSelectMulti } from '@/shared/ui-kit/BaseSelectMulti/BaseSelectMulti';
 import { useTaskDetail } from '@/tasks/hooks/useTaskDetail';
 import { Loader } from '@/shared/ui-kit/Loader/Loader';
 import { TaskPreviewChips } from '@/tasks/ui/widgets/TaskPreviewChips/TaskPreviewChips';
-import { TaskCoursePopup } from '@/tasks/ui/widgets/TaskCoursePopup/TaskCoursePopup';
 import { TaskAssignPopup } from '@/tasks/ui/widgets/TaskAssignPopup/TaskAssignPopup';
 import type { TaskItemResponseDto } from '@/tasks/types';
 import {
@@ -24,7 +26,7 @@ interface TaskDetailViewProps {
 // материал, все пункты; правильный ответ — под каждым пунктом (только учителю).
 // Чипы (типы/темы/механики/Mixed) показываются один раз вверху — переиспользуется
 // компонент TaskPreviewChips со списком банка; механику в каждом пункте не дублируем.
-// Быстрые действия учителя: курсы (добавить через попап выбора курса) и назначение ученику.
+// Быстрые действия учителя: inline-мультиселект курсов и назначение ученику.
 export function TaskDetailView({ publicId }: TaskDetailViewProps) {
     const isTeacher = AuthService.getUserRole() === 'TEACHER';
     const { task, isLoading, isError, error, reload } = useTaskDetail(publicId);
@@ -34,8 +36,51 @@ export function TaskDetailView({ publicId }: TaskDetailViewProps) {
     useEffect(() => {
         reload();
     }, [reload]);
-    const [coursePopupOpen, setCoursePopupOpen] = useState(false);
+
+    // Inline-мультиселект курсов: все курсы учителя + предвыбранные из task.courseIds.
+    const [selectedCourseIds, setSelectedCourseIds] = useState<string[]>([]);
+    const [actionError, setActionError] = useState<string | null>(null);
     const [assignPopupOpen, setAssignPopupOpen] = useState(false);
+
+    const { courses: teacherCourses, isLoading: coursesLoading } = useTeacherCourses(true);
+
+    const courseNames = useMemo(
+        () => (task?.courseIds ?? [])
+            .slice(0, 3)
+            .map((id) => teacherCourses.find((c) => c.id === id)?.name)
+            .filter(Boolean) as string[],
+        [task?.courseIds, teacherCourses],
+    );
+
+    const courseOptions = useMemo(
+        () => teacherCourses.map((c) => ({ value: String(c.id), label: c.name })),
+        [teacherCourses],
+    );
+
+    // Инициализация выбранных курсов из task.courseIds
+    useEffect(() => {
+        if (task?.courseIds) {
+            setSelectedCourseIds(task.courseIds.map((id) => String(id)));
+        } else {
+            setSelectedCourseIds([]);
+        }
+    }, [task?.courseIds]);
+
+    const handleCourseChange = useCallback(
+        async (values: string[]) => {
+            setSelectedCourseIds(values);
+            setActionError(null);
+            if (!task?.id) return;
+
+            const courseIdNums = values.map(Number);
+            try {
+                await TasksBankService.updateTaskCourseIds(task.id, courseIdNums);
+            } catch (e) {
+                setActionError(e instanceof Error ? e.message : 'Не удалось обновить курсы.');
+            }
+        },
+        [task],
+    );
 
     if (isLoading) {
         return (
@@ -70,12 +115,9 @@ export function TaskDetailView({ publicId }: TaskDetailViewProps) {
                 <p className={styles.publicIdText}>{task.publicId}</p>
             </div>
 
-            {/* Быстрые действия учителя (курсы/назначение работают только с id из полной карточки). */}
+            {/* Быстрые действия учителя (назначение/редактирование). */}
             {isTeacher && (
                 <div className={styles.actions}>
-                    <button type="button" className={styles.actionBtn} onClick={() => setCoursePopupOpen(true)}>
-                        Добавить в курс
-                    </button>
                     <button type="button" className={styles.actionBtn} onClick={() => setAssignPopupOpen(true)}>
                         Назначить ученику
                     </button>
@@ -83,10 +125,22 @@ export function TaskDetailView({ publicId }: TaskDetailViewProps) {
                     <Link to="/tasks-bank/edit/$publicId" params={{ publicId: task.publicId }} className={styles.actionBtn}>
                         Редактировать
                     </Link>
+                    <section className={styles.courseSelect}>
+                        <h2 className={styles.sectionTitle}>Курсы</h2>
+                        {actionError && <div className={styles.error}>{actionError}</div>}
+                        <BaseSelectMulti
+                            options={courseOptions}
+                            value={selectedCourseIds}
+                            onChange={handleCourseChange}
+                            placeholder={'Выберите курсы'}
+                            isDisabled={coursesLoading}
+                            ariaLabel="Курсы для задания"
+                        />
+                    </section>
                 </div>
             )}
 
-            <TaskPreviewChips levels={task.levels} examType={task.examType} grammarTypes={task.taskTypes} topics={task.topics} itemTypes={itemTypes} isMixed={task.isMixed} />
+            <TaskPreviewChips levels={task.levels} examType={task.examType} grammarTypes={task.taskTypes} topics={task.topics} itemTypes={itemTypes} isMixed={task.isMixed} courseNames={courseNames} />
 
             {task.instruction && (
                 <section className={styles.section}>
@@ -113,9 +167,6 @@ export function TaskDetailView({ publicId }: TaskDetailViewProps) {
                 </ol>
             </section>
 
-            {isTeacher && coursePopupOpen && (
-                <TaskCoursePopup open onClose={() => setCoursePopupOpen(false)} taskId={task.id} />
-            )}
             {isTeacher && assignPopupOpen && (
                 <TaskAssignPopup open onClose={() => setAssignPopupOpen(false)} tasks={[{ id: task.id, name: task.name }]} />
             )}
