@@ -1,21 +1,16 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { AuthService } from '@/auth/services/AuthService.ts';
-import { TasksBankService } from '@/tasks/services/TasksBankService';
 import { useTeacherCourses } from '@/teacher/hooks/useTeacherCourses';
 import { CourseSelectMulti } from '@/tasks/ui/widgets/CourseSelectMulti/CourseSelectMulti';
 import { useTaskDetail } from '@/tasks/hooks/useTaskDetail';
+import { useTaskDetailCourses } from '@/tasks/hooks/useTaskDetailCourses';
+import { useIsTeacher } from '@/tasks/hooks/useIsTeacher';
 import { Loader } from '@/shared/ui-kit/Loader/Loader';
 import { TaskPreviewChips } from '@/tasks/ui/widgets/TaskPreviewChips/TaskPreviewChips';
 import { TaskAssignPopup } from '@/tasks/ui/widgets/TaskAssignPopup/TaskAssignPopup';
-import type { TaskItemResponseDto } from '@/tasks/types';
-import {
-    parseGapFillContent,
-    parseMatchingContent,
-    parseTaskContext,
-    parseWordFormationContent,
-    parseExplanation,
-} from '@/tasks/lib/parseTaskContent';
+import { BackLink } from '@/tasks/ui/widgets/BackLink/BackLink';
+import { TaskDetailItem } from '@/tasks/ui/widgets/TaskDetailItem/TaskDetailItem';
+import { parseTaskContext } from '@/tasks/lib/parseTaskContent';
 import styles from './TaskDetailView.module.scss';
 
 interface TaskDetailViewProps {
@@ -28,21 +23,21 @@ interface TaskDetailViewProps {
 // компонент TaskPreviewChips со списком банка; механику в каждом пункте не дублируем.
 // Быстрые действия учителя: inline-мультиселект курсов и назначение ученику.
 export function TaskDetailView({ publicId }: TaskDetailViewProps) {
-    const isTeacher = AuthService.getUserRole() === 'TEACHER';
+    const isTeacher = useIsTeacher();
     const { task, isLoading, isError, error, reload } = useTaskDetail(publicId);
 
     // Перезагрузка при каждом входе на экран: после сохранения на странице редактирования
-    // просмотр обязан показать свежие данные (useTaskDetail кэша не имеет — это локальный state).
+    // просмотр обязан показать свежие данные (useTaskDetail кэша не имеет — staleTime: 0).
     useEffect(() => {
         reload();
     }, [reload]);
 
     // Inline-мультиселект курсов: все курсы учителя + предвыбранные из task.courseIds.
-    const [selectedCourseIds, setSelectedCourseIds] = useState<string[]>([]);
-    const [actionError, setActionError] = useState<string | null>(null);
     const [assignPopupOpen, setAssignPopupOpen] = useState(false);
 
     const { courses: teacherCourses, isLoading: coursesLoading, createCourse } = useTeacherCourses(true);
+
+    const { selectedCourseIds, actionError, handleCourseChange } = useTaskDetailCourses(task?.id, task?.courseIds);
 
     const courseNames = useMemo(
         () => (task?.courseIds ?? [])
@@ -55,31 +50,6 @@ export function TaskDetailView({ publicId }: TaskDetailViewProps) {
     const courseOptions = useMemo(
         () => teacherCourses.map((c) => ({ value: String(c.id), label: c.name })),
         [teacherCourses],
-    );
-
-    // Инициализация выбранных курсов из task.courseIds
-    useEffect(() => {
-        if (task?.courseIds) {
-            setSelectedCourseIds(task.courseIds.map((id) => String(id)));
-        } else {
-            setSelectedCourseIds([]);
-        }
-    }, [task?.courseIds]);
-
-    const handleCourseChange = useCallback(
-        async (values: string[]) => {
-            setSelectedCourseIds(values);
-            setActionError(null);
-            if (!task?.id) return;
-
-            const courseIdNums = values.map(Number);
-            try {
-                await TasksBankService.updateTaskCourseIds(task.id, courseIdNums);
-            } catch (e) {
-                setActionError(e instanceof Error ? e.message : 'Не удалось обновить курсы.');
-            }
-        },
-        [task],
     );
 
     if (isLoading) {
@@ -173,61 +143,4 @@ export function TaskDetailView({ publicId }: TaskDetailViewProps) {
             )}
         </div>
     );
-}
-
-function BackLink() {
-    return (
-        <Link to="/tasks-bank" className={styles.backLink}>
-            ← К банку заданий
-        </Link>
-    );
-}
-
-// Один пункт задания: prompt/механика-специфичные поля (база, опции, пара) + пояснение.
-// Механику здесь не подписываем — чипы с механиками показаны один раз вверху страницы.
-// Правильный ответ показываем только учителю (showAnswers) — под пунктом.
-function TaskDetailItem({ item, showAnswers }: { item: TaskItemResponseDto; showAnswers: boolean }) {
-    const word = parseWordFormationContent(item.content);
-    const gap = parseGapFillContent(item.content);
-    const pair = parseMatchingContent(item.content);
-    const explanation = parseExplanation(item.content);
-
-    return (
-        <li className={styles.item}>
-            <div className={styles.itemHeader}>Пункт {item.position + 1}</div>
-
-            {item.prompt && <p className={styles.itemPrompt}>{item.prompt}</p>}
-
-            {item.itemType === 'WORD_FORMATION' && word?.base && (
-                <p className={styles.itemMeta}>
-                    База: <strong>{word.base}</strong>
-                </p>
-            )}
-            {item.itemType === 'GAP_FILL' && gap?.options?.length ? (
-                <p className={styles.itemMeta}>Опции: {gap.options.join(', ')}</p>
-            ) : null}
-            {item.itemType === 'MATCHING' && pair?.left_label && (
-                <p className={styles.itemMeta}>
-                    {pair.left_label} → {pair.right_label ?? ''}
-                </p>
-            )}
-
-            {showAnswers && (
-                <p className={styles.itemAnswer}>
-                    Ответ: <strong>{formatCorrectAnswer(item)}</strong>
-                </p>
-            )}
-            {explanation && <p className={styles.itemExplanation}>Пояснение: {explanation}</p>}
-        </li>
-    );
-}
-
-// Человекочитаемый правильный ответ пункта: у MATCHING эталона нет — собираем пару из content.
-function formatCorrectAnswer(item: TaskItemResponseDto): string {
-    if (item.correctAnswer) return item.correctAnswer;
-    if (item.itemType === 'MATCHING') {
-        const pair = parseMatchingContent(item.content);
-        if (pair?.left_label) return `${pair.left_label} → ${pair.right_label ?? ''}`;
-    }
-    return '—';
 }

@@ -1,0 +1,11 @@
+.backLink {
+  display: inline-block;
+  font-size: 13px;
+  color: var(--p);
+  cursor: pointer;
+  user-select: none;
+
+  &:active {
+    opacity: 0.7;
+  }
+}

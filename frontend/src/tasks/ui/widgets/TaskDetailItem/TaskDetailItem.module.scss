@@ -1,0 +1,41 @@
+.item {
+  border: 1px solid rgba(157, 124, 242, 0.25);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.itemHeader {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--p);
+  margin-bottom: 6px;
+}
+
+.itemPrompt {
+  margin: 0 0 6px;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.itemMeta {
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: var(--c3);
+}
+
+.itemAnswer {
+  margin: 0 0 6px;
+  font-size: 13px;
+
+  strong {
+    color: #2a8a4e;
+  }
+}
+
+.itemExplanation {
+  margin: 0;
+  font-size: 12px;
+  color: var(--c3);
+  font-style: italic;
+}

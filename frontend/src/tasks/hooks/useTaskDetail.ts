@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
-import { extractErrorMessage } from '@/core/api/utils/errors';
+import { useQuery } from '@tanstack/react-query';
 import { TasksBankService } from '@/tasks/services/TasksBankService';
+import { extractErrorMessage } from '@/core/api/utils/errors';
 import type { TaskResponseDto } from '@/tasks/types';
 
 export interface UseTaskDetailResult {
@@ -15,51 +15,21 @@ export interface UseTaskDetailResult {
 
 /**
  * Загрузка детальной карточки задания по publicId из URL-параметра роута.
- * fetcher внедряется параметром — хук не зависит от транспорта и легко тестируется.
+ * Использует TanStack Query — кэш отсутствует (staleTime: 0), перезапрос на каждый mount/reload.
  */
-export function useTaskDetail(
-    publicId: string,
-    fetcher: (publicId: string) => Promise<TaskResponseDto> = TasksBankService.getTaskByPublicId,
-): UseTaskDetailResult {
-    const [task, setTask] = useState<TaskResponseDto | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isError, setIsError] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    // Счётчик перезагрузок: инкремент заставляет effect ниже запросить карточку заново.
-    const [reloadToken, setReloadToken] = useState(0);
-    const reload = useCallback(() => setReloadToken((t) => t + 1), []);
+export function useTaskDetail(publicId: string): UseTaskDetailResult {
+    const query = useQuery({
+        queryKey: ['task', publicId],
+        queryFn: () => TasksBankService.getTaskByPublicId(publicId),
+        staleTime: 0,
+        retry: false,
+    });
 
-    useEffect(() => {
-        let active = true;
-
-        // Сбрасываем ошибку предыдущей загрузки: иначе при повторном запросе (reload,
-        // смена publicId) экран на долю секунды показывал красный блок прошлой ошибки.
-        setIsError(false);
-        setError(null);
-        setIsLoading(true);
-        fetcher(publicId)
-            .then((data) => {
-                if (!active) return;
-                setTask(data);
-                setIsError(false);
-                setError(null);
-            })
-            .catch((e) => {
-                if (!active) return;
-                setTask(null);
-                setIsError(true);
-                setError(extractErrorMessage(e as Error));
-            })
-            .finally(() => {
-                if (active) setIsLoading(false);
-            });
-
-        return () => {
-            active = false;
-        };
-        // fetcher стабилен по смыслу (метод сервиса) — в deps только данные-зависимости.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [publicId, reloadToken]);
-
-    return { task, isLoading, isError, error, reload };
+    return {
+        task: query.data ?? null,
+        isLoading: query.isLoading,
+        isError: query.isError,
+        error: query.error ? extractErrorMessage(query.error) : null,
+        reload: query.refetch,
+    };
 }

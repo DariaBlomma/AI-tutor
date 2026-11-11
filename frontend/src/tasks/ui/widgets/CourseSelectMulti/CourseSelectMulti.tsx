@@ -1,10 +1,8 @@
 import { useCallback } from 'react';
 import CreatableSelect from 'react-select/creatable';
 import type { MultiValue } from 'react-select';
-import type { CourseSelectMultiProps } from './types';
+import type { CourseSelectMultiProps, RSType } from './types';
 import styles from './CourseSelectMulti.module.scss';
-
-type RSType = { readonly value: string; readonly label: string };
 
 export function CourseSelectMulti({
                                       options,
@@ -70,7 +68,7 @@ export function CourseSelectMulti({
                     const trimmed = inputValue.trim();
                     if (!trimmed) return false;
                     return !opts.some(
-                        (o) => o.label.toLowerCase() === trimmed.toLowerCase(),
+                        (o) => o.label?.toLowerCase() === trimmed.toLowerCase(),
                     );
                 }}
                 components={{
@@ -95,8 +93,7 @@ export function CourseSelectMulti({
                     menuList: () => styles.menuList,
                     option: ({ isSelected, isFocused }) =>
                         `${styles.option} ${isSelected ? styles.optionSelected : ''} ${isFocused ? styles.optionFocused : ''}`,
-                    // Стилизация самой опции "Создать курс ..."
-                    createOption: () => styles.createOption,
+
                 }}
                 styles={{
                     control: (base: any) => ({ ...base, minHeight: 0, width: '100%', cursor: isDisabled ? 'not-allowed' : 'pointer' }),

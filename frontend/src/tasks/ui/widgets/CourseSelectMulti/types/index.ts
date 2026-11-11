@@ -1,3 +1,8 @@
+export interface RSType {
+    readonly value: string;
+    readonly label: string;
+}
+
 export interface CourseSelectMultiProps {
     /** Плоский список опций курсов. */
     options: ReadonlyArray<{ value: string; label: string }>;
