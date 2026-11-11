@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { BaseInputText } from '@/shared/ui-kit/BaseInputText/BaseInputText';
+import { BaseSelectMulti } from '@/shared/ui-kit/BaseSelectMulti/BaseSelectMulti';
 import { ChipsMultiselect } from '@/tasks/ui/widgets/ChipsMultiselect/ChipsMultiselect';
 import { InstructionSection } from '@/tasks/ui/widgets/InstructionSection/InstructionSection';
 import { ItemTypeSelect } from '@/tasks/ui/widgets/ItemTypeSelect/ItemTypeSelect';
@@ -7,6 +8,7 @@ import { TextSection } from '@/tasks/ui/widgets/TextSection/TextSection';
 import { TaskItemCard } from '@/tasks/ui/widgets/TaskItemCard/TaskItemCard';
 import type { CreateTaskFormState } from '@/tasks/hooks/useCreateTask';
 import { useTaskRefs } from '@/tasks/hooks/useTaskRefs';
+import { useTeacherCourses } from '@/teacher/hooks/useTeacherCourses';
 import { needsText, validateTaskForm } from '@/tasks/lib/validateTaskForm';
 import { INSTRUCTION_MAX_LENGTH, TASK_NAME_MAX_LENGTH } from '@/tasks/data';
 import { CEFR_LEVEL_OPTIONS, EXAM_TYPE_OPTIONS } from '@/tasks/types';
@@ -86,11 +88,21 @@ export function TaskForm({
     const [items, setItems] = useState<TaskItemDraft[]>(initial.items);
     const [showErrors, setShowErrors] = useState(false);
 
+    // Курсы: мультиселект всех курсов учителя с предвыбранными из initial.courseIds.
+    const [selectedCourseIds, setSelectedCourseIds] = useState<string[]>(initial.courseIds.map(String));
+
+    const { courses: teacherCourses, isLoading: coursesLoading } = useTeacherCourses(true);
+
+    const courseOptions = useMemo(
+        () => teacherCourses.map((c) => ({ value: String(c.id), label: c.name })),
+        [teacherCourses],
+    );
+
     const refs = useTaskRefs();
 
     const form = useMemo(
-        () => ({ name, instruction, topicIds, grammarTypeIds, itemType, levels, examType, materialTitle, materialText, items }),
-        [name, instruction, topicIds, grammarTypeIds, itemType, levels, examType, materialTitle, materialText, items],
+        () => ({ name, instruction, topicIds, grammarTypeIds, itemType, levels, examType, materialTitle, materialText, items, courseIds: selectedCourseIds.map(Number) }),
+        [name, instruction, topicIds, grammarTypeIds, itemType, levels, examType, materialTitle, materialText, items, selectedCourseIds],
     );
 
     const errors = validateTaskForm(form);
@@ -107,6 +119,10 @@ export function TaskForm({
     const handleItemChange = (id: number, patch: Partial<TaskItemDraft>) => {
         setItems((prev) => prev.map((item) => (item.id === id ? { ...item, ...patch } : item)));
     };
+
+    const handleCourseChange = useCallback((values: string[]) => {
+        setSelectedCourseIds(values);
+    }, []);
 
     const moveItem = (index: number, target: number) => {
         setItems((prev) => {
@@ -219,6 +235,19 @@ export function TaskForm({
                             ⚠ Выбрано несколько грамматических типов — задание будет смешанным (Mixed). Смешивайте типы только если это нужно.
                         </div>
                     )}
+                </div>
+
+                {/* Курсы — мультиселект, обновление при сабмите формы */}
+                <div className={styles.field}>
+                    <label className={styles.label}>Курсы</label>
+                    <BaseSelectMulti
+                        options={courseOptions}
+                        value={selectedCourseIds}
+                        onChange={handleCourseChange}
+                        placeholder={teacherCourses.length ? 'Выберите курсы' : 'Сначала создайте курс'}
+                        isDisabled={coursesLoading}
+                        ariaLabel="Курсы для задания"
+                    />
                 </div>
             </div>
 

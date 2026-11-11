@@ -20,6 +20,8 @@ export interface CreateTaskFormState {
     materialTitle: string;
     materialText: string;
     items: TaskItemDraft[];
+    /** Курсы, в которые добавляется задание. */
+    courseIds: number[];
 }
 
 interface UseTaskSubmitResult {

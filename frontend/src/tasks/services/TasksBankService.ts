@@ -1,5 +1,13 @@
 import { api } from '@/core/api/AxiosInstance';
-import type { PageDto, TaskCreateRequestDto, TaskResponseDto, TaskUpdateRequestDto, TaskUsageDto, TasksQueryParams, TaskSummary } from '@/tasks/types';
+import type {
+    PageDto,
+    TaskCreateRequestDto,
+    TaskResponseDto,
+    TaskSummary,
+    TaskUpdateRequestDto,
+    TaskUsageDto,
+    TasksQueryParams,
+} from '@/tasks/types';
 
 // Базовый путь контроллера заданий (TaskController, context-path /api уже в baseURL).
 const TASKS_PATH = '/tasks';
@@ -35,6 +43,15 @@ export class TasksBankService {
     /** DELETE /api/tasks/{id} -> 204. Бэк проверяет владение (403 для чужих заданий). */
     static async deleteTask(id: number): Promise<void> {
         await api.delete<void>(`${TASKS_PATH}/${id}`);
+    }
+
+    /**
+     * PUT /api/tasks/{id}/courses — обновление только курсовой привязки задания.
+     * Бэк синхронизирует: удаляет из курсов, которых нет в courseIds,
+     * добавляет в новые.
+     */
+    static async updateTaskCourseIds(id: number, courseIds: number[]): Promise<void> {
+        await api.put<void>(`${TASKS_PATH}/${id}/courses`, { courseIds });
     }
 
     /** GET /api/tasks/by-public-id/{publicId} -> TaskResponse — страница просмотра задания. */

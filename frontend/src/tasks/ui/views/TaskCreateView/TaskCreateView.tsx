@@ -18,6 +18,7 @@ function emptyForm(): CreateTaskFormState {
         materialTitle: '',
         materialText: '',
         items: [createEmptyItem('WORD_FORMATION')],
+        courseIds: [],
     };
 }
 

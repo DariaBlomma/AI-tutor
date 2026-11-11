@@ -73,5 +73,6 @@ export function taskToFormState(task: TaskResponseDto): CreateTaskFormState {
         materialTitle: context?.title ?? '',
         materialText: context?.text ?? '',
         items: sortedItems.map(itemResponseToDraft),
+        courseIds: task.courseIds ?? [],
     };
 }
