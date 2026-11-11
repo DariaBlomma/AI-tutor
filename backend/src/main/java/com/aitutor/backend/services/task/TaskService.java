@@ -19,6 +19,7 @@ import com.aitutor.backend.exceptions.InvalidRequestException;
 import com.aitutor.backend.exceptions.ResourceNotFoundException;
 import com.aitutor.backend.helpers.PublicIdGenerator;
 import com.aitutor.backend.mappers.TaskMapper;
+import com.aitutor.backend.services.course.CourseService;
 import com.aitutor.backend.repositories.StudentWorkRepository;
 import com.aitutor.backend.repositories.TopicRepository;
 import com.aitutor.backend.repositories.UserRepository;
@@ -54,6 +55,7 @@ public class TaskService {
     private final UserRepository userRepository;
     private final StudentWorkRepository studentWorkRepository;
     private final TaskMapper taskMapper;
+    private final CourseService courseService;
     private final TaskPreviewBuilder previewBuilder;
     private final TaskContentValidator contentValidator;
     private final PublicIdGenerator publicIdGenerator;
@@ -93,7 +95,7 @@ public class TaskService {
     public Page<TaskSummaryResponse> getAllPaged(Long taskTypeId, boolean includeMixed, String search,
                                                  ItemType itemType, CefrLevel level, ExamType examType,
                                                  List<Long> courseIds,
-                                                 int page, int size) {
+                                                 int page, int size, Long teacherId) {
         Specification<Task> spec = buildSpec(taskTypeId, includeMixed, search)
                 .and(TaskSpecifications.byItemType(itemType))
                 .and(TaskSpecifications.byLevel(level))
@@ -117,6 +119,12 @@ public class TaskService {
                 .map(byId::get)
                 .filter(Objects::nonNull)
                 .map(taskMapper::toSummary)
+                .peek(response -> {
+                    Task task = byId.get(response.getId());
+                    if (task != null && teacherId != null) {
+                        response.setCourseIds(courseService.getCourseIdsForTask(task.getId(), teacherId));
+                    }
+                })
                 .toList();
 
         return new PageImpl<>(content, PageRequest.of(page, size, sort), idPage.getTotalElements());
@@ -131,7 +139,10 @@ public class TaskService {
     /** Детальная карточка: полный контент (topics, taskTypes, items). */
     @Transactional(readOnly = true)
     public TaskResponse getById(Long id) {
-        return taskMapper.toResponse(findActiveWithRelations(id));
+        Task task = findActiveWithRelations(id);
+        TaskResponse response = taskMapper.toResponse(task);
+        response.setCourseIds(courseService.getCourseIdsForTask(id, task.getCreatedBy().getId()));
+        return response;
     }
 
     /**
@@ -145,7 +156,9 @@ public class TaskService {
         if (task.getDeletedAt() != null) {
             throw new ResourceNotFoundException("Задание удалено: publicId=" + publicId);
         }
-        return taskMapper.toResponse(task);
+        TaskResponse response = taskMapper.toResponse(task);
+        response.setCourseIds(courseService.getCourseIdsForTask(task.getId(), task.getCreatedBy().getId()));
+        return response;
     }
 
     /**
@@ -200,6 +213,9 @@ public class TaskService {
         task.setPreviewText(previewBuilder.build(task.getItems()));
         taskRepository.saveAndFlush(task); // flush -> INSERT с уже заполненным public_id
 
+        // Синхронизация курсов в той же транзакции
+        courseService.syncTaskCourses(task.getId(), request.getCourseIds(), teacherId);
+
         return getById(task.getId());
     }
 
@@ -241,6 +257,9 @@ public class TaskService {
         // тип экзамена — необязательное поле: null в запросе очищает значение (edit in place).
         task.setLevels(request.getLevels() == null ? Set.of() : request.getLevels());
         task.setExamType(request.getExamType());
+
+        // Полная синхронизация курсов в той же транзакции
+        courseService.syncTaskCourses(id, request.getCourseIds(), teacherId);
 
         return taskMapper.toResponse(task);
     }

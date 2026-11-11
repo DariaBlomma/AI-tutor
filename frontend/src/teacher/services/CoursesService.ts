@@ -1,5 +1,11 @@
 import { api } from '@/core/api/AxiosInstance';
-import type { CourseByTask, CourseRequestDto, CourseSummary, CourseTaskAddRequestDto } from '@/teacher/types';
+import type {
+    CourseByTask,
+    CourseBulkAddRequestDto,
+    CourseRequestDto,
+    CourseSummary,
+    CourseTaskAddRequestDto,
+} from '@/teacher/types';
 
 // Базовый путь контроллера курсов (CourseController, context-path /api уже в baseURL).
 const COURSES_PATH = '/courses';
@@ -34,5 +40,10 @@ export class CoursesService {
     /** DELETE /api/courses/{courseId}/tasks/{taskId} -> CourseResponse (задание остаётся в банке). */
     static async removeTaskFromCourse(courseId: number, taskId: number): Promise<void> {
         await api.delete(`${COURSES_PATH}/${courseId}/tasks/${taskId}`);
+    }
+
+    /** Bulk-добавление заданий в курсы — один запрос вместо N×M. */
+    static async bulkAddTasks(payload: CourseBulkAddRequestDto): Promise<void> {
+        await api.post(`${COURSES_PATH}/bulk-add`, payload);
     }
 }

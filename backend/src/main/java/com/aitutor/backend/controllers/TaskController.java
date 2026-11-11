@@ -40,8 +40,9 @@ public class TaskController {
             // Фильтр по курсам (мультиселект банка заданий): задания, входящие хотя бы в один выбранный курс.
             @RequestParam(required = false) java.util.List<Long> courseIds,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        return taskService.getAllPaged(taskTypeId, includeMixed, search, itemType, level, examType, courseIds, page, size);
+            @RequestParam(defaultValue = "20") int size,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return taskService.getAllPaged(taskTypeId, includeMixed, search, itemType, level, examType, courseIds, page, size, userDetails.getId());
     }
 
     /** Детальная карточка: полный контент (topics, taskTypes, items). */

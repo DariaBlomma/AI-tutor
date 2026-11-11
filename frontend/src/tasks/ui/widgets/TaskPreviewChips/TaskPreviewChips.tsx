@@ -9,7 +9,7 @@ import styles from './TaskPreviewChips.module.scss';
 // в пунктах её не дублируем.
 const EXAM_LABEL: Record<string, string> = Object.fromEntries(EXAM_TYPE_OPTIONS.map((o) => [o.value, o.label]));
 
-export function TaskPreviewChips({ grammarTypes, topics, itemTypes, isMixed, levels, examType }: TaskPreviewChipsProps) {
+export function TaskPreviewChips({ grammarTypes, topics, itemTypes, isMixed, levels, examType, courseNames }: TaskPreviewChipsProps) {
     // itemTypes мог прийти с бэка с повторами — нормализуем к уникальному списку.
     const uniqueItemTypes = [...new Set(itemTypes)] as ItemType[];
 
@@ -37,6 +37,11 @@ export function TaskPreviewChips({ grammarTypes, topics, itemTypes, isMixed, lev
                 </span>
             ))}
             {isMixed && <span className={`${styles.tag} ${styles.mixedTag}`}>Mixed</span>}
+            {(courseNames ?? []).map((name, i) => (
+                <span key={`cr-${i}`} className={styles.tag}>
+                    {name}
+                </span>
+            ))}
         </div>
     );
 }

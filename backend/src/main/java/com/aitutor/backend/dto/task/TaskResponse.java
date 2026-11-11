@@ -29,4 +29,6 @@ public class TaskResponse {
     private Set<TaskTypeResponse> taskTypes;
     private List<TaskItemResponse> items;
     private Instant createdAt;
+    /** Курсы, в которые добавлено задание. */
+    private Set<Long> courseIds;
 }

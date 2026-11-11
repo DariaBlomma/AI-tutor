@@ -13,4 +13,6 @@ export interface TaskPreviewChipsProps {
     itemTypes: ItemType[];
     /** Смешанное ли задание (несколько механик) — жёлтый чип «Mixed». */
     isMixed: boolean;
+    /** Названия курсов (до 3 штук) для отображения чипами. */
+    courseNames?: string[];
 }

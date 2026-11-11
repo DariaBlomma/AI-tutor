@@ -40,4 +40,7 @@ public class TaskCreateRequest {
 
     @NotEmpty(message = "Выберите хотя бы один тип задания")
     private Set<Long> taskTypeIds;
+
+    /** Курсы, в которые нужно добавить задание при создании (синхронизация в @Transactional). */
+    private Set<Long> courseIds;
 }

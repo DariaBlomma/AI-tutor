@@ -246,4 +246,75 @@ public class CourseService {
         }
         return course;
     }
+
+    /** Id курсов учителя, где указано задание. */
+    public Set<Long> getCourseIdsForTask(Long taskId, Long teacherId) {
+        return new HashSet<>(courseTaskRepository.findCourseIdsByTaskId(teacherId, taskId));
+    }
+
+    /**
+     * Полная синхронизация курсов для задания.
+     * Удаляет задание из курсов, которых нет в targetCourseIds,
+     * добавляет в курсы, которых ещё нет.
+     */
+    @Transactional
+    public void syncTaskCourses(Long taskId, Set<Long> targetCourseIds, Long teacherId) {
+        if (targetCourseIds == null) {
+            targetCourseIds = Set.of();
+        }
+
+        Set<Long> currentCourseIds = new HashSet<>(
+                courseTaskRepository.findCourseIdsByTaskId(teacherId, taskId));
+
+        // Удаляем из курсов, которых нет в целевом списке
+        for (Long courseId : currentCourseIds) {
+            if (!targetCourseIds.contains(courseId)) {
+                removeTask(courseId, taskId, teacherId);
+            }
+        }
+
+        // Добавляем в новые курсы
+        for (Long courseId : targetCourseIds) {
+            if (!currentCourseIds.contains(courseId)) {
+                CourseTaskAddRequest request = new CourseTaskAddRequest(taskId, null);
+                addTask(courseId, request, teacherId);
+            }
+        }
+    }
+
+    /**
+     * Bulk-добавление заданий в курсы.
+     * Дубликаты (задание уже в курсе) молча игнорируются.
+     */
+    @Transactional
+    public void bulkAddTasks(Set<Long> taskIds, Set<Long> courseIds, Long teacherId) {
+        if (taskIds == null || courseIds == null || taskIds.isEmpty() || courseIds.isEmpty()) {
+            return;
+        }
+
+        for (Long courseId : courseIds) {
+            Course course = findOwnedActiveCourse(courseId, teacherId);
+            int size = courseTaskRepository.countByCourseId(courseId);
+
+            for (Long taskId : taskIds) {
+                // Пропускаем дубликаты
+                if (courseTaskRepository.existsByCourseIdAndTaskId(courseId, taskId)) {
+                    continue;
+                }
+
+                Task task = taskRepository.findWithRelationsById(taskId)
+                        .orElseThrow(() -> new ResourceNotFoundException("Задание не найдено: id=" + taskId));
+                if (task.getDeletedAt() != null) {
+                    throw new InvalidRequestException("Нельзя добавить удалённое задание в курс");
+                }
+
+                // Добавляем в конец курса
+                courseTaskRepository.save(CourseTask.builder()
+                        .course(course)
+                        .task(task)
+                        .position(size)
+                        .build());
+            }
+        }
+    }
 }

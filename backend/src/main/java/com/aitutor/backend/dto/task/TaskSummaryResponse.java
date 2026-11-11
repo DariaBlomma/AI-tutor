@@ -37,4 +37,6 @@ public class TaskSummaryResponse {
     private List<ItemType> itemTypes;
     /** Автор задания — фронт скрывает действия для чужих заданий. */
     private Long createdById;
+    /** Курсы, в которые добавлено задание (чипы в карточке). */
+    private Set<Long> courseIds;
 }

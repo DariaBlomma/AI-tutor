@@ -102,5 +102,6 @@ export function buildTaskPayload(form: CreateTaskFormState): TaskCreateRequestDt
         topicIds: form.topicIds,
         // Имя поля DTO бэкенда (TaskCreateRequest.taskTypeIds) не меняем — только фронтенд-именование.
         taskTypeIds: form.grammarTypeIds,
+        courseIds: form.courseIds?.length ? form.courseIds : undefined,
     };
 }

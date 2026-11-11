@@ -104,6 +104,8 @@ export interface TaskSummary {
     itemTypes?: ItemType[];
     /** Автор задания — действия (удаление) доступны только владельцу. */
     createdById?: number | null;
+    /** Курсы, в которые добавлено задание (чипы в карточке). */
+    courseIds?: number[];
 }
 
 /** task_types — на бэке это сущность, а не enum. Механики пунктов (ItemType) фиксированы. */
@@ -174,6 +176,8 @@ export interface TaskCreateRequestDto {
     topicIds?: number[];
     /** Имя поля бэкенда TaskCreateRequest — не переименовывается. */
     taskTypeIds: number[];
+    /** Курсы, в которые нужно добавить задание при создании. */
+    courseIds?: number[];
 }
 
 /** PUT /api/tasks/{id} -> TaskUpdateRequest (com.aitutor.backend.dto.task.TaskUpdateRequest). */
@@ -187,6 +191,8 @@ export interface TaskUpdateRequestDto {
     examType?: ExamType | null;
     topicIds?: number[];
     taskTypeIds: number[];
+    /** Актуальный список курсов задания — полная синхронизация при обновлении. */
+    courseIds?: number[];
 }
 
 /** GET /api/tasks/by-public-id/{publicId}/usage -> TaskUsageResponse (факт использования задания учениками). */
@@ -227,6 +233,8 @@ export interface TaskResponseDto {
     taskTypes: GrammarType[];
     items: TaskItemResponseDto[];
     createdAt: string;
+    /** Курсы, в которые добавлено задание. */
+    courseIds?: number[];
 }
 
 /** TaskItemResponse из состава TaskResponse. */

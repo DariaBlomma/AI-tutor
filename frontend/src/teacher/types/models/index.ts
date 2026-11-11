@@ -57,6 +57,12 @@ export interface CourseRequestDto {
     name: string;
 }
 
+// POST /api/courses/bulk-add — bulk-добавление заданий в курсы.
+export interface CourseBulkAddRequestDto {
+    taskIds: number[];
+    courseIds: number[];
+}
+
 // GET /api/teacher/students -> StudentBriefResponse (ученик в списке назначения).
 export interface StudentBrief {
     id: number;

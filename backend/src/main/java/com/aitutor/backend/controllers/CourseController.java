@@ -1,5 +1,6 @@
 package com.aitutor.backend.controllers;
 
+import com.aitutor.backend.dto.course.CourseBulkAddRequest;
 import com.aitutor.backend.dto.course.CourseByTaskResponse;
 import com.aitutor.backend.dto.course.CourseRequest;
 import com.aitutor.backend.dto.course.CourseResponse;
@@ -98,5 +99,15 @@ public class CourseController {
                                   @Valid @RequestBody CourseTasksReorderRequest request,
                                   @AuthenticationPrincipal CustomUserDetails userDetails) {
         return courseService.reorder(id, request.getTaskIds(), userDetails.getId());
+    }
+
+    /**
+     * Bulk-добавление заданий в курсы.
+     * Один запрос вместо N×M отдельных POST.
+     */
+    @PostMapping("/bulk-add")
+    public void bulkAddTasks(@Valid @RequestBody CourseBulkAddRequest request,
+                             @AuthenticationPrincipal CustomUserDetails userDetails) {
+        courseService.bulkAddTasks(request.getTaskIds(), request.getCourseIds(), userDetails.getId());
     }
 }

@@ -42,4 +42,7 @@ public class TaskUpdateRequest {
 
     @NotEmpty(message = "Выберите хотя бы один тип задания")
     private Set<Long> taskTypeIds;
+
+    /** Актуальный список курсов задания — полная синхронизация при обновлении. */
+    private Set<Long> courseIds;
 }
