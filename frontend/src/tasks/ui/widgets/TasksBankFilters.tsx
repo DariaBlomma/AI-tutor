@@ -3,7 +3,8 @@ import { CourseSelectMulti } from '@/tasks/ui/widgets/CourseSelectMulti/CourseSe
 import { CEFR_LEVEL_OPTIONS, EXAM_TYPE_OPTIONS, ITEM_TYPE_OPTIONS } from '@/tasks/types';
 import type { ChipItem } from '@/tasks/ui/widgets/ChipsMultiselect/types';
 import type { CefrLevel, ExamType, ItemType } from '@/tasks/types';
-import styles from './TasksBankView.module.scss';
+// todo: refactor to use its own styles or a common layout
+import styles from '../views/TasksBankView/TasksBankView.module.scss';
 
 const MECHANIC_ITEMS: ChipItem[] = ITEM_TYPE_OPTIONS.map((o, i) => ({ id: i + 1, name: o.label }));
 const MECHANIC_BY_ID = new Map(MECHANIC_ITEMS.map((c, i) => [c.id, ITEM_TYPE_OPTIONS[i].value]));

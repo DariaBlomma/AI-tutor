@@ -14,7 +14,7 @@ import { TaskCoursePopup } from '@/tasks/ui/widgets/TaskCoursePopup/TaskCoursePo
 import { TaskPreviewChips } from '@/tasks/ui/widgets/TaskPreviewChips/TaskPreviewChips';
 import type { TasksBulkAction } from '@/tasks/types';
 import type { CefrLevel, ExamType, ItemType, TaskSummary } from '@/tasks/types';
-import { TasksBankFilters } from './TasksBankFilters';
+import { TasksBankFilters } from '../../widgets/TasksBankFilters';
 import styles from './TasksBankView.module.scss';
 
 const SEARCH_DEBOUNCE_MS = 300;
