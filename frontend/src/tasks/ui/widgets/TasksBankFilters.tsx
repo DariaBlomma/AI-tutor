@@ -1,22 +1,12 @@
-import { ChipsMultiselect } from '@/tasks/ui/widgets/ChipsMultiselect/ChipsMultiselect';
+import { BasePlusButtonLink } from '@/shared/ui-kit/BasePlusButtonLink/BasePlusButtonLink';
+import { BaseSelectSingle } from '@/shared/ui-kit/BaseSelectSingle/BaseSelectSingle';
 import { CourseSelectMulti } from '@/tasks/ui/widgets/CourseSelectMulti/CourseSelectMulti';
 import { CEFR_LEVEL_OPTIONS, EXAM_TYPE_OPTIONS, ITEM_TYPE_OPTIONS } from '@/tasks/types';
-import type { ChipItem } from '@/tasks/ui/widgets/ChipsMultiselect/types';
 import type { CefrLevel, ExamType, ItemType } from '@/tasks/types';
 // todo: refactor to use its own styles or a common layout
 import styles from '../views/TasksBankView/TasksBankView.module.scss';
 
-const MECHANIC_ITEMS: ChipItem[] = ITEM_TYPE_OPTIONS.map((o, i) => ({ id: i + 1, name: o.label }));
-const MECHANIC_BY_ID = new Map(MECHANIC_ITEMS.map((c, i) => [c.id, ITEM_TYPE_OPTIONS[i].value]));
-
-const LEVEL_ITEMS: ChipItem[] = CEFR_LEVEL_OPTIONS.map((o, i) => ({ id: i + 1, name: o.label }));
-const LEVEL_BY_ID = new Map(LEVEL_ITEMS.map((c, i) => [c.id, CEFR_LEVEL_OPTIONS[i].value]));
-
-const EXAM_ITEMS: ChipItem[] = EXAM_TYPE_OPTIONS.map((o, i) => ({ id: i + 1, name: o.label }));
-const EXAM_BY_ID = new Map(EXAM_ITEMS.map((c, i) => [c.id, EXAM_TYPE_OPTIONS[i].value]));
-
 export interface TasksBankFiltersProps {
-    isTeacher: boolean;
     grammarTypes: { id: number; name: string }[];
     topicsForFilter: { id: number; name: string }[];
     grammarTypeId: number | null;
@@ -36,10 +26,12 @@ export interface TasksBankFiltersProps {
     changeTopic: (value: number | null) => void;
     changeCourseIds: (value: string[]) => void;
     changeIncludeMixed: (value: boolean) => void;
+    onClearAll?: () => void;
+    manageGrammarTypesTo?: '/tasks-bank/grammar-types';
+    manageTopicsTo?: '/tasks-bank/topics';
 }
 
 export function TasksBankFilters({
-    isTeacher,
     grammarTypes,
     topicsForFilter,
     grammarTypeId,
@@ -59,68 +51,95 @@ export function TasksBankFilters({
     changeTopic,
     changeCourseIds,
     changeIncludeMixed,
+    onClearAll,
+    manageGrammarTypesTo,
+    manageTopicsTo,
 }: TasksBankFiltersProps) {
     return (
         <aside className={styles.filters}>
+            {onClearAll && (
+                <button type="button" className={styles.clearAllBtn} onClick={onClearAll}>
+                    Сбросить всё
+                </button>
+            )}
+
             <div className={styles.filterBlock}>
                 <div className={styles.filterLabel}>Грамматические типы</div>
-                <ChipsMultiselect
-                    items={grammarTypes}
-                    selectedIds={grammarTypeId == null ? [] : [grammarTypeId]}
-                    single
-                    onChange={(ids) => onChangeGrammarType(ids[0] ?? null)}
-                    onClear={() => onChangeGrammarType(null)}
-                    clearLabel="Все типы"
-                    manageTo={isTeacher ? '/tasks-bank/grammar-types' : undefined}
-                />
+                <div className={styles.filterRow}>
+                    <BaseSelectSingle
+                        options={[
+                            { value: '', label: 'Все типы' },
+                            ...grammarTypes.map((g) => ({ value: String(g.id), label: g.name })),
+                        ]}
+                        value={grammarTypeId != null ? String(grammarTypeId) : ''}
+                        onChange={(v) => onChangeGrammarType(v ? Number(v) : null)}
+                        placeholder="Все типы"
+                        isClearable
+                    />
+                    {manageGrammarTypesTo && (
+                        <BasePlusButtonLink to={manageGrammarTypesTo} ariaLabel="Управление справочником" />
+                    )}
+                </div>
             </div>
 
             <div className={styles.filterBlock}>
                 <div className={styles.filterLabel}>Лексические темы</div>
-                <ChipsMultiselect
-                    items={topicsForFilter}
-                    selectedIds={topicId == null ? [] : [topicId]}
-                    single
-                    onChange={(ids) => changeTopic(ids[0] ?? null)}
-                    onClear={() => changeTopic(null)}
-                    clearLabel="Все темы"
-                    manageTo={isTeacher ? '/tasks-bank/topics' : undefined}
-                />
+                <div className={styles.filterRow}>
+                    <BaseSelectSingle
+                        options={[
+                            { value: '', label: 'Все темы' },
+                            ...topicsForFilter.map((t) => ({ value: String(t.id), label: t.name })),
+                        ]}
+                        value={topicId != null ? String(topicId) : ''}
+                        onChange={(v) => changeTopic(v ? Number(v) : null)}
+                        placeholder="Все темы"
+                        isClearable
+                    />
+                    {manageTopicsTo && (
+                        <BasePlusButtonLink to={manageTopicsTo} ariaLabel="Управление справочником" />
+                    )}
+                </div>
             </div>
 
             <div className={styles.filterBlock}>
                 <div className={styles.filterLabel}>Механика пунктов</div>
-                <ChipsMultiselect
-                    items={MECHANIC_ITEMS}
-                    selectedIds={itemType == null ? [] : [MECHANIC_ITEMS.findIndex((c) => MECHANIC_BY_ID.get(c.id) === itemType) + 1]}
-                    single
-                    onChange={(ids) => changeItemType(ids.length ? (MECHANIC_BY_ID.get(ids[0]) ?? null) : null)}
-                    onClear={() => changeItemType(null)}
-                    clearLabel="Все"
+                <BaseSelectSingle
+                    options={[
+                        { value: '', label: 'Все' },
+                        ...ITEM_TYPE_OPTIONS.map((o) => ({ value: o.value, label: o.label })),
+                    ]}
+                    value={itemType ?? ''}
+                    onChange={(v) => changeItemType(v || null)}
+                    placeholder="Все"
+                    isClearable
                 />
             </div>
 
             <div className={styles.filterBlock}>
                 <div className={styles.filterLabel}>Уровень языка</div>
-                <ChipsMultiselect
-                    items={LEVEL_ITEMS}
-                    selectedIds={level == null ? [] : [LEVEL_ITEMS.findIndex((c) => LEVEL_BY_ID.get(c.id) === level) + 1]}
-                    single
-                    onChange={(ids) => changeLevel(ids.length ? (LEVEL_BY_ID.get(ids[0]) ?? null) : null)}
-                    onClear={() => changeLevel(null)}
-                    clearLabel="Все уровни"
+                <BaseSelectSingle
+                    options={[
+                        { value: '', label: 'Все уровни' },
+                        ...CEFR_LEVEL_OPTIONS.map((o) => ({ value: o.value, label: o.label })),
+                    ]}
+                    value={level ?? ''}
+                    onChange={(v) => changeLevel(v || null)}
+                    placeholder="Все уровни"
+                    isClearable
                 />
             </div>
 
             <div className={styles.filterBlock}>
                 <div className={styles.filterLabel}>Экзамен</div>
-                <ChipsMultiselect
-                    items={EXAM_ITEMS}
-                    selectedIds={examType == null ? [] : [EXAM_ITEMS.findIndex((c) => EXAM_BY_ID.get(c.id) === examType) + 1]}
-                    single
-                    onChange={(ids) => changeExamType(ids.length ? (EXAM_BY_ID.get(ids[0]) ?? null) : null)}
-                    onClear={() => changeExamType(null)}
-                    clearLabel="Все экзамены"
+                <BaseSelectSingle
+                    options={[
+                        { value: '', label: 'Все экзамены' },
+                        ...EXAM_TYPE_OPTIONS.map((o) => ({ value: o.value, label: o.label })),
+                    ]}
+                    value={examType ?? ''}
+                    onChange={(v) => changeExamType(v || null)}
+                    placeholder="Все экзамены"
+                    isClearable
                 />
             </div>
 

@@ -117,6 +117,18 @@ export function TasksBankView() {
     // Мультиселект курсов: тот же сброс на первую страницу, что у остальных фильтров.
     const changeCourseIds = applyFilter(setCourseIdsFilter);
 
+    // Глобальный сброс всех фильтров.
+    const clearAllFilters = useCallback(() => {
+        setGrammarTypeId(null);
+        setItemType(null);
+        setLevel(null);
+        setExamType(null);
+        setTopicId(null);
+        setCourseIdsFilter([]);
+        setIncludeMixed(false);
+        setPage(0);
+    }, []);
+
     const applySearch = (value: string) => {
         setSearchInput(value);
         setPage(0);
@@ -271,7 +283,6 @@ export function TasksBankView() {
 
             <div className={styles.content}>
                 <TasksBankFilters
-                    isTeacher={isTeacher}
                     grammarTypes={refs.grammarTypes}
                     topicsForFilter={topicsForFilter}
                     grammarTypeId={grammarTypeId}
@@ -291,6 +302,9 @@ export function TasksBankView() {
                     changeTopic={changeTopic}
                     changeCourseIds={changeCourseIds}
                     changeIncludeMixed={changeIncludeMixed}
+                    onClearAll={isTeacher ? clearAllFilters : undefined}
+                    manageGrammarTypesTo={isTeacher ? '/tasks-bank/grammar-types' : undefined}
+                    manageTopicsTo={isTeacher ? '/tasks-bank/topics' : undefined}
                 />
 
                 <section className={styles.tasksSection}>

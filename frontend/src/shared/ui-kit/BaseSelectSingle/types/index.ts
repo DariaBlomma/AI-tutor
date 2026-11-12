@@ -12,4 +12,6 @@ export interface BaseSelectSingleProps<TValue extends string = string> {
     /** Дополнительный класс к контейнеру селекта. */
     className?: string;
     ariaLabel?: string;
+    /** Показывать крестик очистки. По умолчанию — true. */
+    isClearable?: boolean;
 }

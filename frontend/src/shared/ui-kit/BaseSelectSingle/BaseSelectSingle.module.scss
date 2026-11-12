@@ -67,6 +67,24 @@
   line-height: 1;
 }
 
+.clearIndicator {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  color: var(--c3);
+  cursor: pointer;
+  transition: color 0.15s;
+
+  &:hover {
+    color: var(--err);
+  }
+
+  span {
+    font-size: 14px;
+    line-height: 1;
+  }
+}
+
 .menu {
   margin-top: 4px;
   background: #1a1a1a;

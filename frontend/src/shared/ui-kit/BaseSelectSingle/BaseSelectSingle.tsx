@@ -5,6 +5,7 @@ import Select, {
   type GroupBase,
   type OptionsOrGroups,
   type StylesConfig,
+  type ClearIndicatorProps,
 } from "react-select";
 import type { BaseSelectOption, BaseSelectSingleProps } from "./types";
 import styles from "./BaseSelectSingle.module.scss";
@@ -21,6 +22,20 @@ const selectStyles: StylesConfig<BaseSelectOption<string>, false> = {
   menu: (base) => ({ ...base, zIndex: 200 }),
   menuPortal: (base) => ({ ...base, zIndex: 300 }),
   valueContainer: (base) => ({ ...base, padding: "2px 8px" }),
+  indicatorsContainer: (base) => ({
+    ...base,
+    gap: "8px",
+    paddingRight: "4px",
+  }),
+  clearIndicator: (base) => ({
+    ...base,
+    opacity: 1,
+    color: "var(--c3)",
+    transition: "color 0.15s",
+    "&:hover": {
+      color: "var(--err)",
+    },
+  }),
 };
 
 export function BaseSelectSingle<TValue extends string = string>({
@@ -31,6 +46,7 @@ export function BaseSelectSingle<TValue extends string = string>({
   isDisabled,
   className,
   ariaLabel,
+  isClearable = true,
 }: BaseSelectSingleProps<TValue>) {
   const selected =
     value != null ? (options.find((o) => o.value === value) ?? null) : null;
@@ -46,13 +62,15 @@ export function BaseSelectSingle<TValue extends string = string>({
         }
         value={selected}
         onChange={(option) => {
-          if (option && !Array.isArray(option)) {
+          if (option === null) {
+            onChange('' as unknown as TValue);
+          } else if (!Array.isArray(option)) {
             onChange(option.value as TValue);
           }
         }}
         placeholder={placeholder}
         isDisabled={isDisabled}
-        isClearable={false}
+        isClearable={isClearable}
         isSearchable={false}
         aria-label={ariaLabel}
         styles={selectStyles}
@@ -70,6 +88,11 @@ export function BaseSelectSingle<TValue extends string = string>({
             </div>
           ),
           IndicatorSeparator: () => null,
+          ClearIndicator: (props: ClearIndicatorProps<BaseSelectOption<string>, false>) => (
+            <div {...props.innerProps} className={styles.clearIndicator}>
+              <span aria-hidden="true">×</span>
+            </div>
+          ),
         }}
         classNames={{
           control: ({ isFocused }) =>
