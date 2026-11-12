@@ -35,3 +35,27 @@ textarea {
 .main--with-sidebar {
     margin-left: 0;
 }
+
+// Красивый скролл
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(157, 124, 242, 0.3);
+    border-radius: 3px;
+
+    &:hover {
+        background: rgba(157, 124, 242, 0.5);
+    }
+}
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(157, 124, 242, 0.3) transparent;
+}

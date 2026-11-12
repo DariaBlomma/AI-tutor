@@ -1,3 +1,5 @@
+@use '@/shared/styles/variables' as *;
+
 .page {
   min-height: 100vh;
   position: relative;
@@ -8,7 +10,7 @@
 
 // Десктопный layout — контент на всю ширину с отступом под сайдбар.
 // Скролл запрещён на странице, скролл только внутри колонок.
-@media (min-width: 1024px) {
+@media (min-width: $breakpoint-desktop) {
   .page {
     padding-left: calc(var(--sidebar-width) + 20px);
     padding-bottom: 20px;
@@ -27,39 +29,13 @@
   }
 }
 
-// Красивый скролл для колонок
-@media (min-width: 1024px) {
-  .filters,
-  .tasksSection {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(157, 124, 242, 0.3) transparent;
-
-    &::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: rgba(157, 124, 242, 0.3);
-      border-radius: 3px;
-
-      &:hover {
-        background: rgba(157, 124, 242, 0.5);
-      }
-    }
-  }
-}
-
 .content {
   max-width: 480px;
   margin: 0 auto;
   padding: 0 20px;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: $breakpoint-desktop) {
   .content {
     max-width: none;
     margin: 0;
@@ -86,7 +62,7 @@
   display: block;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: $breakpoint-desktop) {
   .filters {
     display: flex;
     flex-direction: column;
@@ -107,7 +83,7 @@
   display: block;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: $breakpoint-desktop) {
   .tasksSection {
     display: flex;
     flex-direction: column;
@@ -221,9 +197,6 @@
   overflow-wrap: anywhere;
 }
 
-
-
-
 .footer {
   display: flex;
   justify-content: space-between;
@@ -279,9 +252,6 @@
   color: #ff6b6b;
 }
 
-
-
-
 // Нумерованный список предложений в карточке задания (превью).
 .previewList {
   list-style: decimal;
@@ -301,14 +271,6 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-}
-
-
-
-
-.count {
-  font-size: 11px;
-  color: var(--c3);
 }
 
 .headerRow {
