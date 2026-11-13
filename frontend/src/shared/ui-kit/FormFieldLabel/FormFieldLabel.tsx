@@ -16,6 +16,8 @@ interface FormFieldLabelProps {
  * Если label не передан — рендерит только звёздочку (если isRequired).
  */
 export function FormFieldLabel({ label, isRequired, className }: FormFieldLabelProps) {
+    if (!label && !isRequired) return null;
+
     return (
         <div className={`${styles.fieldLabelRow} ${className || ''}`}>
             {isRequired && <RequiredBadge />}

@@ -4,7 +4,7 @@ import { CourseSelectMulti } from '@/tasks/ui/widgets/CourseSelectMulti/CourseSe
 import { CEFR_LEVEL_OPTIONS, EXAM_TYPE_OPTIONS, ITEM_TYPE_OPTIONS } from '@/tasks/types';
 import type { CefrLevel, ExamType, ItemType } from '@/tasks/types';
 // todo: refactor to use its own styles or a common layout
-import styles from '../views/TasksBankView/TasksBankView.module.scss';
+import styles from './TasksBankFilters.module.scss';
 
 export interface TasksBankFiltersProps {
     grammarTypes: { id: number; name: string }[];

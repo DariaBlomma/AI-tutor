@@ -52,27 +52,6 @@
   }
 }
 
-.filters {
-  display: block;
-}
-
-@media (min-width: $breakpoint-desktop) {
-  .filters {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    overflow-y: auto;
-
-    .filterBlock {
-      margin-bottom: 0;
-    }
-
-    .mixedToggle {
-      margin-bottom: 0;
-    }
-  }
-}
-
 .tasksSection {
   display: block;
 }
@@ -301,6 +280,7 @@
 .filterRow {
   display: flex;
   align-items: flex-start;
+  justify-content: center;
   gap: 6px;
 }
 

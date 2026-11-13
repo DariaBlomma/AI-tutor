@@ -46,11 +46,9 @@ export function TeacherHomeView() {
 
             <div className={styles.section}>
                 <div className={styles.sectionTitle}>Быстрые действия</div>
-                <div className={styles.btnRow}>
-                    <button type="button" className={styles.btn} onClick={goToTasksBank}>
-                        Назначить ДЗ
-                    </button>
-                </div>
+                <button type="button" className={styles.btn} onClick={goToTasksBank}>
+                    Назначить ДЗ
+                </button>
             </div>
 
             {SHOW_TMP_DATA && (
