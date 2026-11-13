@@ -1,8 +1,9 @@
-import { Outlet, useLocation } from '@tanstack/react-router';
+import { useLocation } from '@tanstack/react-router';
 import { AuthService } from '@/auth/services/AuthService.ts';
 import { AppBottomNav } from '@/shared/widgets/AppBottomNav/AppBottomNav';
 import { AppSidebar } from '@/shared/widgets/AppSidebar/AppSidebar';
 import { useSidebar } from '@/shared/hooks/useSidebar';
+import { PageLayout } from '@/shared/layouts/PageLayout';
 import type { AppBottomNavActive } from '@/shared/widgets/AppBottomNav/types';
 import { useEffect, useState } from 'react';
 
@@ -57,7 +58,7 @@ export function LayoutRoot() {
             {isDesktop && navActive && (
                 <AppSidebar active={navActive} hiddenIds={hiddenIds} />
             )}
-            <Outlet />
+            <PageLayout />
             {!isDesktop && navActive && (
                 <AppBottomNav active={navActive} hiddenIds={hiddenIds} />
             )}
