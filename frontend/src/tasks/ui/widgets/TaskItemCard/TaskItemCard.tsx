@@ -1,4 +1,5 @@
 import { BaseInputText } from '@/shared/ui-kit/BaseInputText/BaseInputText';
+import { BaseInputTextarea } from '@/shared/ui-kit/BaseInputTextarea/BaseInputTextarea';
 import { ANSWER_MAX_LENGTH, GAP_MARK, TFNS_ANSWERS } from '@/tasks/data';
 import type { TaskItemDraft } from '@/tasks/types';
 import type { TaskItemCardProps } from './types';
@@ -30,86 +31,67 @@ export function TaskItemCard({ item, index, isFirst, isLast, error, onChange, on
             <div className={styles.body}>
                 {(item.itemType === 'WORD_FORMATION' || item.itemType === 'GAP_FILL') && (
                     <>
-                        <div className={styles.field}>
-                            <label className={styles.label}>
-                                Предложение с пропуском <span className={styles.req}>*</span>
-                            </label>
-                            <textarea
-                                className={styles.textarea}
-                                value={item.prompt}
-                                placeholder={`Используйте ${GAP_MARK} для пропуска`}
-                                onChange={(e) => patch({ prompt: e.target.value })}
-                                disabled={disabled}
-                                readOnly={disabled}
-                            />
-                        </div>
-                        <div className={styles.field}>
-                            <label className={styles.label}>
-                                Ответ <span className={styles.req}>*</span>
-                            </label>
-                            <BaseInputText
-                                value={item.answer}
-                                maxLength={ANSWER_MAX_LENGTH}
-                                placeholder="Правильный ответ"
-                                onChange={(e) => patch({ answer: e.target.value })}
-                                disabled={disabled}
-                                readOnly={disabled}
-                            />
-                        </div>
+                        <BaseInputTextarea
+                            label="Предложение с пропуском"
+                            isRequired
+                            value={item.prompt}
+                            placeholder={`Используйте ${GAP_MARK} для пропуска`}
+                            onChange={(e) => patch({ prompt: e.target.value })}
+                            disabled={disabled}
+                            readOnly={disabled}
+                        />
+                        <BaseInputText
+                            label="Ответ"
+                            isRequired
+                            value={item.answer}
+                            maxLength={ANSWER_MAX_LENGTH}
+                            placeholder="Правильный ответ"
+                            onChange={(e) => patch({ answer: e.target.value })}
+                            disabled={disabled}
+                            readOnly={disabled}
+                        />
                     </>
                 )}
 
                 {/* WORD_FORMATION: prompt — только предложение с ___; слово-база вводится отдельно,
                     раннер сам отрендерит (BASE) после пропуска (см. backend README). */}
                 {item.itemType === 'WORD_FORMATION' && (
-                    <div className={styles.field}>
-                        <label className={styles.label}>
-                            Слово-база <span className={styles.req}>*</span>
-                        </label>
-                        <BaseInputText
-                            value={item.base}
-                            placeholder="Например: BE"
-                            onChange={(e) => patch({ base: e.target.value })}
-                            disabled={disabled}
-                            readOnly={disabled}
-                        />
-                    </div>
+                    <BaseInputText
+                        label="Слово-база"
+                        isRequired
+                        value={item.base}
+                        placeholder="Например: BE"
+                        onChange={(e) => patch({ base: e.target.value })}
+                        disabled={disabled}
+                        readOnly={disabled}
+                    />
                 )}
 
                 {/* GAP_FILL по бэку — открытый пропуск: ученик сам вписывает ответ.
                     content.options — необязательный список-подсказка, не «выбор из вариантов». */}
                 {item.itemType === 'GAP_FILL' && (
-                    <div className={styles.field}>
-                        <label className={styles.label}>Подсказка-опции (необязательно)</label>
-                        <BaseInputText
-                            value={item.options}
-                            placeholder="Через запятую: study, studied, had studied"
-                            onChange={(e) => patch({ options: e.target.value })}
-                            disabled={disabled}
-                            readOnly={disabled}
-                        />
-                    </div>
+                    <BaseInputText
+                        label="Подсказка-опции"
+                        value={item.options}
+                        placeholder="Через запятую: study, studied, had studied"
+                        onChange={(e) => patch({ options: e.target.value })}
+                        disabled={disabled}
+                        readOnly={disabled}
+                    />
                 )}
 
                 {item.itemType === 'TFNS' && (
                     <>
+                        <BaseInputTextarea
+                            label="Утверждение"
+                            isRequired
+                            value={item.prompt}
+                            placeholder="Введите утверждение для проверки"
+                            onChange={(e) => patch({ prompt: e.target.value })}
+                            disabled={disabled}
+                            readOnly={disabled}
+                        />
                         <div className={styles.field}>
-                            <label className={styles.label}>
-                                Утверждение <span className={styles.req}>*</span>
-                            </label>
-                            <textarea
-                                className={styles.textarea}
-                                value={item.prompt}
-                                placeholder="Введите утверждение для проверки"
-                                onChange={(e) => patch({ prompt: e.target.value })}
-                                disabled={disabled}
-                                readOnly={disabled}
-                            />
-                        </div>
-                        <div className={styles.field}>
-                            <label className={styles.label}>
-                                Правильный ответ <span className={styles.req}>*</span>
-                            </label>
                             <div className={styles.chips}>
                                 {TFNS_ANSWERS.map((answer) => (
                                     <button
@@ -129,31 +111,29 @@ export function TaskItemCard({ item, index, isFirst, isLast, error, onChange, on
 
                 {item.itemType === 'MATCHING' && (
                     <>
-                        <div className={styles.field}>
-                            <label className={styles.label}>
-                                Левая часть пары <span className={styles.req}>*</span>
-                            </label>
-                            <BaseInputText value={item.leftLabel} onChange={(e) => patch({ leftLabel: e.target.value })} />
-                        </div>
-                        <div className={styles.field}>
-                            <label className={styles.label}>
-                                Правая часть пары <span className={styles.req}>*</span>
-                            </label>
-                            <BaseInputText value={item.rightLabel} onChange={(e) => patch({ rightLabel: e.target.value })} />
-                        </div>
+                        <BaseInputText
+                            label="Левая часть пары"
+                            isRequired
+                            value={item.leftLabel}
+                            onChange={(e) => patch({ leftLabel: e.target.value })}
+                        />
+                        <BaseInputText
+                            label="Правая часть пары"
+                            isRequired
+                            value={item.rightLabel}
+                            onChange={(e) => patch({ rightLabel: e.target.value })}
+                        />
                     </>
                 )}
 
-                <div className={styles.field}>
-                    <label className={styles.label}>Пояснение</label>
-                    <BaseInputText
-                        value={item.explanation}
-                        placeholder="Необязательно"
-                        onChange={(e) => patch({ explanation: e.target.value })}
-                        disabled={disabled}
-                        readOnly={disabled}
-                    />
-                </div>
+                <BaseInputText
+                    label="Пояснение"
+                    value={item.explanation}
+                    placeholder="Необязательно"
+                    onChange={(e) => patch({ explanation: e.target.value })}
+                    disabled={disabled}
+                    readOnly={disabled}
+                />
 
                 {error && <div className={styles.itemError}>⚠ {error}</div>}
             </div>

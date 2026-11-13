@@ -7,13 +7,9 @@ import styles from './InstructionSection.module.scss';
 export function InstructionSection({ value, maxLength, onChange, error, disabled = false }: InstructionSectionProps) {
     return (
         <div className={styles.section}>
-            <div className={styles.sectionTitle}>
-                <span>Инструкция</span>
-                <span className={styles.optional}>необязательно</span>
-            </div>
+            <div className={styles.sectionTitle}>Инструкция</div>
 
             <div className={styles.field}>
-                <label className={styles.fieldLabel}>Что нужно сделать в задании</label>
                 <BaseInputText
                     value={value}
                     maxLength={maxLength}

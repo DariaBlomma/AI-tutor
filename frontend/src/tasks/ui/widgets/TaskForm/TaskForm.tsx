@@ -137,7 +137,7 @@ export function TaskForm({
             {/* ТИП ЗАДАНИЯ */}
             <div className={styles.section}>
                 <div className={styles.sectionTitle}>Тип задания</div>
-                <ItemTypeSelect value={itemType} onChange={handleItemTypeChange} disabled={editMode} />
+                <ItemTypeSelect value={itemType} onChange={handleItemTypeChange} disabled={editMode} label="Тип задания" isRequired />
                 {editMode && (
                     <div className={styles.warning}>Механику задания нельзя изменить после создания — она задаёт набор полей пунктов.</div>
                 )}

@@ -5,14 +5,15 @@ import type { ItemTypeSelectProps } from './types';
 
 // Выбор механики задания (enum ItemType бэка) до конструктора пунктов:
 // тип определяет набор полей карточки пункта и необходимость текста-материала.
-export function ItemTypeSelect({ value, onChange, disabled = false }: ItemTypeSelectProps) {
+export function ItemTypeSelect({ value, onChange, disabled = false, label, isRequired }: ItemTypeSelectProps) {
     return (
         <BaseSelectSingle<ItemType>
             options={ITEM_TYPES}
             value={value}
             onChange={onChange}
             isDisabled={disabled}
-            ariaLabel="Тип задания"
+            label={label}
+            isRequired={isRequired}
         />
     );
 }
