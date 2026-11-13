@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import CreatableSelect from 'react-select/creatable';
 import type { MultiValue, DropdownIndicatorProps } from 'react-select';
 import type { CourseSelectMultiProps, RSType } from './types';
+import { FormFieldLabel } from '@/shared/ui-kit/FormFieldLabel/FormFieldLabel';
 import styles from './CourseSelectMulti.module.scss';
 
 export function CourseSelectMulti({
@@ -14,6 +15,8 @@ export function CourseSelectMulti({
                                       ariaLabel,
                                       error,
                                       onCreateCourse,
+                                      label,
+                                      isRequired,
                                   }: CourseSelectMultiProps) {
     const rsOptions: ReadonlyArray<RSType> = options;
     const selected: RSType[] = value
@@ -46,6 +49,7 @@ export function CourseSelectMulti({
 
     return (
         <div className={className} style={{ width: '100%' }}>
+            <FormFieldLabel label={label} isRequired={isRequired} />
             <CreatableSelect<RSType, true>
                 isMulti
                 options={rsOptions}

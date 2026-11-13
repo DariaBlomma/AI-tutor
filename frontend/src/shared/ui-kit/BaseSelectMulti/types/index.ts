@@ -14,4 +14,10 @@ export interface BaseSelectMultiProps<TValue extends string = string> {
     /** Дополнительные react-select components (переопределяют/дополняют стандартные). */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     components?: Record<string, any>;
+    /** Показывать крестик очистки. По умолчанию — true. */
+    isClearable?: boolean;
+    /** Видимый лейбл над полем. */
+    label?: string;
+    /** Показывать красную звёздочку перед лейблом. */
+    isRequired?: boolean;
 }

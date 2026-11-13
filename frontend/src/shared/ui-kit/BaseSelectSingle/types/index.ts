@@ -14,4 +14,8 @@ export interface BaseSelectSingleProps<TValue extends string = string> {
     ariaLabel?: string;
     /** Показывать крестик очистки. По умолчанию — true. */
     isClearable?: boolean;
+    /** Видимый лейбл над полем. */
+    label?: string;
+    /** Показывать красную звёздочку перед лейблом. */
+    isRequired?: boolean;
 }

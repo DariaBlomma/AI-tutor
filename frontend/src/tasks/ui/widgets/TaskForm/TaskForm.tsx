@@ -1,7 +1,8 @@
 import { useCallback, useMemo, useState } from 'react';
 import { BaseInputText } from '@/shared/ui-kit/BaseInputText/BaseInputText';
+import { BaseSelectMulti } from '@/shared/ui-kit/BaseSelectMulti/BaseSelectMulti';
+import { BaseSelectSingle } from '@/shared/ui-kit/BaseSelectSingle/BaseSelectSingle';
 import { CourseSelectMulti } from '@/tasks/ui/widgets/CourseSelectMulti/CourseSelectMulti';
-import { ChipsMultiselect } from '@/tasks/ui/widgets/ChipsMultiselect/ChipsMultiselect';
 import { InstructionSection } from '@/tasks/ui/widgets/InstructionSection/InstructionSection';
 import { ItemTypeSelect } from '@/tasks/ui/widgets/ItemTypeSelect/ItemTypeSelect';
 import { TextSection } from '@/tasks/ui/widgets/TextSection/TextSection';
@@ -12,17 +13,8 @@ import { useTeacherCourses } from '@/teacher/hooks/useTeacherCourses';
 import { needsText, validateTaskForm } from '@/tasks/lib/validateTaskForm';
 import { INSTRUCTION_MAX_LENGTH, TASK_NAME_MAX_LENGTH } from '@/tasks/data';
 import { CEFR_LEVEL_OPTIONS, EXAM_TYPE_OPTIONS } from '@/tasks/types';
-import type { ChipItem } from '@/tasks/ui/widgets/ChipsMultiselect/types';
 import type { CefrLevel, ExamType, ItemType, TaskItemDraft } from '@/tasks/types';
 import styles from './TaskForm.module.scss';
-
-// Чипы уровня CEFR (enum CefrLevel) и экзамена (enum ExamType) — числовые id для общего виджета чипов.
-const LEVEL_ITEMS: ChipItem[] = CEFR_LEVEL_OPTIONS.map((o, i) => ({ id: i + 1, name: o.label }));
-const LEVEL_BY_ID = new Map(LEVEL_ITEMS.map((c, i) => [c.id, CEFR_LEVEL_OPTIONS[i].value]));
-const EXAM_ITEMS: ChipItem[] = EXAM_TYPE_OPTIONS.map((o, i) => ({ id: i + 1, name: o.label }));
-const EXAM_BY_ID = new Map(EXAM_ITEMS.map((c, i) => [c.id, EXAM_TYPE_OPTIONS[i].value]));
-
-let nextItemId = 1;
 
 // Пустой пункт под выбранную механику: поля чужих типов не заводим.
 export function createEmptyItem(itemType: ItemType): TaskItemDraft {
@@ -38,6 +30,8 @@ export function createEmptyItem(itemType: ItemType): TaskItemDraft {
         explanation: '',
     };
 }
+
+let nextItemId = 1;
 
 export interface TaskFormProps {
     /** Начальное состояние: пустая форма (создание) или предзаполненная карточка (редактирование). */
@@ -169,7 +163,6 @@ export function TaskForm({
                 <div className={styles.sectionTitle}>Основное</div>
 
                 <div className={styles.field}>
-                    <label className={styles.label}>Название задания</label>
                     <BaseInputText
                         id="task-name"
                         value={name}
@@ -186,50 +179,51 @@ export function TaskForm({
                 </div>
 
                 <div className={styles.field}>
-                    <label className={styles.label}>Уровень языка *</label>
-                    <ChipsMultiselect
-                        items={LEVEL_ITEMS}
-                        selectedIds={levels.map((lv) => LEVEL_ITEMS.findIndex((c) => LEVEL_BY_ID.get(c.id) === lv) + 1)}
-                        onChange={(ids) => setLevels(ids.map((id) => LEVEL_BY_ID.get(id)).filter(Boolean) as CefrLevel[])}
-                        onClear={() => setLevels([])}
-                        clearLabel="Без уровня"
-                    />
-                    {showErrors && errors.levels && <div className={styles.fieldError}>{errors.levels}</div>}
-                </div>
-
-                <div className={styles.field}>
-                    <label className={styles.label}>Экзамен</label>
-                    <ChipsMultiselect
-                        items={EXAM_ITEMS}
-                        selectedIds={examType == null ? [] : [EXAM_ITEMS.findIndex((c) => EXAM_BY_ID.get(c.id) === examType) + 1]}
-                        single
-                        onChange={(ids) => setExamType(ids.length ? (EXAM_BY_ID.get(ids[0]) ?? null) : null)}
-                        onClear={() => setExamType(null)}
-                        clearLabel="Без экзамена"
+                    <BaseSelectMulti
+                        options={CEFR_LEVEL_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+                        value={levels}
+                        onChange={setLevels}
+                        placeholder="Выберите уровни"
+                        isClearable
+                        error={showErrors ? errors.levels : undefined}
+                        label="Уровень языка"
+                        isRequired
                     />
                 </div>
 
                 <div className={styles.field}>
-                    <label className={styles.label}>Лексические темы</label>
-                    <ChipsMultiselect
-                        items={refs.topics}
-                        selectedIds={topicIds}
-                        onChange={setTopicIds}
+                    <BaseSelectSingle
+                        options={EXAM_TYPE_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+                        value={examType ?? ''}
+                        onChange={(v) => setExamType(v || null)}
+                        placeholder=""
+                        isClearable
+                        label="Экзамен"
                     />
                 </div>
 
                 <div className={styles.field}>
-                    <label className={styles.label}>
-                        Грамматические типы <span className={styles.req}>*</span>
-                    </label>
-                    <ChipsMultiselect
-                        items={refs.grammarTypes}
-                        selectedIds={grammarTypeIds}
-                        onChange={setGrammarTypeIds}
+                    <BaseSelectMulti
+                        options={refs.topics.map((t) => ({ value: String(t.id), label: t.name }))}
+                        value={topicIds.map(String)}
+                        onChange={(ids) => setTopicIds(ids.map(Number))}
+                        placeholder="Выберите темы"
+                        isClearable
+                        label="Лексические темы"
                     />
-                    {showErrors && selectedTypesCount === 0 && (
-                        <div className={styles.fieldError}>Выберите хотя бы один грамматический тип</div>
-                    )}
+                </div>
+
+                <div className={styles.field}>
+                    <BaseSelectMulti
+                        options={refs.grammarTypes.map((g) => ({ value: String(g.id), label: g.name }))}
+                        value={grammarTypeIds.map(String)}
+                        onChange={(ids) => setGrammarTypeIds(ids.map(Number))}
+                        placeholder="Выберите типы"
+                        isClearable
+                        error={showErrors && selectedTypesCount === 0 ? 'Выберите хотя бы один грамматический тип' : undefined}
+                        label="Грамматические типы"
+                        isRequired
+                    />
                     {selectedTypesCount > 1 && (
                         <div className={styles.warning}>
                             ⚠ Выбрано несколько грамматических типов — задание будет смешанным (Mixed). Смешивайте типы только если это нужно.
@@ -239,7 +233,6 @@ export function TaskForm({
 
                 {/* Курсы — мультиселект с возможностью создания нового курса */}
                 <div className={styles.field}>
-                    <label className={styles.label}>Курсы</label>
                     <CourseSelectMulti
                         options={courseOptions}
                         value={selectedCourseIds}
@@ -248,6 +241,7 @@ export function TaskForm({
                         isDisabled={coursesLoading}
                         ariaLabel="Курсы для задания"
                         onCreateCourse={createCourse}
+                        label="Курсы"
                     />
                 </div>
             </div>

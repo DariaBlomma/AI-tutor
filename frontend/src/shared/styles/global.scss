@@ -59,3 +59,12 @@ textarea {
     scrollbar-width: thin;
     scrollbar-color: rgba(157, 124, 242, 0.3) transparent;
 }
+
+// Звёздочка обязательного поля
+.requiredBadge {
+    color: #ff6b6b;
+    font-size: 11px;
+    margin-right: 2px;
+    display: inline-flex;
+    align-items: center;
+}

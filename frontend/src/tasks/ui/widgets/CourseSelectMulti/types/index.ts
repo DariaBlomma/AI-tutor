@@ -18,4 +18,8 @@ export interface CourseSelectMultiProps {
     error?: string;
     /** Callback для создания нового курса. Возвращает текст ошибки или null при успехе. */
     onCreateCourse: (name: string) => Promise<string | null>;
+    /** Видимый лейбл над полем. */
+    label?: string;
+    /** Показывать красную звёздочку перед лейблом. */
+    isRequired?: boolean;
 }

@@ -1,4 +1,5 @@
 // Те же токены темы, что у BaseSelectSingle (одна библиотека react-select, единый стиль).
+
 .control {
   display: flex;
   align-items: center;
@@ -53,6 +54,24 @@
 .arrow {
   font-size: 12px;
   line-height: 1;
+}
+
+.clearIndicator {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  color: var(--c3);
+  cursor: pointer;
+  transition: color 0.15s;
+
+  &:hover {
+    color: var(--err);
+  }
+
+  span {
+    font-size: 14px;
+    line-height: 1;
+  }
 }
 
 // Выбранные значения — «чипы» в поле контроля.

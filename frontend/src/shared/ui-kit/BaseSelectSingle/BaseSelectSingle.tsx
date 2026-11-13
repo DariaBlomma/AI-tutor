@@ -8,6 +8,7 @@ import Select, {
   type ClearIndicatorProps,
 } from "react-select";
 import type { BaseSelectOption, BaseSelectSingleProps } from "./types";
+import { FormFieldLabel } from '@/shared/ui-kit/FormFieldLabel/FormFieldLabel';
 import styles from "./BaseSelectSingle.module.scss";
 
 // Стили react-select минимальны: всё остальное — CSS-модуль через classNames,
@@ -47,12 +48,15 @@ export function BaseSelectSingle<TValue extends string = string>({
   className,
   ariaLabel,
   isClearable = true,
+  label,
+  isRequired,
 }: BaseSelectSingleProps<TValue>) {
   const selected =
     value != null ? (options.find((o) => o.value === value) ?? null) : null;
 
   return (
     <div className={className} style={{ width: "100%" }}>
+      <FormFieldLabel label={label} isRequired={isRequired} />
       <Select<BaseSelectOption<string>, false>
         options={
           options as unknown as OptionsOrGroups<
