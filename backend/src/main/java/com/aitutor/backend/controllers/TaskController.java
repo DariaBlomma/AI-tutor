@@ -34,8 +34,8 @@ public class TaskController {
             @RequestParam(required = false) String search,
             // Механика пунктов (WORD_FORMATION / GAP_FILL / TFNS / MATCHING) — nullable
             @RequestParam(required = false) com.aitutor.backend.enums.ItemType itemType,
-            // Уровень CEFR (A1..C1) — nullable
-            @RequestParam(required = false) com.aitutor.backend.enums.CefrLevel level,
+            // Уровни CEFR (A1..C1) — мультиселект, nullable, максимум 2
+            @RequestParam(required = false) java.util.List<com.aitutor.backend.enums.CefrLevel> levels,
             // Тип экзамена (OGE / EGE) — nullable
             @RequestParam(required = false) com.aitutor.backend.enums.ExamType examType,
             // Фильтр по курсам (мультиселект банка заданий): задания, входящие хотя бы в один выбранный курс.
@@ -43,7 +43,10 @@ public class TaskController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        return taskService.getAllPaged(taskTypeId, includeMixed, search, itemType, level, examType, courseIds, page, size, userDetails.getId());
+        if (levels != null && levels.size() > 2) {
+            throw new IllegalArgumentException("Максимум 2 уровня для фильтра");
+        }
+        return taskService.getAllPaged(taskTypeId, includeMixed, search, itemType, levels, examType, courseIds, page, size, userDetails.getId());
     }
 
     /** Детальная карточка: полный контент (topics, taskTypes, items). */

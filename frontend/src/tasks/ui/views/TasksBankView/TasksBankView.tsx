@@ -107,7 +107,7 @@ export function TasksBankView() {
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [grammarTypeId, setGrammarTypeId] = useState<number | null>(null);
     const [itemType, setItemType] = useState<ItemType | null>(null);
-    const [level, setLevel] = useState<CefrLevel | null>(null);
+    const [levels, setLevels] = useState<CefrLevel[]>([]);
     const [examType, setExamType] = useState<ExamType | null>(null);
     const [topicId, setTopicId] = useState<number | null>(null);
     // Фильтр по курсам (мультиселект BaseSelectMulti — та же react-select, что сингл-селекты).
@@ -130,7 +130,7 @@ export function TasksBankView() {
     };
     const changeGrammarType = applyFilter(setGrammarTypeId);
     const changeItemType = applyFilter(setItemType);
-    const changeLevel = applyFilter(setLevel);
+    const changeLevels = applyFilter(setLevels);
     const changeExamType = applyFilter(setExamType);
     const changeTopic = applyFilter(setTopicId);
     const changeIncludeMixed = applyFilter(setIncludeMixed);
@@ -141,7 +141,7 @@ export function TasksBankView() {
     const clearAllFilters = useCallback(() => {
         setGrammarTypeId(null);
         setItemType(null);
-        setLevel(null);
+        setLevels([]);
         setExamType(null);
         setTopicId(null);
         setCourseIdsFilter([]);
@@ -164,7 +164,7 @@ export function TasksBankView() {
                 search: debouncedSearch.trim() || undefined,
                 taskTypeId: grammarTypeId ?? undefined,
                 itemType: itemType ?? undefined,
-                levels: level ?? undefined,
+                levels: levels.length ? levels : undefined,
                 examType: examType ?? undefined,
                 // Фильтр по курсам: пустой мультиселект = не применять (undefined), иначе number[].
                 courseIds: courseIdsFilter.length ? courseIdsFilter.map(Number) : undefined,
@@ -172,7 +172,7 @@ export function TasksBankView() {
                 page,
                 size,
             }),
-        [debouncedSearch, grammarTypeId, itemType, level, examType, courseIdsFilter, includeMixed],
+        [debouncedSearch, grammarTypeId, itemType, levels, examType, courseIdsFilter, includeMixed],
     );
 
     const { pageItems, totalCount, totalPages, page, setPage, isLoading, isError, error, reload } = useTasksBank(fetcher);
@@ -325,7 +325,7 @@ export function TasksBankView() {
                     topicsForFilter={topicsForFilter}
                     grammarTypeId={grammarTypeId}
                     itemType={itemType}
-                    level={level}
+                    levels={levels}
                     examType={examType}
                     topicId={topicId}
                     courseIdsFilter={courseIdsFilter}
@@ -335,7 +335,7 @@ export function TasksBankView() {
                     onCreateCourse={createCourse}
                     onChangeGrammarType={changeGrammarType}
                     changeItemType={changeItemType}
-                    changeLevel={changeLevel}
+                    changeLevels={changeLevels}
                     changeExamType={changeExamType}
                     changeTopic={changeTopic}
                     changeCourseIds={changeCourseIds}

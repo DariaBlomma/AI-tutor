@@ -40,8 +40,8 @@ export interface TasksQueryParams {
     /** Имя query-параметра бэкенда GET /api/tasks. */
     taskTypeId?: number;
     itemType?: ItemType;
-    /** Уровни CEFR (enum CefrLevel) — серверный фильтр (минимум один с миграции 021). */
-    levels?: CefrLevel;
+    /** Уровни CEFR (enum CefrLevel) — серверный фильтр, мультиселект (строгое совпадение набора). */
+    levels?: CefrLevel[];
     /** Тип экзамена (enum ExamType: OGE/EGE) — серверный фильтр. */
     examType?: ExamType;
     includeMixed?: boolean;

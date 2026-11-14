@@ -94,12 +94,12 @@ public class TaskService {
      */
     @Transactional(readOnly = true)
     public Page<TaskSummaryResponse> getAllPaged(Long taskTypeId, boolean includeMixed, String search,
-                                                 ItemType itemType, CefrLevel level, ExamType examType,
+                                                 ItemType itemType, java.util.List<CefrLevel> levels, ExamType examType,
                                                  List<Long> courseIds,
                                                  int page, int size, Long teacherId) {
         Specification<Task> spec = buildSpec(taskTypeId, includeMixed, search)
                 .and(TaskSpecifications.byItemType(itemType))
-                .and(TaskSpecifications.byLevel(level))
+                .and(TaskSpecifications.byLevels(levels))
                 .and(TaskSpecifications.byExamType(examType))
                 .and(TaskSpecifications.byCourses(courseIds));
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");

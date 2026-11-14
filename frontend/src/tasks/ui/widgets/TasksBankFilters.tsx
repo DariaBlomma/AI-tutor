@@ -1,17 +1,21 @@
+import { useCallback, useState } from 'react';
 import { BasePlusButtonLink } from '@/shared/ui-kit/BasePlusButtonLink/BasePlusButtonLink';
 import { BaseSelectSingle } from '@/shared/ui-kit/BaseSelectSingle/BaseSelectSingle';
+import { BaseSelectMulti } from '@/shared/ui-kit/BaseSelectMulti/BaseSelectMulti';
 import { CourseSelectMulti } from '@/tasks/ui/widgets/CourseSelectMulti/CourseSelectMulti';
 import { CEFR_LEVEL_OPTIONS, EXAM_TYPE_OPTIONS, ITEM_TYPE_OPTIONS } from '@/tasks/types';
 import type { CefrLevel, ExamType, ItemType } from '@/tasks/types';
 // todo: refactor to use its own styles or a common layout
 import styles from './TasksBankFilters.module.scss';
 
+const MAX_LEVELS = 2;
+
 export interface TasksBankFiltersProps {
     grammarTypes: { id: number; name: string }[];
     topicsForFilter: { id: number; name: string }[];
     grammarTypeId: number | null;
     itemType: ItemType | null;
-    level: CefrLevel | null;
+    levels: CefrLevel[];
     examType: ExamType | null;
     topicId: number | null;
     courseIdsFilter: string[];
@@ -21,7 +25,7 @@ export interface TasksBankFiltersProps {
     onCreateCourse: (name: string) => Promise<string | null>;
     onChangeGrammarType: (value: number | null) => void;
     changeItemType: (value: ItemType | null) => void;
-    changeLevel: (value: CefrLevel | null) => void;
+    changeLevels: (value: CefrLevel[]) => void;
     changeExamType: (value: ExamType | null) => void;
     changeTopic: (value: number | null) => void;
     changeCourseIds: (value: string[]) => void;
@@ -36,7 +40,7 @@ export function TasksBankFilters({
     topicsForFilter,
     grammarTypeId,
     itemType,
-    level,
+    levels,
     examType,
     topicId,
     courseIdsFilter,
@@ -46,7 +50,7 @@ export function TasksBankFilters({
     onCreateCourse,
     onChangeGrammarType,
     changeItemType,
-    changeLevel,
+    changeLevels,
     changeExamType,
     changeTopic,
     changeCourseIds,
@@ -55,6 +59,23 @@ export function TasksBankFilters({
     manageGrammarTypesTo,
     manageTopicsTo,
 }: TasksBankFiltersProps) {
+    const [levelError, setLevelError] = useState<string | null>(null);
+
+    const handleLevelsChange = useCallback(
+        (selected: CefrLevel[]) => {
+            if (selected.length > MAX_LEVELS) {
+                // Оставляем выбранными максимум MAX_LEVELS, показываем ошибку
+                const trimmed = selected.slice(0, MAX_LEVELS);
+                setLevelError(`Максимум ${MAX_LEVELS} уровня`);
+                changeLevels(trimmed);
+                return;
+            }
+            setLevelError(null);
+            changeLevels(selected);
+        },
+        [changeLevels],
+    );
+
     return (
         <div className={styles.filtersContent}>
             {onClearAll && (
@@ -117,15 +138,13 @@ export function TasksBankFilters({
 
             <div className={styles.filterBlock}>
                 <div className={styles.filterLabel}>Уровень языка</div>
-                <BaseSelectSingle
-                    options={[
-                        { value: '', label: 'Все уровни' },
-                        ...CEFR_LEVEL_OPTIONS.map((o) => ({ value: o.value, label: o.label })),
-                    ]}
-                    value={level ?? ''}
-                    onChange={(v) => changeLevel(v || null)}
+                <BaseSelectMulti
+                    options={CEFR_LEVEL_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+                    value={levels}
+                    onChange={handleLevelsChange}
                     placeholder="Все уровни"
                     isClearable
+                    error={levelError ?? undefined}
                 />
             </div>
 

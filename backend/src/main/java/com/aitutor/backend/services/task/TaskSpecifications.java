@@ -74,13 +74,25 @@ public final class TaskSpecifications {
     }
 
     /**
-     * Фильтр по уровню CEFR (enum CefrLevel: A1..C1): задание подходит, если уровень есть в его списке.
-     * Задания без уровней (старые данные до заполнения) при выбранном фильтре не попадают.
+     * Фильтр по уровням CEFR (enum CefrLevel: A1..C1): строгое совпадение.
+     * Если уровни выбраны — задача должна иметь ровно этот набор уровней (ни больше, ни меньше).
+     * Если уровни не выбраны — фильтр не применяется.
      */
-    public static Specification<Task> byLevel(com.aitutor.backend.enums.CefrLevel level) {
-        return (root, query, cb) -> level == null
-                ? cb.conjunction()
-                : cb.isMember(level, root.get("levels"));
+    public static Specification<Task> byLevels(java.util.List<com.aitutor.backend.enums.CefrLevel> levels) {
+        return (root, query, cb) -> {
+            if (levels == null || levels.isEmpty()) {
+                return cb.conjunction();
+            }
+            // Строгое совпадение: количество уровней = размеру списка И каждый выбранный уровень присутствует.
+            java.util.List<Predicate> predicates = new java.util.ArrayList<>();
+            // Каждый выбранный уровень должен быть в задаче
+            for (com.aitutor.backend.enums.CefrLevel level : levels) {
+                predicates.add(cb.isMember(level, root.get("levels")));
+            }
+            // Количество уровней в задаче должно совпадать с количеством выбранных
+            predicates.add(cb.equal(cb.size(root.get("levels")), levels.size()));
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
     }
 
     /**
