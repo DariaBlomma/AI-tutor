@@ -1,4 +1,4 @@
-import { useLocation } from '@tanstack/react-router';
+import { Outlet, useLocation } from '@tanstack/react-router';
 import { AuthService } from '@/auth/services/AuthService.ts';
 import { AppBottomNav } from '@/shared/widgets/AppBottomNav/AppBottomNav';
 import { AppSidebar } from '@/shared/widgets/AppSidebar/AppSidebar';
@@ -52,14 +52,15 @@ export function LayoutRoot() {
 
     const isTeacher = AuthService.getUserRole() === 'TEACHER';
     const hiddenIds: AppBottomNavActive[] = isTeacher ? [] : ['bank'];
+    const isAuthPage = pathname.startsWith('/auth');
 
     return (
-        <main className={`main ${isDesktop ? 'main--with-sidebar' : ''}`}>
-            {isDesktop && navActive && (
+        <main className={`main ${isDesktop && !isAuthPage ? 'main--with-sidebar' : ''}`}>
+            {isDesktop && navActive && !isAuthPage && (
                 <AppSidebar active={navActive} hiddenIds={hiddenIds} />
             )}
-            <PageLayout />
-            {!isDesktop && navActive && (
+            {isAuthPage ? <Outlet /> : <PageLayout />}
+            {!isDesktop && navActive && !isAuthPage && (
                 <AppBottomNav active={navActive} hiddenIds={hiddenIds} />
             )}
         </main>
