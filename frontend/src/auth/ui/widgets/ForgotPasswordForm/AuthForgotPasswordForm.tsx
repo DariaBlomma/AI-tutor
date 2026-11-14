@@ -17,6 +17,7 @@ interface AuthForgotPasswordFormProps {
 // Форма восстановления пароля в едином треугольном каркасе (как на странице входа).
 export function AuthForgotPasswordForm({ isPending, onSubmit }: AuthForgotPasswordFormProps) {
     const { fields, handleSubmit } = useAuthForgotPasswordFormValidation();
+    console.log('fields', fields);
 
     const onFormSubmit = handleSubmit((data) => onSubmit(data));
 

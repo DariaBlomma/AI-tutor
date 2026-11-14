@@ -17,7 +17,24 @@ import type { CefrLevel, ExamType, ItemType, TaskSummary } from '@/tasks/types';
 import { TasksBankFilters } from '../../widgets/TasksBankFilters';
 import styles from './TasksBankView.module.scss';
 
+// SVG icon for filter button (mobile)
+const FilterIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+    </svg>
+);
+
 const SEARCH_DEBOUNCE_MS = 300;
+
+// Russian pluralization: 1 задание, 2-4 задания, 5-0 заданий
+function pluralizeTasks(count: number): string {
+    const abs = Math.abs(count) % 100;
+    const lastDigit = abs % 10;
+    if (abs > 10 && abs < 20) return 'заданий';
+    if (lastDigit > 1 && lastDigit < 5) return 'задания';
+    if (lastDigit === 1) return 'задание';
+    return 'заданий';
+}
 
 // Страница «Банк заданий» — общая для учителя и ученика:
 // список и фильтры видят все авторизованные; кнопки создания — только учителю.
@@ -99,6 +116,9 @@ export function TasksBankView() {
     // Галочка «Включать смешанные задания»: по умолчанию выключена — совпадает с дефолтом
     // бэкенда (TaskController: includeMixed=false). Разница состояний теперь видна сразу.
     const [includeMixed, setIncludeMixed] = useState(false);
+
+    // Mobile filter sidebar toggle
+    const [filtersOpen, setFiltersOpen] = useState(false);
 
     // Смена фильтра возвращает на первую страницу: иначе при галочке/фильтре остаётся
     // старый page, а новых страниц может не быть — бэк отдаёт пустую страницу, UI выглядит сломанным.
@@ -261,15 +281,23 @@ export function TasksBankView() {
     return (
         <div className={styles.page}>
             <div className={styles.header}>
+                <h1>Банк заданий</h1>
                 <div className={styles.headerRow}>
-                    <h1>Банк заданий</h1>
+                    <button
+                        type="button"
+                        className={styles.filterToggleBtn}
+                        onClick={() => setFiltersOpen((prev) => !prev)}
+                        aria-label="Фильтры"
+                        aria-expanded={filtersOpen}
+                    >
+                        <FilterIcon />
+                    </button>
                     {isTeacher && (
                         <Link to="/tasks-bank/create" className={styles.createBtn}>
                             Создать задание
                         </Link>
                     )}
                 </div>
-                <p>{isLoading ? 'Загрузка…' : `${totalCount} заданий`}</p>
             </div>
 
             {/* Поиск */}
@@ -281,8 +309,18 @@ export function TasksBankView() {
                 onChange={(e) => applySearch(e.target.value)}
             />
 
+            {/* Mobile overlay */}
+            {filtersOpen && (
+                <div
+                    className={styles.overlay}
+                    onClick={() => setFiltersOpen(false)}
+                    aria-hidden="true"
+                />
+            )}
+
             <div className={styles.content}>
-                <TasksBankFilters
+                <aside className={`${styles.filters} ${filtersOpen ? styles.filtersOpen : ''}`}>
+                    <TasksBankFilters
                     grammarTypes={refs.grammarTypes}
                     topicsForFilter={topicsForFilter}
                     grammarTypeId={grammarTypeId}
@@ -306,6 +344,7 @@ export function TasksBankView() {
                     manageGrammarTypesTo={isTeacher ? '/tasks-bank/grammar-types' : undefined}
                     manageTopicsTo={isTeacher ? '/tasks-bank/topics' : undefined}
                 />
+                </aside>
 
                 <section className={styles.tasksSection}>
                     {(isError || error) && <div className={styles.error}>{error ?? 'Не удалось загрузить банк заданий.'}</div>}
@@ -343,6 +382,11 @@ export function TasksBankView() {
                     {/* Постраничная навигация (серверная пагинация — GET /api/tasks?page&size) */}
                     {!isError && totalPages >= 1 && (
                         <Pagination page={page} totalPages={totalPages} onPageChange={changePage} />
+                    )}
+
+                    {/* Общее количество заданий — после пагинации */}
+                    {!isLoading && (
+                        <p className={styles.totalCount}>Всего: <strong>{totalCount} {pluralizeTasks(totalCount)}</strong></p>
                     )}
                 </section>
             </div>

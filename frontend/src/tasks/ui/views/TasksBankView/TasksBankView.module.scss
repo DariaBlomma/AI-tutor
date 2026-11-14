@@ -27,6 +27,7 @@
 
 .content {
   padding: 0 20px;
+  position: relative;
 }
 
 @media (min-width: $breakpoint-desktop) {
@@ -52,6 +53,69 @@
   }
 }
 
+// Mobile overlay — затемнение фона при открытом sidebar
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 199;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+// Mobile filter sidebar — fixed, slides in from left
+.filters {
+  // Default (mobile): hidden off-screen
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 300px;
+  height: 100vh;
+  background: var(--bg);
+  z-index: 200;
+  transform: translateX(-100%);
+  transition: transform 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+  padding: 70px 20px 20px;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.filters.filtersOpen {
+  transform: translateX(0);
+}
+
+// Desktop: filters are part of the grid, not fixed
+@media (min-width: $breakpoint-desktop) {
+  .filters {
+    position: static;
+    transform: none;
+    box-shadow: none;
+    padding: 0;
+    width: auto;
+    height: auto;
+    max-height: none;
+  }
+
+  // On desktop, always show filter content
+  .filtersContent {
+    display: flex;
+  }
+}
+
+// Mobile: hide filter content when sidebar is closed
+@media (max-width: 1023px) {
+  .filters:not(.filtersOpen) .filtersContent {
+    display: none;
+  }
+}
+
 .tasksSection {
   display: block;
 }
@@ -72,13 +136,15 @@
   h1 {
     font-size: 24px;
     font-weight: 700;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
   }
+}
 
-  p {
-    color: var(--c3);
-    font-size: 13px;
-  }
+.totalCount {
+  color: var(--c3);
+  font-size: 13px;
+  margin-top: 14px;
+  text-align: center;
 }
 
 .createBtn {
@@ -248,11 +314,37 @@
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  margin-bottom: 4px;
+}
 
-  h1 {
-    font-size: 24px;
-    font-weight: 700;
+// Filter toggle button — visible only on mobile
+.filterToggleBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(157, 124, 242, 0.08);
+  border: 1px solid rgba(157, 124, 242, 0.25);
+  border-radius: var(--r, 6px);
+  color: var(--c3);
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+
+  &:hover {
+    color: var(--p);
+    background: rgba(157, 124, 242, 0.15);
+    border-color: var(--p);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+@media (min-width: $breakpoint-desktop) {
+  .filterToggleBtn {
+    display: none;
   }
 }
 

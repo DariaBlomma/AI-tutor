@@ -56,7 +56,7 @@ export function TasksBankFilters({
     manageTopicsTo,
 }: TasksBankFiltersProps) {
     return (
-        <aside className={styles.filters}>
+        <div className={styles.filtersContent}>
             {onClearAll && (
                 <button type="button" className={styles.clearAllBtn} onClick={onClearAll}>
                     Сбросить всё
@@ -160,6 +160,6 @@ export function TasksBankFilters({
                 <input type="checkbox" checked={includeMixed} onChange={(e) => changeIncludeMixed(e.target.checked)} />
                 <span>Включать смешанные задания</span>
             </label>
-        </aside>
+        </div>
     );
 }
