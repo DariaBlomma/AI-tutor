@@ -1,0 +1,18 @@
+@use '@/shared/styles/variables' as *;
+
+.header {
+    margin-bottom: 32px;
+
+    h1 {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 4px;
+        color: $c1;
+    }
+
+    p {
+        color: $p;
+        font-size: 14px;
+        font-weight: 600;
+    }
+}

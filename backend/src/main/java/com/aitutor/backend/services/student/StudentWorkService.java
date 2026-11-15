@@ -4,9 +4,12 @@ import com.aitutor.backend.dto.student.AssignTasksRequest;
 import com.aitutor.backend.dto.student.AssignmentResultResponse;
 import com.aitutor.backend.dto.student.StudentProgressOverviewResponse;
 import com.aitutor.backend.dto.student.StudentWorkResponse;
+import com.aitutor.backend.dto.tasktype.TaskTypeResponse;
+import com.aitutor.backend.dto.topic.TopicResponse;
 import com.aitutor.backend.entities.StudentProfile;
 import com.aitutor.backend.entities.StudentWork;
 import com.aitutor.backend.entities.Task;
+import com.aitutor.backend.entities.TaskItem;
 import com.aitutor.backend.entities.User;
 import com.aitutor.backend.enums.UserRole;
 import com.aitutor.backend.enums.WorkStatus;
@@ -32,6 +35,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -265,7 +269,37 @@ public class StudentWorkService {
                 .assignedAt(work.getCreatedAt())
                 .startedAt(work.getStartedAt())
                 .completedAt(work.getCompletedAt())
+                .levels(task.getLevels() != null ? task.getLevels().stream().map(Enum::name).collect(Collectors.toSet()) : null)
+                .taskTypes(mapTaskTypes(task.getTaskTypes()))
+                .topics(mapTopics(task.getTopics()))
+                .itemTypes(task.getItems() == null
+                        ? List.of()
+                        : task.getItems().stream()
+                                .map(item -> item.getItemType() != null ? item.getItemType().name() : null)
+                                .filter(java.util.Objects::nonNull)
+                                .distinct()
+                                .toList())
+                .isMixed(task.getIsMixed())
                 .build();
+    }
+
+    private List<TaskTypeResponse> mapTaskTypes(Set<com.aitutor.backend.entities.TaskType> types) {
+        if (types == null) return List.of();
+        return types.stream()
+                .map(tt -> TaskTypeResponse.builder()
+                        .id(tt.getId())
+                        .name(tt.getName())
+                        .description(tt.getDescription())
+                        .isActive(tt.getIsActive())
+                        .build())
+                .toList();
+    }
+
+    private List<TopicResponse> mapTopics(Set<com.aitutor.backend.entities.Topic> topics) {
+        if (topics == null) return List.of();
+        return topics.stream()
+                .map(t -> TopicResponse.builder().id(t.getId()).name(t.getName()).build())
+                .toList();
     }
 
     private static List<Long> distinct(List<Long> ids) {

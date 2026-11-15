@@ -1,0 +1,33 @@
+@use '@/shared/styles/variables' as *;
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+}
+
+.statCard {
+    background: rgba(157, 124, 242, 0.05);
+    border: 1px solid rgba(157, 124, 242, 0.2);
+    border-radius: $radius;
+    padding: 20px 12px;
+    text-align: center;
+    transition: border-color 0.2s;
+
+    &:hover {
+        filter: brightness(1.1);
+    }
+}
+
+.statValue {
+    font-size: 24px;
+    font-weight: 700;
+    color: $c1;
+    margin-bottom: 4px;
+}
+
+.statLabel {
+    font-size: 12px;
+    color: $c3;
+}

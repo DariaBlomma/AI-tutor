@@ -1,3 +1,23 @@
+@use '@/shared/styles/variables' as *;
+
 .page {
-  color: var(--c1);
+    padding-bottom: 80px;
+    min-height: 100vh;
+    color: $c1;
+}
+
+.error {
+    text-align: center;
+    padding: 40px 20px;
+
+    p {
+        color: $err;
+        font-size: 16px;
+        margin-bottom: 8px;
+    }
+
+    .errorDetail {
+        color: $c3;
+        font-size: 13px;
+    }
 }
