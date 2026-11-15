@@ -9,8 +9,6 @@ interface StudentAssignmentListProps {
 }
 
 export function StudentAssignmentList({ assignments, isLoading }: StudentAssignmentListProps) {
-    const validAssignments = assignments.filter(a => a.taskName && a.deadline);
-
     if (isLoading) {
         return (
             <div className={styles.section}>
@@ -20,7 +18,7 @@ export function StudentAssignmentList({ assignments, isLoading }: StudentAssignm
         );
     }
 
-    if (validAssignments.length === 0) {
+    if (assignments.length === 0) {
         return (
             <div className={styles.section}>
                 <div className={styles.sectionTitle}>Назначенные ДЗ</div>
@@ -33,7 +31,7 @@ export function StudentAssignmentList({ assignments, isLoading }: StudentAssignm
         <div className={styles.section}>
             <div className={styles.sectionTitle}>Назначенные ДЗ</div>
             <div className={styles.list}>
-                {validAssignments.map(a => (
+                {assignments.map(a => (
                     <StudentAssignmentItem key={a.id} assignment={a} />
                 ))}
             </div>

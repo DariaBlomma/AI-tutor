@@ -1,6 +1,5 @@
 import type { StudentWorkResponse } from '@/student/services/StudentDashboardService';
 import type { MonthlyStats, DashboardAssignment } from '@/student/types/models/dashboard';
-import { toDashboardStatus } from '@/student/types/work';
 
 // Получить начало и конец текущего календарного месяца (timestamp в мс).
 export function getMonthBounds(): { start: number; end: number } {
@@ -16,7 +15,7 @@ export function mapToDashboardAssignment(work: StudentWorkResponse): DashboardAs
         id: work.id,
         taskPublicId: work.taskPublicId,
         taskName: work.taskName,
-        status: toDashboardStatus(work.status),
+        status: work.status,
         rawStatus: work.status,
         deadline: work.deadline,
         levels: work.levels ?? null,
@@ -33,6 +32,7 @@ export function computeMonthlyStats(works: DashboardAssignment[]): MonthlyStats 
     const { start, end } = getMonthBounds();
 
     const monthWorks = works.filter(w => {
+        if (!w.deadline) return false;
         const ts = new Date(w.deadline).getTime();
         return ts >= start && ts <= end;
     });

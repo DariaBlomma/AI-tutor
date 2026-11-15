@@ -1,14 +1,11 @@
 import type { WorkStatus } from '@/student/types/work';
 
-// UI-статус задания на дашборде.
-export type DashboardWorkStatus = 'NEW' | 'IN_PROGRESS' | 'OVERDUE';
-
 // Одно назначение для дашборда (обогащённые данные из StudentWorkResponse).
 export interface DashboardAssignment {
     id: number;
     taskPublicId: string;
     taskName: string;
-    status: DashboardWorkStatus;
+    status: WorkStatus;
     rawStatus: WorkStatus;
     deadline: string | null; // ISO-8601
     teacherName?: string | null;

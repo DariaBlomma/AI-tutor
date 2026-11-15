@@ -9,10 +9,15 @@ export interface StudentWorkResponse {
     taskPublicId: string;
     taskName: string;
     status: WorkStatus;
-    deadline: string;
+    deadline: string | null;
     assignedAt: string;
     startedAt: string;
     completedAt: string;
+    levels?: string[] | null;
+    taskTypes?: Array<{ id: number; name: string; description: string | null; isActive: boolean }> | null;
+    topics?: Array<{ id: number; name: string }> | null;
+    itemTypes?: string[] | null;
+    isMixed?: boolean | null;
 }
 
 export interface StudentWorkPage {

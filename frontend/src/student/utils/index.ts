@@ -1,7 +1,7 @@
 // UI-хелперы для модуля Student (форматирование, подсчёты, маппинги).
 
 import { format } from 'date-fns';
-import ru from 'date-fns/locale/ru';
+import { ru } from 'date-fns/locale';
 
 // Склонение слова «задание»: 1 задание, 2-4 задания, 5-0 заданий
 export function pluralizeTasks(count: number): string {
@@ -18,8 +18,4 @@ export function formatDeadline(isoString: string | null | undefined): string {
     const date = new Date(isoString);
     if (Number.isNaN(date.getTime())) return '';
     return `до ${format(date, 'd MMMM', { locale: ru })}`;
-}
-
-export function toDashboardStatusLabel(status: string): 'new' | 'in-progress' | 'overdue' {
-    return status.toLowerCase().replace(/ /g, '-') as 'new' | 'in-progress' | 'overdue';
 }

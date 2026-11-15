@@ -8,8 +8,7 @@ import styles from './StudentHomeView.module.scss';
 export function StudentHomeView() {
     const { stats, assignments, isLoading, isError, error } = useStudentDashboard();
 
-    const validAssignments = assignments.filter(a => a.taskName && a.deadline);
-    const assignedCount = validAssignments.filter(a => a.status === 'NEW').length;
+    const assignedCount = assignments.filter(a => a.rawStatus === 'ASSIGNED').length;
 
     return (
         <div className={styles.page}>
@@ -24,7 +23,7 @@ export function StudentHomeView() {
                 <>
                     <StudentDashboardHeader assignedCount={assignedCount} />
                     {stats && <StudentStatCards stats={stats} />}
-                    <StudentAssignmentList assignments={validAssignments} isLoading={isLoading} />
+                    <StudentAssignmentList assignments={assignments} isLoading={isLoading} />
                 </>
             )}
         </div>
