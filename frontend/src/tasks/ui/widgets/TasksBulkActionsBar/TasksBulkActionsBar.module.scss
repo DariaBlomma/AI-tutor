@@ -3,7 +3,7 @@
 // Фиксированная панель над нижним меню (меню ~62px + отступ 8px, как в дизайне bottom: 70px).
 .bar {
   position: fixed;
-  bottom: 70px;
+  bottom: 90px;
   left: 50%;
   transform: translateX(-50%);
   max-width: 480px;
@@ -17,11 +17,51 @@
   align-items: center;
   gap: 12px;
   z-index: 90;
+  // Мягкое затемнение и блюр вокруг панели ~30px
+  box-shadow:
+    0 0 30px 30px rgba(0, 0, 0, 0.15),
+    0 0 60px 60px rgba(0, 0, 0, 0.08);
+}
+
+@media (min-width: $breakpoint-desktop) {
+  .bar {
+    bottom: 30px;
+    // Смещаем вправо на половину ширины сайдбара, чтобы панель была по центру области контента
+    left: calc(50% + 140px);
+  }
+}
+
+.closeBtn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 8px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: $c3;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s;
+
+  &:hover {
+    color: $c1;
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
 }
 
 .count {
   font-size: 13px;
   color: $c1;
+  margin-left: 24px;
 
   strong {
     color: $p;

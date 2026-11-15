@@ -391,11 +391,6 @@ export function TasksBankView() {
                 </section>
             </div>
 
-            {/* Панель массовых действий — только учителю и только при выбранном > 0. */}
-            {selectedIds.size > 0 && (
-                <TasksBulkActionsBar selectedCount={selectedIds.size} onAction={setBulkAction} />
-            )}
-
             {/* Bulk-действия: без промежуточного подтверждения — кнопка панели сразу открывает
                 финальную модалку (назначение ученикам / добавление в курс). Любое закрытие
                 (Esc, клик вне, «Отмена», успех) снимает выбор через closeBulkAction. */}
@@ -422,6 +417,12 @@ export function TasksBankView() {
                     onOpenChange={closeDeletePopup}
                     onConfirm={confirmDelete}
                 />
+            )}
+
+            {/* Панель массовых действий — рендерится вне .page, чтобы position: fixed
+                работала на десктопе (иначе клиппируется overflow: hidden у .page). */}
+            {selectedIds.size > 0 && (
+                <TasksBulkActionsBar selectedCount={selectedIds.size} onAction={setBulkAction} onClose={closeBulkAction} />
             )}
         </div>
     );
