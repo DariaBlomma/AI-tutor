@@ -82,14 +82,13 @@ export function WorkExecutionView({ workId }: WorkExecutionViewProps) {
         );
     }
 
-    // Все пункты решены — редирект на результаты (синхронно, до рендера)
-    if (solvedItems >= totalItems && totalItems > 0) {
-        completeWork();
-        return (
-            <div className={styles.page}>
-                <Loader />
-            </div>
-        );
+    // Работа завершена — редирект на результаты
+    if (workDetail?.status === 'COMPLETED') {
+        navigate({
+            to: '/student/work/$workId/results',
+            params: { workId: String(workId) },
+        });
+        return null;
     }
 
     if (!currentItem) {

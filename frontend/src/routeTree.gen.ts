@@ -24,6 +24,7 @@ import { Route as TasksBankTopicsRouteImport } from './routes/tasks-bank/topics'
 import { Route as TeacherReportsRouteImport } from './routes/teacher/reports'
 import { Route as StudentWorkWorkIdRouteImport } from './routes/student/work.$workId'
 import { Route as TasksBankEditPublicIdRouteImport } from './routes/tasks-bank/edit.$publicId'
+import { Route as StudentWorkWorkIdExecutionRouteImport } from './routes/student/work.$workId.execution'
 import { Route as StudentWorkWorkIdResultsRouteImport } from './routes/student/work.$workId.results'
 
 const IndexRoute = IndexRouteImport.update({
@@ -101,6 +102,12 @@ const TasksBankEditPublicIdRoute = TasksBankEditPublicIdRouteImport.update({
   path: '/tasks-bank/edit/$publicId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StudentWorkWorkIdExecutionRoute =
+  StudentWorkWorkIdExecutionRouteImport.update({
+    id: '/execution',
+    path: '/execution',
+    getParentRoute: () => StudentWorkWorkIdRoute,
+  } as any)
 const StudentWorkWorkIdResultsRoute =
   StudentWorkWorkIdResultsRouteImport.update({
     id: '/results',
@@ -124,6 +131,7 @@ export interface FileRoutesByFullPath {
   '/tasks-bank/': typeof TasksBankIndexRoute
   '/student/work/$workId': typeof StudentWorkWorkIdRouteWithChildren
   '/tasks-bank/edit/$publicId': typeof TasksBankEditPublicIdRoute
+  '/student/work/$workId/execution': typeof StudentWorkWorkIdExecutionRoute
   '/student/work/$workId/results': typeof StudentWorkWorkIdResultsRoute
 }
 export interface FileRoutesByTo {
@@ -142,6 +150,7 @@ export interface FileRoutesByTo {
   '/tasks-bank': typeof TasksBankIndexRoute
   '/student/work/$workId': typeof StudentWorkWorkIdRouteWithChildren
   '/tasks-bank/edit/$publicId': typeof TasksBankEditPublicIdRoute
+  '/student/work/$workId/execution': typeof StudentWorkWorkIdExecutionRoute
   '/student/work/$workId/results': typeof StudentWorkWorkIdResultsRoute
 }
 export interface FileRoutesById {
@@ -161,6 +170,7 @@ export interface FileRoutesById {
   '/tasks-bank/': typeof TasksBankIndexRoute
   '/student/work/$workId': typeof StudentWorkWorkIdRouteWithChildren
   '/tasks-bank/edit/$publicId': typeof TasksBankEditPublicIdRoute
+  '/student/work/$workId/execution': typeof StudentWorkWorkIdExecutionRoute
   '/student/work/$workId/results': typeof StudentWorkWorkIdResultsRoute
 }
 export interface FileRouteTypes {
@@ -181,6 +191,7 @@ export interface FileRouteTypes {
     | '/tasks-bank/'
     | '/student/work/$workId'
     | '/tasks-bank/edit/$publicId'
+    | '/student/work/$workId/execution'
     | '/student/work/$workId/results'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -199,6 +210,7 @@ export interface FileRouteTypes {
     | '/tasks-bank'
     | '/student/work/$workId'
     | '/tasks-bank/edit/$publicId'
+    | '/student/work/$workId/execution'
     | '/student/work/$workId/results'
   id:
     | '__root__'
@@ -217,6 +229,7 @@ export interface FileRouteTypes {
     | '/tasks-bank/'
     | '/student/work/$workId'
     | '/tasks-bank/edit/$publicId'
+    | '/student/work/$workId/execution'
     | '/student/work/$workId/results'
   fileRoutesById: FileRoutesById
 }
@@ -341,6 +354,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TasksBankEditPublicIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/student/work/$workId/execution': {
+      id: '/student/work/$workId/execution'
+      path: '/execution'
+      fullPath: '/student/work/$workId/execution'
+      preLoaderRoute: typeof StudentWorkWorkIdExecutionRouteImport
+      parentRoute: typeof StudentWorkWorkIdRoute
+    }
     '/student/work/$workId/results': {
       id: '/student/work/$workId/results'
       path: '/results'
@@ -370,10 +390,12 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
 )
 
 interface StudentWorkWorkIdRouteChildren {
+  StudentWorkWorkIdExecutionRoute: typeof StudentWorkWorkIdExecutionRoute
   StudentWorkWorkIdResultsRoute: typeof StudentWorkWorkIdResultsRoute
 }
 
 const StudentWorkWorkIdRouteChildren: StudentWorkWorkIdRouteChildren = {
+  StudentWorkWorkIdExecutionRoute: StudentWorkWorkIdExecutionRoute,
   StudentWorkWorkIdResultsRoute: StudentWorkWorkIdResultsRoute,
 }
 

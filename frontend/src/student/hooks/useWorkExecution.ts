@@ -196,18 +196,18 @@ export function useWorkExecution(workId: number): UseWorkExecutionResult {
         setAnswer('');
         setFeedback(null);
         setShowHint(false);
-        setCurrentItemIndex((prev) => {
-            const next = prev + 1;
-            // Если все решены — редирект на результаты
-            if (workDetail && next >= workDetail.items.length) {
-                navigate({
-                    to: '/student/work/$workId/results',
-                    params: { workId: String(workId) },
-                });
-            }
-            return next;
-        });
-    }, [workDetail, navigate, workId]);
+        setCurrentItemIndex((prev) => prev + 1);
+    }, []);
+
+    // Навигация на результаты когда все пункты решены
+    useEffect(() => {
+        if (workDetail && currentItemIndex >= workDetail.items.length) {
+            navigate({
+                to: '/student/work/$workId/results',
+                params: { workId: String(workId) },
+            });
+        }
+    }, [currentItemIndex, workDetail, navigate, workId]);
 
     const workIdRef = useRef(workId);
     useEffect(() => { workIdRef.current = workId; }, [workId]);

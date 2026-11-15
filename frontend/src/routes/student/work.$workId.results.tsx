@@ -13,7 +13,6 @@ export const Route = createFileRoute('/student/work/$workId/results')({
         if (isNaN(workId)) {
             throw new Error('Некорректный ID работы');
         }
-        await StudentWorkService.getWorkSummary(workId);
         return { workId };
     },
     errorComponent: () => {

@@ -75,13 +75,13 @@ export interface StudentSubmitAnswerResponse {
  * Зеркалит com.aitutor.backend.dto.student.StudentWorkSummaryResponse. */
 export interface StudentWorkSummaryResponse {
     workId: number;
-    taskName: string;
-    status: WorkStatus;
-    startedAt: string | null;
-    completedAt: string | null;
-    durationSeconds: number | null;
+    taskName?: string;
+    status?: WorkStatus;
+    startedAt?: string | null;
+    completedAt?: string | null;
+    durationSeconds?: number | null;
     totalItems: number;
-    solvedItems: number;
+    solvedItems?: number;
     firstTryCorrect: number;
     correctAfterHints: number;
     totalHintsGiven: number;

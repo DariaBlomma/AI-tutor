@@ -19,10 +19,10 @@ interface WorkResultsViewProps {
 export function WorkResultsView({ workId }: WorkResultsViewProps) {
     const navigate = useNavigate();
 
-    const { data: summary, isLoading, isError } = useQuery({
+    const { data: summary, isLoading, isError, error: queryError } = useQuery({
         queryKey: ['student', 'work', workId, 'summary'],
         queryFn: () => StudentWorkService.getWorkSummary(workId),
-        staleTime: 0,
+        staleTime: Infinity,
         retry: false,
     });
 
@@ -55,7 +55,7 @@ export function WorkResultsView({ workId }: WorkResultsViewProps) {
 
             {/* Header */}
             <div className={styles.header}>
-                <h1>{summary.taskName}</h1>
+                <h1>{summary.taskName ?? 'Работа'}</h1>
                 <span className={styles.badge}>Выполнено</span>
             </div>
 
@@ -67,7 +67,7 @@ export function WorkResultsView({ workId }: WorkResultsViewProps) {
                 </div>
                 <div className={styles.statCard}>
                     <div className={styles.statValue}>
-                        {summary.solvedItems}/{summary.totalItems}
+                        {summary.solvedItems ?? '—'}/{summary.totalItems}
                     </div>
                     <div className={styles.statLabel}>Пунктов</div>
                 </div>
