@@ -10,3 +10,16 @@ export interface StudentStats {
     /** Пункты, где финальный ответ ученика не совпал с эталоном. */
     errorsCount: number;
 }
+
+// Реэкспорт типов для выполнения работ.
+export type {
+    WorkStatus,
+    WorkItemType,
+    ItemProgressStatus,
+    StudentWorkDetailResponse,
+    StudentItemProgressDto,
+    StudentTaskItemDto,
+    StudentSubmitAnswerRequest,
+    StudentSubmitAnswerResponse,
+    StudentWorkSummaryResponse,
+} from '../work';

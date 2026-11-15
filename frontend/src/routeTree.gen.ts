@@ -22,7 +22,9 @@ import { Route as TasksBankCreateRouteImport } from './routes/tasks-bank/create'
 import { Route as TasksBankGrammarTypesRouteImport } from './routes/tasks-bank/grammar-types'
 import { Route as TasksBankTopicsRouteImport } from './routes/tasks-bank/topics'
 import { Route as TeacherReportsRouteImport } from './routes/teacher/reports'
+import { Route as StudentWorkWorkIdRouteImport } from './routes/student/work.$workId'
 import { Route as TasksBankEditPublicIdRouteImport } from './routes/tasks-bank/edit.$publicId'
+import { Route as StudentWorkWorkIdResultsRouteImport } from './routes/student/work.$workId.results'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -89,11 +91,22 @@ const TeacherReportsRoute = TeacherReportsRouteImport.update({
   path: '/teacher/reports',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StudentWorkWorkIdRoute = StudentWorkWorkIdRouteImport.update({
+  id: '/student/work/$workId',
+  path: '/student/work/$workId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TasksBankEditPublicIdRoute = TasksBankEditPublicIdRouteImport.update({
   id: '/tasks-bank/edit/$publicId',
   path: '/tasks-bank/edit/$publicId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StudentWorkWorkIdResultsRoute =
+  StudentWorkWorkIdResultsRouteImport.update({
+    id: '/results',
+    path: '/results',
+    getParentRoute: () => StudentWorkWorkIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -109,7 +122,9 @@ export interface FileRoutesByFullPath {
   '/tasks-bank/topics': typeof TasksBankTopicsRoute
   '/teacher/reports': typeof TeacherReportsRoute
   '/tasks-bank/': typeof TasksBankIndexRoute
+  '/student/work/$workId': typeof StudentWorkWorkIdRouteWithChildren
   '/tasks-bank/edit/$publicId': typeof TasksBankEditPublicIdRoute
+  '/student/work/$workId/results': typeof StudentWorkWorkIdResultsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -125,7 +140,9 @@ export interface FileRoutesByTo {
   '/tasks-bank/topics': typeof TasksBankTopicsRoute
   '/teacher/reports': typeof TeacherReportsRoute
   '/tasks-bank': typeof TasksBankIndexRoute
+  '/student/work/$workId': typeof StudentWorkWorkIdRouteWithChildren
   '/tasks-bank/edit/$publicId': typeof TasksBankEditPublicIdRoute
+  '/student/work/$workId/results': typeof StudentWorkWorkIdResultsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -142,7 +159,9 @@ export interface FileRoutesById {
   '/tasks-bank/topics': typeof TasksBankTopicsRoute
   '/teacher/reports': typeof TeacherReportsRoute
   '/tasks-bank/': typeof TasksBankIndexRoute
+  '/student/work/$workId': typeof StudentWorkWorkIdRouteWithChildren
   '/tasks-bank/edit/$publicId': typeof TasksBankEditPublicIdRoute
+  '/student/work/$workId/results': typeof StudentWorkWorkIdResultsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -160,7 +179,9 @@ export interface FileRouteTypes {
     | '/tasks-bank/topics'
     | '/teacher/reports'
     | '/tasks-bank/'
+    | '/student/work/$workId'
     | '/tasks-bank/edit/$publicId'
+    | '/student/work/$workId/results'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -176,7 +197,9 @@ export interface FileRouteTypes {
     | '/tasks-bank/topics'
     | '/teacher/reports'
     | '/tasks-bank'
+    | '/student/work/$workId'
     | '/tasks-bank/edit/$publicId'
+    | '/student/work/$workId/results'
   id:
     | '__root__'
     | '/'
@@ -192,7 +215,9 @@ export interface FileRouteTypes {
     | '/tasks-bank/topics'
     | '/teacher/reports'
     | '/tasks-bank/'
+    | '/student/work/$workId'
     | '/tasks-bank/edit/$publicId'
+    | '/student/work/$workId/results'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -205,6 +230,7 @@ export interface RootRouteChildren {
   TasksBankTopicsRoute: typeof TasksBankTopicsRoute
   TeacherReportsRoute: typeof TeacherReportsRoute
   TasksBankIndexRoute: typeof TasksBankIndexRoute
+  StudentWorkWorkIdRoute: typeof StudentWorkWorkIdRouteWithChildren
   TasksBankEditPublicIdRoute: typeof TasksBankEditPublicIdRoute
 }
 
@@ -301,12 +327,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeacherReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/student/work/$workId': {
+      id: '/student/work/$workId'
+      path: '/student/work/$workId'
+      fullPath: '/student/work/$workId'
+      preLoaderRoute: typeof StudentWorkWorkIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tasks-bank/edit/$publicId': {
       id: '/tasks-bank/edit/$publicId'
       path: '/tasks-bank/edit/$publicId'
       fullPath: '/tasks-bank/edit/$publicId'
       preLoaderRoute: typeof TasksBankEditPublicIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/student/work/$workId/results': {
+      id: '/student/work/$workId/results'
+      path: '/results'
+      fullPath: '/student/work/$workId/results'
+      preLoaderRoute: typeof StudentWorkWorkIdResultsRouteImport
+      parentRoute: typeof StudentWorkWorkIdRoute
     }
   }
 }
@@ -329,6 +369,17 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
   AuthRouteRouteChildren,
 )
 
+interface StudentWorkWorkIdRouteChildren {
+  StudentWorkWorkIdResultsRoute: typeof StudentWorkWorkIdResultsRoute
+}
+
+const StudentWorkWorkIdRouteChildren: StudentWorkWorkIdRouteChildren = {
+  StudentWorkWorkIdResultsRoute: StudentWorkWorkIdResultsRoute,
+}
+
+const StudentWorkWorkIdRouteWithChildren =
+  StudentWorkWorkIdRoute._addFileChildren(StudentWorkWorkIdRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRouteRoute: AuthRouteRouteWithChildren,
@@ -339,6 +390,7 @@ const rootRouteChildren: RootRouteChildren = {
   TasksBankTopicsRoute: TasksBankTopicsRoute,
   TeacherReportsRoute: TeacherReportsRoute,
   TasksBankIndexRoute: TasksBankIndexRoute,
+  StudentWorkWorkIdRoute: StudentWorkWorkIdRouteWithChildren,
   TasksBankEditPublicIdRoute: TasksBankEditPublicIdRoute,
 }
 export const routeTree = rootRouteImport

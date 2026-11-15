@@ -30,4 +30,6 @@ public class StudentSubmitAnswerResponse {
     private Integer hintsRemaining;
     /** Решена ли работа целиком (все пункты SOLVED) — сигнал фронту показать «Завершить». */
     private boolean allItemsSolved;
+    /** Подсказка от ИИ (null если ИИ недоступен — free тариф). */
+    private String hint;
 }

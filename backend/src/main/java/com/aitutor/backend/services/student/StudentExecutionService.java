@@ -7,6 +7,8 @@ import com.aitutor.backend.dto.student.StudentTaskItemDto;
 import com.aitutor.backend.dto.student.StudentWorkCompleteResponse;
 import com.aitutor.backend.dto.student.StudentWorkDetailResponse;
 import com.aitutor.backend.dto.student.StudentWorkSummaryResponse;
+import com.aitutor.backend.dto.tasktype.TaskTypeResponse;
+import com.aitutor.backend.dto.topic.TopicResponse;
 import com.aitutor.backend.entities.StudentWork;
 import com.aitutor.backend.entities.StudentWorkItemProgress;
 import com.aitutor.backend.entities.TaskItem;
@@ -29,6 +31,7 @@ import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -353,18 +356,39 @@ public class StudentExecutionService {
     private StudentWorkDetailResponse buildDetail(StudentWork work) {
         List<TaskItem> items = sortedItems(work);
         Map<Long, StudentWorkItemProgress> byItemId = progressByItem(work.getId());
+        var task = work.getTask();
 
         return StudentWorkDetailResponse.builder()
                 .workId(work.getId())
-                .taskId(work.getTask().getId())
-                .taskPublicId(work.getTask().getPublicId())
-                .taskName(work.getTask().getName())
+                .taskId(task.getId())
+                .taskPublicId(task.getPublicId())
+                .taskName(task.getName())
                 .status(work.getStatus())
                 .deadline(work.getDeadline())
                 .startedAt(work.getStartedAt())
                 .completedAt(work.getCompletedAt())
                 .items(items.stream().map(this::toItemDto).toList())
                 .progress(items.stream().map(item -> toProgressDto(item, byItemId.get(item.getId()))).toList())
+                .levels(task.getLevels() != null ? task.getLevels().stream().map(Enum::name).collect(Collectors.toSet()) : null)
+                .taskTypes(task.getTaskTypes() != null ? task.getTaskTypes().stream()
+                        .map(tt -> TaskTypeResponse.builder()
+                                .id(tt.getId())
+                                .name(tt.getName())
+                                .description(tt.getDescription())
+                                .isActive(tt.getIsActive())
+                                .build())
+                        .toList() : null)
+                .topics(task.getTopics() != null ? task.getTopics().stream()
+                        .map(t -> TopicResponse.builder()
+                                .id(t.getId())
+                                .name(t.getName())
+                                .build())
+                        .toList() : null)
+                .itemTypes(items.stream()
+                        .map(i -> i.getItemType().name())
+                        .distinct()
+                        .toList())
+                .isMixed(task.getIsMixed())
                 .build();
     }
 

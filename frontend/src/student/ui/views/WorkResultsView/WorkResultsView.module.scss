@@ -1,0 +1,159 @@
+@use '@/shared/styles/variables' as *;
+
+.page {
+    padding: 20px 20px 80px;
+    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+    color: var(--c1);
+}
+
+.header {
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h1 {
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0;
+    }
+}
+
+.badge {
+    font-size: 11px;
+    padding: 3px 8px;
+    background: rgba(107, 203, 119, 0.15);
+    border-radius: var(--r);
+    color: var(--ok);
+    font-weight: 600;
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.statCard {
+    text-align: center;
+    padding: 16px 8px;
+    background: rgba(157, 124, 242, 0.05);
+    border: 1px solid rgba(157, 124, 242, 0.2);
+    border-radius: var(--r);
+}
+
+.statValue {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--p);
+    margin-bottom: 4px;
+}
+
+.statLabel {
+    font-size: 12px;
+    color: var(--c3);
+}
+
+.itemsSection {
+    margin-bottom: 24px;
+}
+
+.sectionTitle {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--c1);
+}
+
+.itemsList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.itemRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: rgba(157, 124, 242, 0.05);
+    border-radius: var(--r);
+    margin-bottom: 6px;
+    font-size: 13px;
+
+    &.correct {
+        border-left: 2px solid var(--ok);
+    }
+
+    &.wrong {
+        border-left: 2px solid var(--err);
+    }
+}
+
+.itemPosition {
+    color: var(--c3);
+    font-size: 11px;
+    min-width: 24px;
+}
+
+.itemType {
+    color: var(--p);
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.itemResult {
+    flex: 1;
+    font-weight: 600;
+    color: var(--c1);
+}
+
+.correctAnswer {
+    font-size: 12px;
+    color: var(--ok);
+}
+
+.actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.actionBtn {
+    width: 100%;
+    padding: 16px 20px;
+    border: none;
+    border-radius: var(--r);
+    color: var(--c1);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:active:not(:disabled) {
+        transform: scale(0.97);
+    }
+}
+
+.primaryBtn {
+    background: linear-gradient(135deg, var(--p), var(--pd));
+    box-shadow: 0 6px 20px rgba(157, 124, 242, 0.3);
+}
+
+.error {
+    text-align: center;
+    padding: 40px 20px;
+
+    p {
+        color: var(--err);
+        font-size: 16px;
+        margin-bottom: 8px;
+    }
+
+    .errorDetail {
+        color: var(--c3);
+        font-size: 13px;
+    }
+}

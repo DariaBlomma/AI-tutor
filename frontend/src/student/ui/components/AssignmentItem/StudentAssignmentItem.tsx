@@ -1,3 +1,4 @@
+import { useNavigate } from '@tanstack/react-router';
 import type { DashboardAssignment } from '@/student/types/models/dashboard';
 import { StudentStatusBadge } from '@/student/ui/components/StatusBadge/StudentStatusBadge';
 import styles from './StudentAssignmentItem.module.scss';
@@ -8,11 +9,25 @@ interface StudentAssignmentItemProps {
 }
 
 export function StudentAssignmentItem({ assignment }: StudentAssignmentItemProps) {
-    const statusType = assignment.status === 'EXPIRED' ? 'overdue' : assignment.status === 'IN_PROGRESS' ? 'in-progress' : 'new';
+    const navigate = useNavigate();
+    const statusType = assignment.status === 'EXPIRED' ? 'overdue' : assignment.status === 'IN_PROGRESS' ? 'in-progress' : assignment.status === 'COMPLETED' ? 'completed' : 'new';
     const deadlineFormatted = formatDeadline(assignment.deadline);
 
+    const handleClick = () => {
+        if (assignment.status === 'ASSIGNED' || assignment.status === 'IN_PROGRESS') {
+            navigate({ to: '/student/work/$workId', params: { workId: String(assignment.id) } });
+        } else if (assignment.status === 'COMPLETED') {
+            navigate({ to: '/student/work/$workId/results', params: { workId: String(assignment.id) } });
+        }
+    };
+
+    const interactive = assignment.status === 'ASSIGNED' || assignment.status === 'IN_PROGRESS' || assignment.status === 'COMPLETED';
+
     return (
-        <div className={`${styles.hwItem} ${assignment.status === 'EXPIRED' ? styles.overdue : ''}`}>
+        <div
+            className={`${styles.hwItem} ${assignment.status === 'EXPIRED' ? styles.overdue : ''} ${interactive ? styles.clickable : ''} ${assignment.status === 'COMPLETED' ? styles.completed : ''}`}
+            onClick={interactive ? handleClick : undefined}
+        >
             <div className={styles.hwHeader}>
                 <div className={styles.hwTitle}>{assignment.taskName ?? assignment.taskPublicId}</div>
                 <StudentStatusBadge type={statusType} />

@@ -14,6 +14,8 @@ const NAV_ACTIVE_BY_PATH: Record<string, AppBottomNavActive> = {
     // Страницы банка заданий (список, просмотр задания, создание, справочники) — под общим нижним меню.
     '/tasks-bank': 'bank',
     '/profile': 'profile',
+    // Страницы выполнения работ студентом — под «Главная».
+    '/student/work': 'home',
 };
 
 const DESKTOP_BREAKPOINT = 1024;
