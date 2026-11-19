@@ -10,7 +10,7 @@ export interface StudentWorkResponse {
     taskName: string;
     status: WorkStatus;
     deadline: string | null;
-    assignedAt: string;
+    createdAt: string;
     startedAt: string;
     completedAt: string;
     levels?: string[] | null;

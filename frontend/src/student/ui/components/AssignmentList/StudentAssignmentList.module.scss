@@ -4,11 +4,26 @@
     margin-bottom: 32px;
 }
 
+.sectionHeader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
 .sectionTitle {
     font-size: 18px;
     font-weight: 600;
-    margin-bottom: 16px;
     color: $c1;
+}
+
+.countBadge {
+    background: rgba(157, 124, 242, 0.15);
+    color: $p;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
 }
 
 .list {
@@ -17,8 +32,16 @@
     gap: 12px;
 }
 
-.empty {
-    color: $c3;
-    font-size: 14px;
-    padding: 20px 0;
+.emptyState {
+    text-align: center;
+    padding: 40px 20px;
+    background: rgba(157, 124, 242, 0.03);
+    border: 1px dashed rgba(157, 124, 242, 0.2);
+    border-radius: $radius;
+
+    p {
+        color: $c3;
+        font-size: 14px;
+        line-height: 1.5;
+    }
 }

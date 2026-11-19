@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import styles from './StudentStatusBadge.module.scss';
 
-export type StatusType = 'new' | 'in-progress' | 'overdue' | 'completed';
+export type StatusType = 'new' | 'in-progress' | 'overdue' | 'completed' | 'urgent';
 
 interface StudentStatusBadgeProps {
     type: StatusType;
@@ -13,6 +13,7 @@ const LABELS: Record<StatusType, string> = {
     'in-progress': 'В процессе',
     'overdue': 'Просрочено',
     'completed': 'Выполнено',
+    'urgent': 'Скоро дедлайн',
 };
 
 export function StudentStatusBadge({ type, children }: StudentStatusBadgeProps) {

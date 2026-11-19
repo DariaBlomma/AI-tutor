@@ -8,6 +8,7 @@ export interface DashboardAssignment {
     status: WorkStatus;
     rawStatus: WorkStatus;
     deadline: string | null; // ISO-8601
+    createdAt: string; // ISO-8601, date when assignment was created
     teacherName?: string | null;
     // Чипы задания (как в TaskSummaryResponse)
     levels?: string[] | null;
@@ -15,11 +16,4 @@ export interface DashboardAssignment {
     topics?: Array<{ id: number; name: string }> | null;
     itemTypes?: string[] | null;
     isMixed?: boolean | null;
-}
-
-// Monthly stats — считаются на фронте из /student/work.
-export interface MonthlyStats {
-    completedCount: number;
-    inProgressCount: number;
-    overdueCount: number;
 }

@@ -1,6 +1,7 @@
 import { useNavigate } from '@tanstack/react-router';
 import type { DashboardAssignment } from '@/student/types/models/dashboard';
 import { StudentStatusBadge } from '@/student/ui/components/StatusBadge/StudentStatusBadge';
+import { getBadgeType } from '@/student/lib/assignmentStatus';
 import styles from './StudentAssignmentItem.module.scss';
 import { formatDeadline } from '@/student/utils';
 
@@ -10,7 +11,7 @@ interface StudentAssignmentItemProps {
 
 export function StudentAssignmentItem({ assignment }: StudentAssignmentItemProps) {
     const navigate = useNavigate();
-    const statusType = assignment.status === 'EXPIRED' ? 'overdue' : assignment.status === 'IN_PROGRESS' ? 'in-progress' : assignment.status === 'COMPLETED' ? 'completed' : 'new';
+    const statusType = getBadgeType(assignment);
     const deadlineFormatted = formatDeadline(assignment.deadline);
 
     const handleClick = () => {

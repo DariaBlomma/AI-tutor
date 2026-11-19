@@ -29,6 +29,7 @@ public class StudentWorkResponse {
     private WorkStatus status;
     private Instant deadline;
     private Instant assignedAt;
+    private Instant createdAt;
     private Instant startedAt;
     private Instant completedAt;
 

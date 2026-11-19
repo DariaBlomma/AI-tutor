@@ -1,9 +1,6 @@
 package com.aitutor.backend.services.student;
 
-import com.aitutor.backend.dto.student.AssignTasksRequest;
-import com.aitutor.backend.dto.student.AssignmentResultResponse;
-import com.aitutor.backend.dto.student.StudentProgressOverviewResponse;
-import com.aitutor.backend.dto.student.StudentWorkResponse;
+import com.aitutor.backend.dto.student.*;
 import com.aitutor.backend.dto.tasktype.TaskTypeResponse;
 import com.aitutor.backend.dto.topic.TopicResponse;
 import com.aitutor.backend.entities.StudentProfile;
@@ -31,6 +28,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -267,6 +267,7 @@ public class StudentWorkService {
                 .status(work.getStatus())
                 .deadline(work.getDeadline())
                 .assignedAt(work.getCreatedAt())
+                .createdAt(work.getCreatedAt())
                 .startedAt(work.getStartedAt())
                 .completedAt(work.getCompletedAt())
                 .levels(task.getLevels() != null ? task.getLevels().stream().map(Enum::name).collect(Collectors.toSet()) : null)

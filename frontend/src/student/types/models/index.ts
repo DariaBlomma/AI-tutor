@@ -22,4 +22,8 @@ export type {
     StudentSubmitAnswerRequest,
     StudentSubmitAnswerResponse,
     StudentWorkSummaryResponse,
-} from '../work';
+}
+    from '../work';
+
+// Реэкспорт типов для дашборда.
+export type { DashboardAssignment } from './dashboard';
