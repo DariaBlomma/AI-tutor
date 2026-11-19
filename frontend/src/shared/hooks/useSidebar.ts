@@ -21,8 +21,18 @@ function setCollapsed(value: boolean) {
 // в рамках одной вкладки (storage event работает только между вкладками).
 const listeners = new Set<() => void>();
 
-function notify() {
+let notifyPending = false;
+
+function flushNotify() {
+    notifyPending = false;
     listeners.forEach(fn => fn());
+}
+
+function notify() {
+    if (!notifyPending) {
+        notifyPending = true;
+        queueMicrotask(flushNotify);
+    }
 }
 
 export function useSidebar() {
