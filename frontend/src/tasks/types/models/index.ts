@@ -203,6 +203,13 @@ export interface TaskUsageDto {
     hasSubmissions: boolean;
 }
 
+/** GET /api/tasks/{id}/assignments -> ученик с активным назначением (ASSIGNED / IN_PROGRESS). */
+export interface TaskAssignmentDto {
+    studentId: number;
+    studentName: string;
+    lastName?: string | null;
+}
+
 /** POST/PUT /api/topics -> TopicRequest. */
 export interface RefNameRequestDto {
     name: string;

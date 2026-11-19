@@ -10,6 +10,7 @@ import { TaskPreviewChips } from '@/tasks/ui/widgets/TaskPreviewChips/TaskPrevie
 import { TaskAssignPopup } from '@/tasks/ui/widgets/TaskAssignPopup/TaskAssignPopup';
 import { BackLink } from '@/tasks/ui/widgets/BackLink/BackLink';
 import { TaskDetailItem } from '@/tasks/ui/widgets/TaskDetailItem/TaskDetailItem';
+import { TaskStudentsBadge } from '@/tasks/ui/widgets/TaskStudentsBadge/TaskStudentsBadge';
 import { parseTaskContext } from '@/tasks/lib/parseTaskContent';
 import styles from './TaskDetailView.module.scss';
 
@@ -88,9 +89,12 @@ export function TaskDetailView({ publicId }: TaskDetailViewProps) {
             {/* Быстрые действия учителя (назначение/редактирование). */}
             {isTeacher && (
                 <div className={styles.actions}>
-                    <button type="button" className={styles.actionBtn} onClick={() => setAssignPopupOpen(true)}>
-                        Назначить ученику
-                    </button>
+                    <div className={styles.assignRow}>
+                        <button type="button" className={styles.actionBtn} onClick={() => setAssignPopupOpen(true)}>
+                            Назначить ученику
+                        </button>
+                        <TaskStudentsBadge taskId={task.id} />
+                    </div>
                     {/* Переход на страницу редактирования (роут /tasks-bank/edit/$publicId). */}
                     <Link to="/tasks-bank/edit/$publicId" params={{ publicId: task.publicId }} className={styles.actionBtn}>
                         Редактировать

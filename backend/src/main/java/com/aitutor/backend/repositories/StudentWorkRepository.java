@@ -61,6 +61,12 @@ public interface StudentWorkRepository extends JpaRepository<StudentWork, Long> 
     boolean existsByTaskIdAndDeletedAtIsNullAndStatusIn(Long taskId, Set<WorkStatus> statuses);
 
     /**
+     * Список активных назначений для задания — для UI учителя (список учеников).
+     * Только ACTIVE (ASSIGNED / IN_PROGRESS), без удалённых.
+     */
+    List<StudentWork> findByTaskIdAndDeletedAtIsNullAndStatusIn(Long taskId, Set<WorkStatus> statuses);
+
+    /**
      * Есть ли у задания сдачи (COMPLETED). deletedAt НЕ фильтруем: удалённое назначение
      * не отменяет того, что ученик уже решал задание и видел его текст и ответы.
      */

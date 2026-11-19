@@ -1,5 +1,6 @@
 package com.aitutor.backend.controllers;
 
+import com.aitutor.backend.dto.task.TaskAssignmentDto;
 import com.aitutor.backend.dto.task.TaskCourseIdsRequest;
 import com.aitutor.backend.dto.task.TaskCreateRequest;
 import com.aitutor.backend.dto.task.TaskResponse;
@@ -14,6 +15,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/tasks")
@@ -100,5 +103,14 @@ public class TaskController {
                                             @Valid @RequestBody TaskCourseIdsRequest request,
                                             @AuthenticationPrincipal CustomUserDetails userDetails) {
         return taskService.updateTaskCourseIds(id, request, userDetails.getId());
+    }
+
+    /**
+     * Список учеников с активными назначениями для задания.
+     * Только ACTIVE (ASSIGNED / IN_PROGRESS), без удалённых.
+     */
+    @GetMapping("/{id}/assignments")
+    public List<TaskAssignmentDto> getAssignments(@PathVariable Long id) {
+        return taskService.getAssignmentsByTaskId(id);
     }
 }

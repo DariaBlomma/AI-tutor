@@ -6,6 +6,7 @@ import com.aitutor.backend.dto.task.TaskItemRequest;
 import com.aitutor.backend.dto.task.TaskResponse;
 import com.aitutor.backend.dto.task.TaskSummaryResponse;
 import com.aitutor.backend.dto.task.TaskUpdateRequest;
+import com.aitutor.backend.dto.task.TaskAssignmentDto;
 import com.aitutor.backend.dto.task.TaskUsageResponse;
 import com.aitutor.backend.entities.Task;
 import com.aitutor.backend.entities.TaskItem;
@@ -172,6 +173,29 @@ public class TaskService {
         Task task = findOwnedActiveTask(id, teacherId);
         courseService.syncTaskCourses(id, request.getCourseIds(), teacherId);
         return taskMapper.toResponse(task);
+    }
+
+    /**
+     * Список учеников с активными назначениями для задания.
+     * Только ACTIVE (ASSIGNED / IN_PROGRESS), без удалённых.
+     */
+    @Transactional(readOnly = true)
+    public List<TaskAssignmentDto> getAssignmentsByTaskId(Long taskId) {
+        // Проверяем существование задания
+        findActiveWithRelations(taskId);
+
+        return studentWorkRepository
+                .findByTaskIdAndDeletedAtIsNullAndStatusIn(taskId, Set.of(WorkStatus.ASSIGNED, WorkStatus.IN_PROGRESS))
+                .stream()
+                .map(sw -> {
+                    User student = sw.getStudent();
+                    return new TaskAssignmentDto(
+                            student.getId(),
+                            student.getUserName(),
+                            student.getLastName()
+                    );
+                })
+                .toList();
     }
 
     /**

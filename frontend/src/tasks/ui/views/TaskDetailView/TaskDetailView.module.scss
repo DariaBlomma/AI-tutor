@@ -30,6 +30,12 @@
   margin-bottom: 16px;
 }
 
+.assignRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .courseSelect {
   grid-column: span 2;
   width: 100%;

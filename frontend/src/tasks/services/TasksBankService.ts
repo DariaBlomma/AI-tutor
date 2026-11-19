@@ -1,6 +1,7 @@
 import { api } from '@/core/api/AxiosInstance';
 import type {
     PageDto,
+    TaskAssignmentDto,
     TaskCreateRequestDto,
     TaskResponseDto,
     TaskSummary,
@@ -66,6 +67,15 @@ export class TasksBankService {
      */
     static async getTaskUsage(publicId: string): Promise<TaskUsageDto> {
         const response = await api.get<TaskUsageDto>(`${TASKS_PATH}/by-public-id/${encodeURIComponent(publicId)}/usage`);
+        return response.data;
+    }
+
+    /**
+     * GET /api/tasks/{id}/assignments -> список учеников с активными назначениями.
+     * Только ACTIVE (ASSIGNED / IN_PROGRESS), без дубликатов и отменённых.
+     */
+    static async getTaskAssignments(taskId: number): Promise<TaskAssignmentDto[]> {
+        const response = await api.get<TaskAssignmentDto[]>(`${TASKS_PATH}/${taskId}/assignments`);
         return response.data;
     }
 }
