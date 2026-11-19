@@ -1,32 +1,13 @@
 import type { DashboardAssignment } from '@/student/types/models/dashboard';
 import { StudentAssignmentItem } from '@/student/ui/components/AssignmentItem/StudentAssignmentItem';
 import { Loader } from '@/shared/ui-kit/Loader/Loader';
+import { Section } from './Section';
 import styles from './StudentAssignmentList.module.scss';
 
 interface StudentAssignmentListProps {
     block1: DashboardAssignment[]; // «Нужно сделать»
     block2: DashboardAssignment[]; // «Новые задания»
     isLoading: boolean;
-}
-
-interface SectionProps {
-    title: string;
-    count: number;
-    children: React.ReactNode;
-}
-
-function Section({ title, count, children }: SectionProps) {
-    return (
-        <div className={styles.section}>
-            <div className={styles.sectionHeader}>
-                <div className={styles.sectionTitle}>{title}</div>
-                {count > 0 && <div className={styles.countBadge}>{count}</div>}
-            </div>
-            <div className={styles.list}>
-                {children}
-            </div>
-        </div>
-    );
 }
 
 export function StudentAssignmentList({ block1, block2, isLoading }: StudentAssignmentListProps) {
