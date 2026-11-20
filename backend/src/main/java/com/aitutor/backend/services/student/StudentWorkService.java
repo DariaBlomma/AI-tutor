@@ -100,10 +100,10 @@ public class StudentWorkService {
                     .orElseThrow(() -> new InvalidRequestException("Ученик не найден или удалён: id=" + studentId));
 
             Set<Long> alreadyActive = studentWorkRepository.findActiveTaskIds(studentId, taskIds);
-            skipped += alreadyActive.size();
 
             for (Task task : tasks) {
                 if (alreadyActive.contains(task.getId())) {
+                    skipped++;
                     continue;
                 }
                 toSave.add(StudentWork.builder()
@@ -115,7 +115,9 @@ public class StudentWorkService {
                 created++;
             }
         }
-        studentWorkRepository.saveAll(toSave);
+        if (!toSave.isEmpty()) {
+            studentWorkRepository.saveAll(toSave);
+        }
         return AssignmentResultResponse.builder()
                 .createdCount(created)
                 .skippedDuplicateCount(skipped)
