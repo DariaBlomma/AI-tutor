@@ -18,6 +18,8 @@ interface TaskCardProps {
     registerDeleteBtn: (taskId: number) => (el: HTMLButtonElement | null) => void;
     // Map id → name всех курсов учителя для отображения чипов.
     courseMap: Map<number, string>;
+    // Токен для принудительного пересоздания бейджа назначений.
+    assignmentsReloadToken?: number;
 }
 
 // Карточка задания — отображение + действия владельца (удаление через попап-подтверждение).
@@ -35,6 +37,7 @@ export function TaskCard({
     onDelete,
     registerDeleteBtn,
     courseMap,
+    assignmentsReloadToken,
 }: TaskCardProps) {
     return (
         <div className={`${styles.card} ${selected ? styles.cardSelected : ''}`}>
@@ -90,7 +93,7 @@ export function TaskCard({
                 <Link to="/tasks-bank/$publicId" params={{ publicId: task.publicId }} className={`${styles.publicId} ${styles.publicIdLink}`}>
                     {task.publicId}
                 </Link>
-                <TaskStudentsBadge taskId={task.id} />
+                <TaskStudentsBadge key={`${task.id}-${assignmentsReloadToken ?? 0}`} taskId={task.id} />
                 {canManage && (
                     <div className={styles.rightActions}>
                         <Link

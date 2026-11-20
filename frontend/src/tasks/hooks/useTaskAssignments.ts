@@ -9,6 +9,8 @@ export interface UseTaskAssignmentsResult {
     isLoading: boolean;
     isError: boolean;
     error: string | null;
+    /** Перезагрузить список назначений. */
+    reload: () => void;
 }
 
 /**
@@ -55,5 +57,5 @@ export function useTaskAssignments(
         return load() as void;
     }, [taskId, load]);
 
-    return { assignments, isLoading, isError, error };
+    return { assignments, isLoading, isError, error, reload: load };
 }

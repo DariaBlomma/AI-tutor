@@ -47,6 +47,8 @@ export function TasksBankView() {
     const [bulkAction, setBulkAction] = useState<TasksBulkAction | null>(null);
     const [deletingId, setDeletingId] = useState<number | null>(null);
     const [actionError, setActionError] = useState<string | null>(null);
+    // Токен для принудительного пересоздания TaskStudentsBadge (key) после bulk-назначения.
+    const [assignmentsReloadToken, setAssignmentsReloadToken] = useState(0);
 
     // Подтверждение удаления — компактный попап рядом с кнопкой «Удалить» (вместо нативного confirm).
     // Позиционирование по кнопке-якорю берёт на себя Radix Popover (virtual ref + flip/shift).
@@ -184,6 +186,13 @@ export function TasksBankView() {
         [selectedTasks],
     );
     const bulkTaskIds = useMemo(() => selectedTasks.map((task) => task.id), [selectedTasks]);
+
+    // Перезагрузка назначений для выбранных заданий после bulk-назначения.
+    // Инкремент токена заставляет TaskStudentsBadge пересоздаться (через key)
+    // и make новый запрос GET /tasks/{id}/assignments.
+    const handleAssignSuccess = useCallback(async () => {
+        setAssignmentsReloadToken((t) => t + 1);
+    }, []);
 
     // Актуальность списка после возврата со страницы редактирования/удаления: fetcher стабилен
     // при неизменных фильтрах, effect выполнится один раз на монтирование экрана.
@@ -367,6 +376,7 @@ export function TasksBankView() {
                                         onDelete={openDeletePopup}
                                         registerDeleteBtn={setDeleteBtnRef}
                                         courseMap={courseMap}
+                                        assignmentsReloadToken={assignmentsReloadToken}
                                     />
                                 ))}
                             </div>
@@ -389,7 +399,7 @@ export function TasksBankView() {
                 финальную модалку (назначение ученикам / добавление в курс). Любое закрытие
                 (Esc, клик вне, «Отмена», успех) снимает выбор через closeBulkAction. */}
             {bulkAction === 'assign' && (
-                <TaskAssignPopup open onClose={closeBulkAction} tasks={bulkAssignTargets} />
+                <TaskAssignPopup open onClose={closeBulkAction} tasks={bulkAssignTargets} onAssignSuccess={handleAssignSuccess} />
             )}
             {bulkAction === 'to-course' && (
                 <TaskCoursePopup

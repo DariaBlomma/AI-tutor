@@ -13,9 +13,11 @@ interface TaskAssignPopupProps {
     onClose: () => void;
     /** Задания для назначения: одно (страница просмотра) или несколько (bulk-выбор в банке). */
     tasks: AssignTaskTarget[];
+    /** Колбэк, вызываемый после успешного назначения (перезагрузка данных). */
+    onAssignSuccess?: () => void;
 }
 
-export function TaskAssignPopup({ open, onClose, tasks }: TaskAssignPopupProps) {
+export function TaskAssignPopup({ open, onClose, tasks, onAssignSuccess }: TaskAssignPopupProps) {
     const { students, isLoadingStudents, isAssigning, error, lastResult, assign } = useAssignTaskToStudents(open);
 
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -31,7 +33,8 @@ export function TaskAssignPopup({ open, onClose, tasks }: TaskAssignPopupProps) 
         const message = await assign(tasks.map((t) => t.id), selectedIds, deadline || null);
 
         if (!message) {
-            // Успех — закрываем попап и сбрасываем форму для следующего открытия.
+            // Успех — вызываем колбэк для перезагрузки данных, закрываем попап и сбрасываем форму.
+            onAssignSuccess?.();
             setSelectedIds([]);
             setDeadline('');
             onClose();

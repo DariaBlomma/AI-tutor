@@ -12,5 +12,5 @@ export const Route = createFileRoute('/tasks-bank/')({
             throw redirect({ to: '/' });
         }
     },
-    component: () => <TasksBankView/>,
+    component: () => <TasksBankView />,
 });
