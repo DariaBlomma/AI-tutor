@@ -1,8 +1,8 @@
 import type { StudentWorkResponse } from '@/student/services/StudentDashboardService';
-import type { DashboardAssignment } from '@/student/types/models/dashboard';
+import type { StudentWorkCard } from '@/student/types/models/studentWorkCard';
 
-// Преобразовать StudentWorkResponse → DashboardAssignment.
-export function mapToDashboardAssignment(work: StudentWorkResponse): DashboardAssignment {
+// Преобразовать StudentWorkResponse → StudentWorkCard.
+export function mapToStudentWorkCard(work: StudentWorkResponse): StudentWorkCard {
     return {
         id: work.id,
         taskPublicId: work.taskPublicId,
@@ -11,6 +11,7 @@ export function mapToDashboardAssignment(work: StudentWorkResponse): DashboardAs
         rawStatus: work.status,
         deadline: work.deadline,
         createdAt: work.createdAt,
+        completedAt: work.completedAt ?? null,
         levels: work.levels ?? null,
         taskTypes: work.taskTypes ?? null,
         topics: work.topics ?? null,

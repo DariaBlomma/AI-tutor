@@ -25,5 +25,5 @@ export type {
 }
     from '../work';
 
-// Реэкспорт типов для дашборда.
-export type { DashboardAssignment } from './dashboard';
+// Реэкспорт типов для карточек работ студента.
+export type { StudentWorkCard } from './studentWorkCard';

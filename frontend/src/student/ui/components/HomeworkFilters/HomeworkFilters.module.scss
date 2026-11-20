@@ -1,0 +1,86 @@
+@use '@/shared/styles/variables' as *;
+
+.filters {
+    margin-bottom: 24px;
+}
+
+.statusChips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.chip {
+    padding: 8px 14px;
+    background: rgba(157, 124, 242, 0.1);
+    border: 1px solid rgba(157, 124, 242, 0.3);
+    border-radius: $radius;
+    font-size: 13px;
+    font-weight: 500;
+    color: $c1;
+    cursor: pointer;
+    transition: all 0.15s;
+
+    &:active {
+        transform: scale(0.95);
+    }
+
+    &.active {
+        background: $p;
+        border-color: $p;
+    }
+}
+
+.dateFilters {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.presetChips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.presetChip {
+    padding: 6px 12px;
+    background: rgba(157, 124, 242, 0.05);
+    border: 1px solid rgba(157, 124, 242, 0.2);
+    border-radius: $radius;
+    font-size: 12px;
+    font-weight: 500;
+    color: $c3;
+    cursor: pointer;
+    transition: all 0.15s;
+
+    &:active {
+        transform: scale(0.95);
+    }
+
+    &.active {
+        background: rgba(157, 124, 242, 0.15);
+        border-color: $p;
+        color: $p;
+    }
+}
+
+.datePickers {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.datePickerGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.dateLabel {
+    font-size: 11px;
+    color: $c3;
+    font-weight: 500;
+}

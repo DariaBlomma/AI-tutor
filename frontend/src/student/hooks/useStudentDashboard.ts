@@ -2,14 +2,14 @@ import { useQueries } from '@tanstack/react-query';
 import { StudentDashboardService } from '@/student/services/StudentDashboardService';
 import type { StudentWorkResponse } from '@/student/services/StudentDashboardService';
 import { extractErrorMessage } from '@/core/api/utils/errors';
-import { mapToDashboardAssignment } from '@/student/lib/dashboardUtils';
-import type { DashboardAssignment } from '@/student/types/models/dashboard';
+import { mapToStudentWorkCard } from '@/student/lib/dashboardUtils';
+import type { StudentWorkCard } from '@/student/types/models/studentWorkCard';
 import { useMemo } from 'react';
 
 /** Результат хука useStudentDashboard — два отфильтрованных блока. */
 export interface UseStudentDashboardResult {
-    block1: DashboardAssignment[]; // «Нужно сделать» — HIGH priority
-    block2: DashboardAssignment[]; // «Новые задания» — LOW priority
+    block1: StudentWorkCard[]; // «Нужно сделать» — HIGH priority
+    block2: StudentWorkCard[]; // «Новые задания» — LOW priority
     isLoading: boolean;
     isError: boolean;
     error: string | null;
@@ -37,7 +37,7 @@ export function useStudentDashboard(): UseStudentDashboardResult {
         : null;
 
     const assignments = useMemo(
-        () => ((worksQuery.data as { content: StudentWorkResponse[] } | undefined)?.content ?? []).map(mapToDashboardAssignment),
+        () => ((worksQuery.data as { content: StudentWorkResponse[] } | undefined)?.content ?? []).map(mapToStudentWorkCard),
         [worksQuery.data],
     );
 
@@ -58,13 +58,13 @@ export function useStudentDashboard(): UseStudentDashboardResult {
     // Block 1: «Нужно сделать» — HIGH priority
     // status = ASSIGNED или IN_PROGRESS, deadline от сегодня до +14 дней
     const block1 = assignments
-        .filter((a: DashboardAssignment) => {
+        .filter((a: StudentWorkCard) => {
             if (a.status !== 'ASSIGNED' && a.status !== 'IN_PROGRESS') return false;
             if (!a.deadline) return false;
             const dl = new Date(a.deadline).getTime();
             return dl >= now && dl <= now + fourteenDaysMs;
         })
-        .sort((a: DashboardAssignment, b: DashboardAssignment) => {
+        .sort((a: StudentWorkCard, b: StudentWorkCard) => {
             if (!a.deadline || !b.deadline) return 0;
             return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
         });
@@ -73,7 +73,7 @@ export function useStudentDashboard(): UseStudentDashboardResult {
     // status = ASSIGNED (не начато), createdAt ≤ 14 дней назад,
     // deadline > 14 дней (если указан), или дедлайна нет
     const block2 = assignments
-        .filter((a: DashboardAssignment) => {
+        .filter((a: StudentWorkCard) => {
             if (a.status !== 'ASSIGNED') return false;
             if (!a.createdAt) return false;
             const created = new Date(a.createdAt).getTime();
@@ -83,7 +83,7 @@ export function useStudentDashboard(): UseStudentDashboardResult {
             if (a.deadline && new Date(a.deadline).getTime() <= now + fourteenDaysMs) return false;
             return true;
         })
-        .sort((a: DashboardAssignment, b: DashboardAssignment) => {
+        .sort((a: StudentWorkCard, b: StudentWorkCard) => {
             if (!a.createdAt || !b.createdAt) return 0;
             return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
         });

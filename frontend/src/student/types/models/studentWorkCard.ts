@@ -1,7 +1,8 @@
 import type { WorkStatus } from '@/student/types/work';
 
-// Одно назначение для дашборда (обогащённые данные из StudentWorkResponse).
-export interface DashboardAssignment {
+// Модель для отображения карточки работы студента в UI.
+// Преобразуется из StudentWorkResponse (сырой DTO с API).
+export interface StudentWorkCard {
     id: number;
     taskPublicId: string;
     taskName: string;

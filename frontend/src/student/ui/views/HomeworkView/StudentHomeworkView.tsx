@@ -1,12 +1,12 @@
 import { useCallback } from 'react';
 import { StudentHomeworkFilters } from '@/student/ui/widgets/HomeworkFilters/StudentHomeworkFilters';
-import { StudentAssignmentItem } from '@/student/ui/components/AssignmentItem/StudentAssignmentItem';
+import { TaskAssignmentItem } from '@/tasks/ui/base/TaskAssignmentItem';
 import { StudentHomeworkProgressBar } from '@/student/ui/base/HomeworkProgressBar/StudentHomeworkProgressBar';
 import { useTaskFilters } from '@/tasks/hooks/useTaskFilters';
 import { useStudentHomeworkData } from '@/student/hooks/useStudentHomeworkData';
+import { useMappedHomework } from '@/student/hooks/useMappedHomework';
 import { Loader } from '@/shared/ui-kit/Loader/Loader';
 import { Pagination } from '@/shared/ui-kit/Pagination/Pagination';
-import type { DashboardAssignment } from '@/student/types/models/dashboard';
 import type { DatePreset } from '@/student/lib/datePresets';
 import type { FilterChipType } from '@/tasks/types/ui';
 import styles from './StudentHomeworkView.module.scss';
@@ -35,6 +35,8 @@ export function StudentHomeworkView() {
         ...apiParams,
         page,
     });
+
+    const cards = useMappedHomework(works);
 
     if (isError) {
         return (
@@ -71,29 +73,15 @@ export function StudentHomeworkView() {
                 <div className={styles.empty}>Нет заданий</div>
             ) : (
                 <div className={styles.list}>
-                    {works.map((work) => {
-                        const completedItems = work.completedItems ?? 0;
-                        const totalItems = work.totalItems ?? 0;
-                        const assignment: DashboardAssignment = {
-                            id: work.id,
-                            taskPublicId: work.taskPublicId,
-                            taskName: work.taskName,
-                            status: work.status,
-                            rawStatus: work.status,
-                            deadline: work.deadline,
-                            createdAt: work.createdAt,
-                            completedAt: work.completedAt,
-                            levels: work.levels,
-                            taskTypes: work.taskTypes,
-                            topics: work.topics,
-                            itemTypes: work.itemTypes,
-                            isMixed: work.isMixed,
-                        };
+                    {cards.map((card) => {
+                        const work = works.find((w) => w.id === card.id);
+                        const completedItems = work?.completedItems ?? 0;
+                        const totalItems = work?.totalItems ?? 0;
 
                         return (
-                            <StudentAssignmentItem
-                                key={work.id}
-                                assignment={assignment}
+                            <TaskAssignmentItem
+                                key={card.id}
+                                card={card}
                                 showProgress={
                                     totalItems > 0 ? (
                                         <StudentHomeworkProgressBar completed={completedItems} total={totalItems} />
