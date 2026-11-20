@@ -1,21 +1,17 @@
 import type { ReactNode } from 'react';
+import type { UITaskStatus } from '@/tasks/types/ui';
+import { UITASK_STATUS_LABELS } from '@/tasks/types/ui';
 import styles from './StudentStatusBadge.module.scss';
 
-export type StatusType = 'new' | 'in-progress' | 'overdue' | 'completed' | 'urgent';
-
 interface StudentStatusBadgeProps {
-    type: StatusType;
+    type: UITaskStatus;
     children?: ReactNode;
 }
 
-const LABELS: Record<StatusType, string> = {
-    'new': 'Новое',
-    'in-progress': 'В процессе',
-    'overdue': 'Просрочено',
-    'completed': 'Выполнено',
-    'urgent': 'Скоро дедлайн',
-};
-
 export function StudentStatusBadge({ type, children }: StudentStatusBadgeProps) {
-    return <span className={`${styles.badge} ${styles[type]}`}>{children ?? LABELS[type]}</span>;
+    return (
+        <span className={`${styles.badge} ${styles[type]}`}>
+            {children ?? UITASK_STATUS_LABELS[type]}
+        </span>
+    );
 }

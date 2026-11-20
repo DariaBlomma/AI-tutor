@@ -19,6 +19,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import com.aitutor.backend.enums.WorkStatus;
+
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -61,6 +64,8 @@ public class StudentWorkController {
     /**
      * «Мои задания» ученика: статусы ASSIGNED / IN_PROGRESS / COMPLETED / CANCELLED / EXPIRED.
      * Пагинация и сортировка (deadline | status | createdAt, direction asc|desc).
+     * Фильтрация по статусу (status), дедлайну (deadlineFrom / deadlineTo / deadlineExcludeFrom)
+     * и createdAt (createdAtFrom) — для UI-пресетов.
      * Без параметров — поведение как раньше: все работы, свежие сверху (createdAt desc).
      */
     @GetMapping("/student/work")
@@ -68,8 +73,14 @@ public class StudentWorkController {
                                                @RequestParam(defaultValue = "0") int page,
                                                @RequestParam(defaultValue = "100") int size,
                                                @RequestParam(required = false) String sort,
-                                               @RequestParam(required = false) String direction) {
-        return studentWorkService.getMyWorkPage(userDetails.getId(), page, size, sort, direction);
+                                               @RequestParam(required = false) String direction,
+                                               @RequestParam(required = false) WorkStatus status,
+                                               @RequestParam(required = false) Instant deadlineFrom,
+                                               @RequestParam(required = false) Instant deadlineTo,
+                                               @RequestParam(required = false) Instant deadlineExcludeFrom,
+                                               @RequestParam(required = false) Instant createdAtFrom) {
+        return studentWorkService.getMyWorkPage(userDetails.getId(), page, size, sort, direction, status,
+                deadlineFrom, deadlineTo, deadlineExcludeFrom, createdAtFrom);
     }
 
     /**

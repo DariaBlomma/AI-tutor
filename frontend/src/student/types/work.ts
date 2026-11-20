@@ -7,6 +7,29 @@ export type WorkItemType = 'WORD_FORMATION' | 'GAP_FILL' | 'TFNS' | 'MATCHING';
 /** Зеркалит com.aitutor.backend.enums.ItemProgressStatus. */
 export type ItemProgressStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'SOLVED';
 
+/** Ответ GET /student/work — карточка работы для списка.
+ * Зеркалит com.aitutor.backend.dto.student.StudentWorkResponse. */
+export interface StudentWorkListItemResponse {
+    id: number;
+    taskId: number;
+    taskPublicId: string;
+    taskName: string;
+    status: WorkStatus;
+    deadline: string | null;
+    createdAt: string;
+    startedAt: string | null;
+    completedAt: string | null;
+    levels?: string[] | null;
+    taskTypes?: Array<{ id: number; name: string; description: string | null; isActive: boolean }> | null;
+    topics?: Array<{ id: number; name: string }> | null;
+    itemTypes?: string[] | null;
+    isMixed?: boolean | null;
+    /** Количество решённых пунктов. */
+    completedItems?: number | null;
+    /** Общее количество пунктов. */
+    totalItems?: number | null;
+}
+
 /** Детальная информация о работе — ответ GET /student/work/{workId}.
  * Зеркалит com.aitutor.backend.dto.student.StudentWorkDetailResponse. */
 export interface StudentWorkDetailResponse {

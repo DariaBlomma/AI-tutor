@@ -8,11 +8,15 @@ const GRADIENT_ID = 'ui-kit-pagination-active-gradient';
  * Пагинация по дизайну: стрелки (в начало / назад / вперёд / в конец) и страницы-«треугольники».
  * Если страниц много — показываем первые/последние и вокруг текущей, остальное сворачиваем в «…».
  */
-export function Pagination({ page, totalPages, onPageChange }: PaginationProps) {
+export function Pagination({ page, totalPages, totalCount, onPageChange }: PaginationProps) {
     const items = buildPageItems(page, totalPages);
 
     return (
-        <nav className={styles.pagination} aria-label="Пагинация">
+        <div className={styles.paginationWrapper}>
+            {totalCount != null && totalCount > 0 && (
+                <div className={styles.totalCount}>Всего: {totalCount}</div>
+            )}
+            <nav className={styles.pagination} aria-label="Пагинация">
             {/* SVG-градиент для заливки активной страницы (тот же угол 135deg, что у кнопки «Создать задание»). */}
             <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true">
                 <defs>
@@ -84,7 +88,8 @@ export function Pagination({ page, totalPages, onPageChange }: PaginationProps) 
                     <path d="M13 17l5-5-5-5M6 17l5-5-5-5" />
                 </svg>
             </button>
-        </nav>
+            </nav>
+        </div>
     );
 }
 

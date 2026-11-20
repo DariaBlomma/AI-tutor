@@ -5,6 +5,7 @@ import com.aitutor.backend.enums.WorkStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,7 +17,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Repository
-public interface StudentWorkRepository extends JpaRepository<StudentWork, Long> {
+public interface StudentWorkRepository extends JpaRepository<StudentWork, Long>, JpaSpecificationExecutor<StudentWork> {
 
     Optional<StudentWork> findByIdAndDeletedAtIsNull(Long id);
 
@@ -25,6 +26,20 @@ public interface StudentWorkRepository extends JpaRepository<StudentWork, Long> 
 
     /** Пагинация «Моих заданий» с сортировкой на уровне БД (см. SORT_WHITELIST в сервисе). */
     Page<StudentWork> findByStudentIdAndDeletedAtIsNull(Long studentId, Pageable pageable);
+
+    /** Пагинация с фильтрацией по дедлайну (используется для UI-пресетов: Сегодня, Неделя, Месяц). */
+    @Query("""
+            SELECT sw FROM StudentWork sw
+            WHERE sw.student.id = :studentId
+              AND sw.deletedAt IS NULL
+              AND (:deadlineFrom IS NULL OR sw.deadline >= :deadlineFrom)
+              AND (:deadlineTo IS NULL OR sw.deadline <= :deadlineTo)
+            """)
+    Page<StudentWork> findByStudentIdAndDeletedAtIsNullWithDeadlineFilter(
+            @Param("studentId") Long studentId,
+            @Param("deadlineFrom") Instant deadlineFrom,
+            @Param("deadlineTo") Instant deadlineTo,
+            Pageable pageable);
 
     /**
      * Активные назначения ученика (ASSIGNED / IN_PROGRESS) — база для краткого прогресса:

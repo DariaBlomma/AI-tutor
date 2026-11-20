@@ -4,6 +4,8 @@ export interface PaginationProps {
     page: number;
     /** Всего страниц (из серверного ответа). */
     totalPages: number;
+    /** Общее количество элементов (для надписи «Всего: N»). */
+    totalCount?: number;
     /** Колбэк смены страницы (0-based). */
     onPageChange: (page: number) => void;
 }

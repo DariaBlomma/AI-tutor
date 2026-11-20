@@ -27,15 +27,25 @@
 ### 1. Структура модулей
 - Каждый доменный модуль (`auth`, `teacher`, `student`, `user`…) — отдельная папка в `src/`.
 - Внутренняя структура модуля:
-  - `ui/views/<ViewName>/` — папка с именем компонента, внутри `<ViewName>.tsx` + `<ViewName>.module.scss`.
+  - `ui/` — все UI-компоненты модуля, разделённые на 4 подпапки:
+    - `ui/views/<ViewName>/` — компонентные страницы (роутинг). Внутри: `<ViewName>.tsx` + `<ViewName>.module.scss`.
+      Компоненты — с суффиксом `View` (`StudentHomeworkView`, `TeacherReportsView`).
+    - `ui/widgets/<WidgetName>/` — смысловые блоки **с логикой** (фильтрация, навигация, бизнес-логика). Внутри: `<WidgetName>.tsx` + `<WidgetName>.module.scss`.
+      Компоненты — с суффиксом `Widget` или без (зависит от назначения), но с префиксом модуля (`StudentHomeworkFilters`, `StudentBottomNavigation`).
+    - `ui/base/<BaseName>/` — базовые переиспользуемые компоненты **без логики** (карточки, прогресс-бары, чипы). Внутри: `<BaseName>.tsx` + `<BaseName>.module.scss`.
+      Компоненты — без суффикса или с `Item`, `Bar`, `Chip` и т.п., но с префиксом модуля (`StudentHomeworkItem`, `StudentHomeworkProgressBar`).
+    - `ui/layouts/<LayoutName>/` — переиспользуемая вёрстка **без логики** (обёртки, сетки, шаблоны). Внутри: `<LayoutName>.tsx` + `<LayoutName>.module.scss`.
+      Компоненты — с суффиксом `Layout` (`StudentDashboardLayout`).
   - `hooks/` — логика загрузки/состояний (выносим из компонентов!).
   - `services/` — работа с API.
   - `types/` — модели данных модуля (`models/`, реэкспорт через `index.ts`).
   - `data/` — статичные данные/моки (только под `SHOW_TMP_DATA`).
-  - `layouts/` — переиспользуемая вёрстка **без логики**.
-  - `widgets/` — смысловые части **с логикой**.
+  - `lib/` — модульные утилиты (чистые функции, хелперы).
 - Общее между модулями → в `shared/` (`widgets`, `icons`, `ui-kit`, `layouts`, `services`).
-- Не путать: если переиспользуется только вёрстка — это layout, а не widget. Название файлов/классов должно отражать роль (`AuthTriangleFormLayout`, а не `...Frame`).
+- Не путать:
+  - если переиспользуется только вёрстка — это `ui/layouts/`, а не `ui/widgets/`.
+  - если есть бизнес-логика/фильтрация — это `ui/widgets/`, а не `ui/base/`.
+  - название файлов/классов должно отражать роль (`AuthTriangleFormLayout`, а не `...Frame`).
 
 ### 2. Именование
 - Компоненты-страницы: суффикс `View` (`TeacherHomeView`, `AuthLoginView`).

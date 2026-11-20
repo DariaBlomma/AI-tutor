@@ -20,16 +20,6 @@ import styles from './TasksBankView.module.scss';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
-// Russian pluralization: 1 задание, 2-4 задания, 5-0 заданий
-function pluralizeTasks(count: number): string {
-    const abs = Math.abs(count) % 100;
-    const lastDigit = abs % 10;
-    if (abs > 10 && abs < 20) return 'заданий';
-    if (lastDigit > 1 && lastDigit < 5) return 'задания';
-    if (lastDigit === 1) return 'задание';
-    return 'заданий';
-}
-
 // Страница «Банк заданий» — общая для учителя и ученика:
 // список и фильтры видят все авторизованные; кнопки создания — только учителю.
 // Фильтры: поиск (name/publicId), грамматический тип и пагинация — серверные (GET /api/tasks);
@@ -385,12 +375,7 @@ export function TasksBankView() {
 
                     {/* Постраничная навигация (серверная пагинация — GET /api/tasks?page&size) */}
                     {!isError && totalPages >= 1 && (
-                        <Pagination page={page} totalPages={totalPages} onPageChange={changePage} />
-                    )}
-
-                    {/* Общее количество заданий — после пагинации */}
-                    {!isLoading && (
-                        <p className={styles.totalCount}>Всего: <strong>{totalCount} {pluralizeTasks(totalCount)}</strong></p>
+                        <Pagination page={page} totalPages={totalPages} totalCount={totalCount} onPageChange={changePage} />
                     )}
                 </section>
             </div>

@@ -7,9 +7,11 @@ import { formatDeadline } from '@/student/utils';
 
 interface StudentAssignmentItemProps {
     assignment: DashboardAssignment;
+    /** Если задан — рендерит прогресс-бар под мета-информацией. */
+    showProgress?: React.ReactNode;
 }
 
-export function StudentAssignmentItem({ assignment }: StudentAssignmentItemProps) {
+export function StudentAssignmentItem({ assignment, showProgress }: StudentAssignmentItemProps) {
     const navigate = useNavigate();
     const statusType = getBadgeType(assignment);
     const deadlineFormatted = formatDeadline(assignment.deadline);
@@ -53,6 +55,9 @@ export function StudentAssignmentItem({ assignment }: StudentAssignmentItemProps
                     {deadlineFormatted}
                 </div>
             </div>
+            {showProgress && (
+                <div className={styles.progress}>{showProgress}</div>
+            )}
         </div>
     );
 }

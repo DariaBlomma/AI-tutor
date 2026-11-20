@@ -19,7 +19,7 @@ interface WorkResultsViewProps {
 export function WorkResultsView({ workId }: WorkResultsViewProps) {
     const navigate = useNavigate();
 
-    const { data: summary, isLoading, isError, error: queryError } = useQuery({
+    const { data: summary, isLoading, isError } = useQuery({
         queryKey: ['student', 'work', workId, 'summary'],
         queryFn: () => StudentWorkService.getWorkSummary(workId),
         staleTime: Infinity,

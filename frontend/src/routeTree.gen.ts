@@ -16,6 +16,7 @@ import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-pas
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
 import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
+import { Route as StudentHomeworkRouteImport } from './routes/student/homework'
 import { Route as TasksBankIndexRouteImport } from './routes/tasks-bank/index'
 import { Route as TasksBankPublicIdRouteImport } from './routes/tasks-bank/$publicId'
 import { Route as TasksBankCreateRouteImport } from './routes/tasks-bank/create'
@@ -61,6 +62,11 @@ const AuthSignUpRoute = AuthSignUpRouteImport.update({
   id: '/sign-up',
   path: '/sign-up',
   getParentRoute: () => AuthRouteRoute,
+} as any)
+const StudentHomeworkRoute = StudentHomeworkRouteImport.update({
+  id: '/student/homework',
+  path: '/student/homework',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const TasksBankIndexRoute = TasksBankIndexRouteImport.update({
   id: '/tasks-bank/',
@@ -123,6 +129,7 @@ export interface FileRoutesByFullPath {
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/student/homework': typeof StudentHomeworkRoute
   '/tasks-bank/$publicId': typeof TasksBankPublicIdRoute
   '/tasks-bank/create': typeof TasksBankCreateRoute
   '/tasks-bank/grammar-types': typeof TasksBankGrammarTypesRoute
@@ -142,6 +149,7 @@ export interface FileRoutesByTo {
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/student/homework': typeof StudentHomeworkRoute
   '/tasks-bank/$publicId': typeof TasksBankPublicIdRoute
   '/tasks-bank/create': typeof TasksBankCreateRoute
   '/tasks-bank/grammar-types': typeof TasksBankGrammarTypesRoute
@@ -162,6 +170,7 @@ export interface FileRoutesById {
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/student/homework': typeof StudentHomeworkRoute
   '/tasks-bank/$publicId': typeof TasksBankPublicIdRoute
   '/tasks-bank/create': typeof TasksBankCreateRoute
   '/tasks-bank/grammar-types': typeof TasksBankGrammarTypesRoute
@@ -183,6 +192,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/sign-up'
+    | '/student/homework'
     | '/tasks-bank/$publicId'
     | '/tasks-bank/create'
     | '/tasks-bank/grammar-types'
@@ -202,6 +212,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/sign-up'
+    | '/student/homework'
     | '/tasks-bank/$publicId'
     | '/tasks-bank/create'
     | '/tasks-bank/grammar-types'
@@ -221,6 +232,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/sign-up'
+    | '/student/homework'
     | '/tasks-bank/$publicId'
     | '/tasks-bank/create'
     | '/tasks-bank/grammar-types'
@@ -237,6 +249,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRouteRoute: typeof AuthRouteRouteWithChildren
   ProfileRoute: typeof ProfileRoute
+  StudentHomeworkRoute: typeof StudentHomeworkRoute
   TasksBankPublicIdRoute: typeof TasksBankPublicIdRoute
   TasksBankCreateRoute: typeof TasksBankCreateRoute
   TasksBankGrammarTypesRoute: typeof TasksBankGrammarTypesRoute
@@ -297,6 +310,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth/sign-up'
       preLoaderRoute: typeof AuthSignUpRouteImport
       parentRoute: typeof AuthRouteRoute
+    }
+    '/student/homework': {
+      id: '/student/homework'
+      path: '/student/homework'
+      fullPath: '/student/homework'
+      preLoaderRoute: typeof StudentHomeworkRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/tasks-bank/': {
       id: '/tasks-bank/'
@@ -406,6 +426,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRouteRoute: AuthRouteRouteWithChildren,
   ProfileRoute: ProfileRoute,
+  StudentHomeworkRoute: StudentHomeworkRoute,
   TasksBankPublicIdRoute: TasksBankPublicIdRoute,
   TasksBankCreateRoute: TasksBankCreateRoute,
   TasksBankGrammarTypesRoute: TasksBankGrammarTypesRoute,

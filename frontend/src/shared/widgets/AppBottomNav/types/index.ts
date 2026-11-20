@@ -2,7 +2,7 @@
 
 import type { IconProps } from '@/shared/icons';
 
-export type AppBottomNavActive = 'home' | 'reports' | 'bank' | 'profile';
+export type AppBottomNavActive = 'home' | 'reports' | 'bank' | 'profile' | 'homework';
 
 export interface AppBottomNavItem {
     id: AppBottomNavActive;

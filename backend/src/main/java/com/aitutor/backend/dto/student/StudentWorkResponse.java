@@ -43,4 +43,8 @@ public class StudentWorkResponse {
     private List<String> itemTypes;
     /** Флаг смешанного задания. */
     private Boolean isMixed;
+    /** Количество решённых пунктов в работе. */
+    private Integer completedItems;
+    /** Общее количество пунктов в работе. */
+    private Integer totalItems;
 }

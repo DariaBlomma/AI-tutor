@@ -1,3 +1,5 @@
+export * from './taskStatus';
+
 import type { ItemType } from '../models';
 
 /** Действие, открываемое кнопками bulk-панели банка заданий (TasksBulkActionsBar). */

@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react';
 // Активный пункт нижнего меню по текущему маршруту.
 const NAV_ACTIVE_BY_PATH: Record<string, AppBottomNavActive> = {
     '/': 'home',
+    '/student/homework': 'homework',
     '/teacher/reports': 'reports',
     // Страницы банка заданий (список, просмотр задания, создание, справочники) — под общим нижним меню.
     '/tasks-bank': 'bank',

@@ -1,0 +1,49 @@
+@use '@/shared/styles/variables' as *;
+
+.container {
+    min-height: 100vh;
+    padding-bottom: 80px; // безопасная зона под фиксированным нижним меню
+    position: relative;
+    color: var(--c1);
+}
+
+.header {
+    margin-bottom: 24px;
+
+    h1 {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    p {
+        color: var(--c3);
+        font-size: 14px;
+    }
+}
+
+.loading {
+    display: flex;
+    justify-content: center;
+    padding: 40px 0;
+}
+
+.empty {
+    text-align: center;
+    color: var(--c3);
+    font-size: 14px;
+    padding: 40px 0;
+}
+
+.error {
+    text-align: center;
+    color: var(--err);
+    font-size: 14px;
+    padding: 40px 0;
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}

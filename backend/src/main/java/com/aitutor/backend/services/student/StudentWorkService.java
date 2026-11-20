@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -157,10 +158,16 @@ public class StudentWorkService {
      * Пагинированный список работ ученика. Сортировка: sort — только из SORT_WHITELIST
      * (по умолчанию createdAt desc), direction — asc|desc (по умолчанию desc).
      * Второй ключ createdAt DESC — детерминированная раздача одинаковых значений.
+     * Фильтрация по статусу, дедлайну (deadlineFrom / deadlineTo / deadlineExcludeFrom)
+     * и createdAt (createdAtFrom) — для UI-пресетов.
      */
     @Transactional(readOnly = true)
     public Page<StudentWorkResponse> getMyWorkPage(Long studentId, int page, int size,
-                                                   String sort, String direction) {
+                                                   String sort, String direction,
+                                                   WorkStatus status,
+                                                   Instant deadlineFrom, Instant deadlineTo,
+                                                   Instant deadlineExcludeFrom,
+                                                   Instant createdAtFrom) {
         String property = SORT_WHITELIST.get(sort == null ? "createdAt" : sort);
         if (property == null) {
             throw new InvalidRequestException("Недопустимое поле сортировки: " + sort
@@ -173,7 +180,42 @@ public class StudentWorkService {
         Sort sortSpec = Sort.by(primary).and(Sort.by(Sort.Direction.DESC, "createdAt"));
         PageRequest request = PageRequest.of(Math.max(page, 0),
                 Math.min(Math.max(size, 1), MAX_PAGE_SIZE), sortSpec);
-        return studentWorkRepository.findByStudentIdAndDeletedAtIsNull(studentId, request)
+
+        // Используем Specification для фильтрации — JPQL не умеет корректно работать
+        // с nullable enum-параметрами в PostgreSQL.
+        Specification<StudentWork> spec = Specification.<StudentWork>where((root, query, cb) ->
+                cb.equal(root.get("student").get("id"), studentId)
+        ).and((root, query, cb) ->
+                cb.isNull(root.get("deletedAt"))
+        );
+        if (status != null) {
+            final WorkStatus s = status;
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), s));
+        }
+        if (deadlineFrom != null) {
+            final Instant df = deadlineFrom;
+            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("deadline"), df));
+        }
+        if (deadlineTo != null) {
+            final Instant dt = deadlineTo;
+            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("deadline"), dt));
+        }
+        if (deadlineExcludeFrom != null) {
+            final Instant def = deadlineExcludeFrom;
+            // deadline IS NULL OR deadline > excludeFrom
+            spec = spec.and((root, query, cb) ->
+                    cb.or(
+                            cb.isNull(root.get("deadline")),
+                            cb.greaterThan(root.get("deadline"), def)
+                    )
+            );
+        }
+        if (createdAtFrom != null) {
+            final Instant cf = createdAtFrom;
+            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("createdAt"), cf));
+        }
+
+        return studentWorkRepository.findAll(spec, request)
                 .map(this::toResponse);
     }
 
@@ -261,6 +303,26 @@ public class StudentWorkService {
 
     private StudentWorkResponse toResponse(StudentWork work) {
         Task task = work.getTask();
+        List<TaskItem> items = task.getItems() == null
+                ? List.of()
+                : task.getItems().stream()
+                        .map(item -> item.getItemType() != null ? item : null)
+                        .filter(java.util.Objects::nonNull)
+                        .toList();
+        
+        // Считаем total items
+        int totalItems = items.size();
+        
+        // Считаем solved items из прогресса
+        int completedItems = 0;
+        if (totalItems > 0) {
+            var agg = progressRepository.aggregateByWorkIds(List.of(work.getId())).stream()
+                    .filter(a -> a.getWorkId().equals(work.getId()))
+                    .findFirst()
+                    .orElse(null);
+            completedItems = agg == null ? 0 : intOf(agg.getSolvedCount());
+        }
+        
         return StudentWorkResponse.builder()
                 .id(work.getId())
                 .taskId(task.getId())
@@ -275,14 +337,14 @@ public class StudentWorkService {
                 .levels(task.getLevels() != null ? task.getLevels().stream().map(Enum::name).collect(Collectors.toSet()) : null)
                 .taskTypes(mapTaskTypes(task.getTaskTypes()))
                 .topics(mapTopics(task.getTopics()))
-                .itemTypes(task.getItems() == null
-                        ? List.of()
-                        : task.getItems().stream()
-                                .map(item -> item.getItemType() != null ? item.getItemType().name() : null)
-                                .filter(java.util.Objects::nonNull)
-                                .distinct()
-                                .toList())
+                .itemTypes(items.stream()
+                        .map(item -> item.getItemType() != null ? item.getItemType().name() : null)
+                        .filter(java.util.Objects::nonNull)
+                        .distinct()
+                        .toList())
                 .isMixed(task.getIsMixed())
+                .completedItems(completedItems)
+                .totalItems(totalItems)
                 .build();
     }
 

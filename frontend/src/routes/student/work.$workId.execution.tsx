@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { WorkExecutionView } from '@/student/ui/views/WorkExecutionView/WorkExecutionView';
 import { AuthService } from '@/auth/services/AuthService';
 

@@ -23,7 +23,7 @@ export function useStudentDashboard(): UseStudentDashboardResult {
         queries: [
             {
                 queryKey: ['student', 'dashboard'],
-                queryFn: () => StudentDashboardService.getWorks(0, 100),
+                queryFn: () => StudentDashboardService.getWorks({ page: 0, size: 100 }),
                 staleTime: 5 * 60 * 1000,
                 retry: 2,
             },

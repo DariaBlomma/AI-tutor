@@ -1,10 +1,23 @@
+.paginationWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.totalCount {
+  color: var(--c3);
+  font-size: 13px;
+  font-weight: 500;
+}
+
 .pagination {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin-top: 16px;
 }
 
 /* Кнопки-стрелки: пунктирная рамка, как в дизайне */

@@ -1,5 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { StudentWorkService } from '@/student/services/StudentWorkService';
 import { WorkResultsView } from '@/student/ui/views/WorkResultsView/WorkResultsView';
 import { AuthService } from '@/auth/services/AuthService';
 
