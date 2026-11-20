@@ -1,6 +1,7 @@
 import { useNavigate } from '@tanstack/react-router';
 import type { StudentWorkCard } from '@/student/types/models/studentWorkCard';
 import { StudentStatusBadge } from '@/student/ui/components/StatusBadge/StudentStatusBadge';
+import { TaskAssignmentDate } from '@/tasks/ui/base/TaskAssignmentDate';
 import { getBadgeType } from '@/student/lib/assignmentStatus';
 import styles from './TaskAssignmentItem.module.scss';
 import { formatDeadline, formatCompletedAt, formatAssignedAt } from '@/student/utils';
@@ -53,15 +54,13 @@ export function TaskAssignmentItem({ card, showProgress }: TaskAssignmentItemPro
                         <span className={styles.chip}>{card.topics[0].name}</span>
                     )}
                 </div>
-                <div className={`${styles.hwDeadline} ${card.status === 'EXPIRED' ? styles.urgent : ''}`}>
-                    {deadlineFormatted}
-                </div>
-                {card.status === 'COMPLETED' && completedAtFormatted && (
-                    <div className={styles.hwExtraDate}>{completedAtFormatted}</div>
-                )}
-                {card.status === 'ASSIGNED' && statusType !== 'urgent' && assignedAtFormatted && (
-                    <div className={styles.hwExtraDate}>{assignedAtFormatted}</div>
-                )}
+                <TaskAssignmentDate
+                    deadline={deadlineFormatted}
+                    statusType={statusType}
+                    completedAt={completedAtFormatted}
+                    assignedAt={assignedAtFormatted}
+                    workStatus={card.status}
+                />
             </div>
             {showProgress && (
                 <div className={styles.progress}>{showProgress}</div>

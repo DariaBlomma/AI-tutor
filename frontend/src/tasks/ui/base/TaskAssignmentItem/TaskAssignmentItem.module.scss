@@ -69,19 +69,7 @@
     color: $c3;
 }
 
-.hwDeadline {
-    font-weight: 500;
 
-    &.urgent {
-        color: $err;
-    }
-}
-
-.hwExtraDate {
-    font-size: 12px;
-    color: $c3;
-    opacity: 0.7;
-}
 
 .progress {
     margin-top: 10px;

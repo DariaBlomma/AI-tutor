@@ -1,0 +1,14 @@
+@use '@/shared/styles/variables' as *;
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+}
+
+.deadline,
+.extraDate {
+    font-size: 13px;
+    color: $c3;
+}
