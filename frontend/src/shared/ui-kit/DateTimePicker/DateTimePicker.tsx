@@ -13,10 +13,19 @@ const DISPLAY_FORMAT = 'dd.MM.yyyy HH:mm';
 interface DateTimePickerProps {
     value: string;
     onChange: (value: string) => void;
+    onClear?: () => void;
 }
 
-export function DateTimePicker({ value, onChange }: DateTimePickerProps) {
+export function DateTimePicker({ value, onChange, onClear }: DateTimePickerProps) {
     const [open, setOpen] = useState(false);
+
+    const hasValue = !!value;
+
+    const handleClear = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+        onChange('');
+        onClear?.();
+    }, [onChange, onClear]);
 
     const parsedDate = useMemo(() => {
         if (!value) return undefined;
@@ -58,6 +67,13 @@ export function DateTimePicker({ value, onChange }: DateTimePickerProps) {
             <Popover.Trigger asChild>
                 <button type="button" className={styles.trigger} aria-label="Выбрать дату и время">
                     <span className={styles.triggerText}>{displayValue}</span>
+                    {hasValue && (
+                        <button type="button" className={styles.clearButton} onClick={handleClear} aria-label="Очистить">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3.5 3.5L10.5 10.5M10.5 3.5L3.5 10.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                            </svg>
+                        </button>
+                    )}
                     <CalendarIcon />
                 </button>
             </Popover.Trigger>

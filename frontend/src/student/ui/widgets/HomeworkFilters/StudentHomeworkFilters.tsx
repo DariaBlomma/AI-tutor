@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import type { DatePreset, DateRange } from '@/student/lib/datePresets';
 import { PRESET_LABELS } from '@/student/lib/datePresets';
 import type { FilterChipType } from '@/tasks/types/ui';
@@ -14,6 +14,7 @@ export interface StudentHomeworkFiltersProps {
     onStatusChange: (status: FilterChipType) => void;
     datePreset: DatePreset;
     onDatePresetChange: (preset: DatePreset) => void;
+    onDatePresetClear: () => void;
     dateRange: DateRange;
     onDateRangeChange: (range: DateRange) => void;
 }
@@ -32,6 +33,7 @@ export function StudentHomeworkFilters({
     onStatusChange,
     datePreset,
     onDatePresetChange,
+    onDatePresetClear,
     dateRange,
     onDateRangeChange,
 }: StudentHomeworkFiltersProps) {
@@ -45,6 +47,11 @@ export function StudentHomeworkFilters({
     const handleDateToChange = useMemo(() => (value: string) => {
         onDateRangeChange({ ...dateRange, to: value });
     }, [dateRange, onDateRangeChange]);
+
+    const handlePresetClear = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+        onDatePresetClear();
+    }, [onDatePresetClear]);
 
     return (
         <div className={styles.filters}>
@@ -73,6 +80,22 @@ export function StudentHomeworkFilters({
                                 onClick={() => onDatePresetChange(preset)}
                             >
                                 {PRESET_LABELS[preset]}
+                                {datePreset === preset && (
+                                    <span
+                                        className={styles.presetClear}
+                                        onClick={handlePresetClear}
+                                        aria-label="Сбросить пресет"
+                                        role="button"
+                                        tabIndex={0}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' || e.key === ' ') handlePresetClear(e as unknown as React.MouseEvent);
+                                        }}
+                                    >
+                                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M2 2L10 10M10 2L2 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                                        </svg>
+                                    </span>
+                                )}
                             </button>
                         ))}
                     </div>
@@ -85,6 +108,7 @@ export function StudentHomeworkFilters({
                                 <DateTimePicker
                                     value={dateRange.from || ''}
                                     onChange={handleDateFromChange}
+                                    onClear={() => handleDateFromChange('')}
                                 />
                             </div>
                             <div className={styles.datePickerGroup}>
@@ -92,6 +116,7 @@ export function StudentHomeworkFilters({
                                 <DateTimePicker
                                     value={dateRange.to || ''}
                                     onChange={handleDateToChange}
+                                    onClear={() => handleDateToChange('')}
                                 />
                             </div>
                         </div>

@@ -25,6 +25,12 @@ export function StudentHomeworkView() {
         setPage(0);
     }, [setDatePreset, setPage]);
 
+    const handleDatePresetClear = useCallback(() => {
+        setDatePreset('all');
+        setDateRange({ from: null, to: null });
+        setPage(0);
+    }, [setDatePreset, setDateRange, setPage]);
+
     const { works, totalElements, totalPages, isLoading, isError } = useStudentHomeworkData({
         ...apiParams,
         page,
@@ -51,6 +57,7 @@ export function StudentHomeworkView() {
                 onStatusChange={handleStatusChange}
                 datePreset={datePreset}
                 onDatePresetChange={handleDatePresetChange}
+                onDatePresetClear={handleDatePresetClear}
                 dateRange={dateRange}
                 onDateRangeChange={setDateRange}
             />
