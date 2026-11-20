@@ -82,6 +82,7 @@ export function StudentHomeworkView() {
                             rawStatus: work.status,
                             deadline: work.deadline,
                             createdAt: work.createdAt,
+                            completedAt: work.completedAt,
                             levels: work.levels,
                             taskTypes: work.taskTypes,
                             topics: work.topics,

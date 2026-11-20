@@ -9,6 +9,7 @@ export interface DashboardAssignment {
     rawStatus: WorkStatus;
     deadline: string | null; // ISO-8601
     createdAt: string; // ISO-8601, date when assignment was created
+    completedAt: string | null; // ISO-8601, date when assignment was completed
     teacherName?: string | null;
     // Чипы задания (как в TaskSummaryResponse)
     levels?: string[] | null;

@@ -19,3 +19,17 @@ export function formatDeadline(isoString: string | null | undefined): string {
     if (Number.isNaN(date.getTime())) return '';
     return `до ${format(date, 'd MMMM', { locale: ru })}`;
 }
+
+export function formatCompletedAt(isoString: string | null | undefined): string {
+    if (!isoString) return '';
+    const date = new Date(isoString);
+    if (Number.isNaN(date.getTime())) return '';
+    return format(date, 'd MMMM yyyy', { locale: ru });
+}
+
+export function formatAssignedAt(isoString: string | null | undefined): string {
+    if (!isoString) return '';
+    const date = new Date(isoString);
+    if (Number.isNaN(date.getTime())) return '';
+    return format(date, 'd MMMM yyyy', { locale: ru });
+}

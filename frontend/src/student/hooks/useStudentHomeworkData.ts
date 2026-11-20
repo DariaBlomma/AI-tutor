@@ -15,7 +15,7 @@ export interface UseStudentHomeworkDataResult {
 
 export function useStudentHomeworkData(filters: HomeworkFilters): UseStudentHomeworkDataResult {
     const { data, isLoading, isError, error, refetch } = useQuery({
-        queryKey: ['student-homework', filters.page, filters.status, filters.deadlineFrom, filters.deadlineTo, filters.deadlineExcludeFrom, filters.createdAtFrom],
+        queryKey: ['student-homework', filters.page, filters.status, filters.deadlineFrom, filters.deadlineTo, filters.deadlineExcludeFrom, filters.createdAtFrom, filters.datePreset],
         queryFn: () => StudentDashboardService.getWorks(filters),
         staleTime: 0,
     });

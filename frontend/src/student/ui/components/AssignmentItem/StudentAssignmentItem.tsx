@@ -3,7 +3,7 @@ import type { DashboardAssignment } from '@/student/types/models/dashboard';
 import { StudentStatusBadge } from '@/student/ui/components/StatusBadge/StudentStatusBadge';
 import { getBadgeType } from '@/student/lib/assignmentStatus';
 import styles from './StudentAssignmentItem.module.scss';
-import { formatDeadline } from '@/student/utils';
+import { formatDeadline, formatCompletedAt, formatAssignedAt } from '@/student/utils';
 
 interface StudentAssignmentItemProps {
     assignment: DashboardAssignment;
@@ -15,6 +15,8 @@ export function StudentAssignmentItem({ assignment, showProgress }: StudentAssig
     const navigate = useNavigate();
     const statusType = getBadgeType(assignment);
     const deadlineFormatted = formatDeadline(assignment.deadline);
+    const completedAtFormatted = formatCompletedAt(assignment.completedAt ?? undefined);
+    const assignedAtFormatted = formatAssignedAt(assignment.createdAt);
 
     const handleClick = () => {
         if (assignment.status === 'ASSIGNED' || assignment.status === 'IN_PROGRESS') {
@@ -54,6 +56,12 @@ export function StudentAssignmentItem({ assignment, showProgress }: StudentAssig
                 <div className={`${styles.hwDeadline} ${assignment.status === 'EXPIRED' ? styles.urgent : ''}`}>
                     {deadlineFormatted}
                 </div>
+                {assignment.status === 'COMPLETED' && completedAtFormatted && (
+                    <div className={styles.hwExtraDate}>{completedAtFormatted}</div>
+                )}
+                {assignment.status === 'ASSIGNED' && statusType !== 'urgent' && assignedAtFormatted && (
+                    <div className={styles.hwExtraDate}>{assignedAtFormatted}</div>
+                )}
             </div>
             {showProgress && (
                 <div className={styles.progress}>{showProgress}</div>

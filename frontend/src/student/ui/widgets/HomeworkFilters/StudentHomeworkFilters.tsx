@@ -6,8 +6,8 @@ import { FILTER_CHIP_LABELS, UITaskStatus } from '@/tasks/types/ui';
 import { DateTimePicker } from '@/shared/ui-kit/DateTimePicker/DateTimePicker';
 import styles from './StudentHomeworkFilters.module.scss';
 
-/** Статусы, для которых datePreset не показывается (статус сам задаёт дедлайн). */
-const HIDDEN_PRESET_STATUSES: FilterChipType[] = [UITaskStatus.NEW, UITaskStatus.URGENT];
+/** Статусы, для которых datePreset показывается (только для завершённых). */
+const PRESET_STATUSES: FilterChipType[] = [UITaskStatus.COMPLETED, UITaskStatus.OVERDUE];
 
 export interface StudentHomeworkFiltersProps {
     statusFilter: FilterChipType;
@@ -38,7 +38,7 @@ export function StudentHomeworkFilters({
     onDateRangeChange,
 }: StudentHomeworkFiltersProps) {
     const isCustom = datePreset === 'custom';
-    const showPresets = !HIDDEN_PRESET_STATUSES.includes(statusFilter);
+    const showPresets = PRESET_STATUSES.includes(statusFilter);
 
     const handleDateFromChange = useMemo(() => (value: string) => {
         onDateRangeChange({ ...dateRange, from: value });
