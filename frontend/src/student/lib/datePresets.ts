@@ -21,7 +21,9 @@ export function getDateRange(preset: DatePreset): DateRange {
             };
         case 'week': {
             const weekStart = new Date(startOfDay);
-            weekStart.setDate(startOfDay.getDate() - startOfDay.getDay());
+            const dayOfWeek = weekStart.getDay(); // 0 = воскресенье, 1 = понедельник
+            const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+            weekStart.setDate(startOfDay.getDate() - daysFromMonday);
             return {
                 from: weekStart.toISOString(),
                 to: now.toISOString(),
