@@ -39,7 +39,7 @@ interface UseTaskUpdateSubmitResult {
 }
 
 // Отправка POST /api/tasks: сначала локальная валидация (зеркалит бэка),
-// затем запрос; текст 400 от TaskContentValidator показываем как есть.
+// затем запрос; текст 400 от валидатора контента показываем как есть.
 export function useCreateTask(onSuccess: () => void): UseTaskSubmitResult {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);

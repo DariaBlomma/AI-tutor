@@ -200,7 +200,8 @@ public class TaskService {
 
     /**
      * Факт использования задания учениками (назначено/решено) — страница редактирования
-     * блокирует по нему содержательные поля. Право на редактирование (владение) проверяет PUT.
+     * блокирует по нему пункты и текст материала (название и инструкция всегда редактируемые).
+     * Право на редактирование (владение) проверяет PUT.
      */
     @Transactional(readOnly = true)
     public TaskUsageResponse getUsageByPublicId(String publicId) {
@@ -265,15 +266,17 @@ public class TaskService {
         Set<Topic> topics = resolveTopics(request.getTopicIds());
         Set<TaskType> taskTypes = resolveTaskTypes(request.getTaskTypeIds());
 
-        // Контент задания (текст задания/инструкция/материал/пункты/ответы) нельзя менять,
+        // Название и инструкция всегда редактируемые. Пункты и текст материала нельзя менять,
         // если задание кому-то назначено или уже кем-то решено: ученик видел именно эти
         // формулировки и ответы. Разрешаем только метаданные (теги). Механику менять нельзя всегда.
-        boolean contentLocked = isContentLocked(task.getId());
-        if (contentLocked) {
-            assertContentUnchanged(task, request);
+        boolean itemsLocked = isContentLocked(task.getId());
+        // Название и инструкция всегда обновляются
+        task.setName(request.getName());
+        task.setInstruction(request.getInstruction());
+
+        if (itemsLocked) {
+            assertItemsUnchanged(task, request);
         } else {
-            task.setName(request.getName());
-            task.setInstruction(request.getInstruction());
             task.setContext(request.getContext());
 
             // Полная замена списка пунктов: отсутствующие в запросе удаляются через orphanRemoval
@@ -347,17 +350,14 @@ public class TaskService {
     }
 
     /**
-     * Сравнение «содержательных» полей запроса с текущим состоянием задания при заблокированном
-     * контенте (задание назначено/решено): любое отличие — 400. Метаданные (теги) менять разрешаем.
+     * Сравнение «содержательных» полей запроса с текущим состоянием задания при заблокированных
+     * пунктах (задание назначено/решено): отличие контекста или пунктов — 400.
+     * Название и инструкция всегда разрешены к изменению. Метаданные (теги) менять разрешаем.
      * Пустая строка и null эквивалентны (фронт шлёт orNull).
      */
-    private void assertContentUnchanged(Task task, TaskUpdateRequest request) {
+    private void assertItemsUnchanged(Task task, TaskUpdateRequest request) {
         String violation = null;
-        if (!sameText(task.getName(), request.getName())) {
-            violation = "название";
-        } else if (!sameText(task.getInstruction(), request.getInstruction())) {
-            violation = "инструкцию";
-        } else if (!sameText(task.getContext(), request.getContext())) {
+        if (!sameText(task.getContext(), request.getContext())) {
             violation = "текст задания";
         } else if (!sameItems(task.getItems(), request.getItems())) {
             violation = "пункты и ответы задания";

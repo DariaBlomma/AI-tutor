@@ -47,6 +47,12 @@
     border-color: var(--p);
     background: rgba(157, 124, 242, 0.1);
   }
+
+  &:disabled {
+    background: rgba(157, 124, 242, 0.08);
+    border-color: rgba(157, 124, 242, 0.15);
+    opacity: 0.85;
+  }
 }
 
 .textareaError {

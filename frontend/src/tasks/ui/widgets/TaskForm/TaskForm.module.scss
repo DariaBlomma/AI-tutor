@@ -95,6 +95,14 @@
   &:active {
     transform: scale(0.98);
   }
+
+  &:disabled {
+    background: rgba(157, 124, 242, 0.08);
+    border-color: rgba(157, 124, 242, 0.15);
+    color: rgba(157, 124, 242, 0.5);
+    opacity: 0.85;
+    cursor: not-allowed;
+  }
 }
 
 .serverError {

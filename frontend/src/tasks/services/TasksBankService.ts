@@ -63,7 +63,7 @@ export class TasksBankService {
 
     /**
      * GET /api/tasks/by-public-id/{publicId}/usage -> TaskUsageResponse — назначено/решено ли задание.
-     * Страница редактирования блокирует по нему содержательные поля (бэк проверяет это же при PUT — 400).
+     * Страница редактирования блокирует по нему пункты и текст материала (бэк проверяет это же при PUT — 400).
      */
     static async getTaskUsage(publicId: string): Promise<TaskUsageDto> {
         const response = await api.get<TaskUsageDto>(`${TASKS_PATH}/by-public-id/${encodeURIComponent(publicId)}/usage`);

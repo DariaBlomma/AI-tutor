@@ -39,11 +39,11 @@ export interface TaskFormProps {
     /** Режим редактирования: механика задания фиксируется (задаётся только при создании). */
     editMode?: boolean;
     /**
-     * Задание уже назначено кому-то или кем-то решено (GET .../usage): содержательные поля
-     * (название, инструкция, текст, пункты/ответы) блокируются — править можно только метаданные
-     * (уровни, экзамен, темы, грамматические типы). Бэкенд дублирует проверку на PUT (400).
+     * Задание уже назначено кому-то или кем-то решено (GET .../usage): пункты и текст материала
+     * блокируются — править можно название, инструкцию, уровни, экзамен, темы, грамматические типы.
+     * Бэкенд дублирует проверку на PUT (400).
      */
-    contentLocked?: boolean;
+    itemsLocked?: boolean;
     /** Текст кнопки сохранения (отличается в режимах). */
     submitLabel: string;
     submittingLabel: string;
@@ -62,7 +62,7 @@ export interface TaskFormProps {
 export function TaskForm({
     initial,
     editMode = false,
-    contentLocked = false,
+    itemsLocked = false,
     submitLabel,
     submittingLabel,
     isSubmitting,
@@ -143,8 +143,6 @@ export function TaskForm({
                     maxLength={TASK_NAME_MAX_LENGTH}
                     placeholder="Например: Phrasal verbs — Travel"
                     error={showErrors ? errors.name : undefined}
-                    disabled={contentLocked}
-                    readOnly={contentLocked}
                     onChange={(e) => setName(e.target.value)}
                 />
                 <div className={`${styles.counter} ${name.length > TASK_NAME_MAX_LENGTH ? styles.over : ''}`}>
@@ -158,10 +156,10 @@ export function TaskForm({
                 {editMode && (
                     <div className={styles.warning}>Механику задания нельзя изменить после создания — она задаёт набор полей пунктов.</div>
                 )}
-                {contentLocked && (
+                {itemsLocked && (
                     <div className={styles.warning}>
-                        ⚠ Задание уже назначено ученикам или кем-то решено — название, инструкция, текст и пункты
-                        с ответами защищены от правки (меняются только уровни, экзамен, темы и грамматические типы).
+                        ⚠ Задание уже назначено ученикам или кем-то решено — пункты и текст материала защищены от правки
+                        (название, инструкция, уровни, экзамен, темы и грамматические типы можно менять).
                     </div>
                 )}
             </div>
@@ -172,7 +170,6 @@ export function TaskForm({
                 maxLength={INSTRUCTION_MAX_LENGTH}
                 onChange={setInstruction}
                 error={showErrors ? errors.instruction : undefined}
-                disabled={contentLocked}
             />
 
             <div className={styles.section}>
@@ -253,7 +250,7 @@ export function TaskForm({
                     onTextChange={setMaterialText}
                     required
                     error={showErrors ? errors.text : undefined}
-                    disabled={contentLocked}
+                    disabled={itemsLocked}
                 />
             )}
 
@@ -273,13 +270,13 @@ export function TaskForm({
                         onMoveUp={(i) => moveItem(i, i - 1)}
                         onMoveDown={(i) => moveItem(i, i + 1)}
                         onRemove={(i) => setItems((prev) => prev.filter((_, idx) => idx !== i))}
-                        disabled={contentLocked}
+                        disabled={itemsLocked}
                     />
                 ))}
 
                 {showErrors && !items.length && <div className={styles.fieldError}>Добавьте хотя бы один пункт задания</div>}
 
-                <button type="button" className={styles.addBtn} disabled={contentLocked} onClick={() => setItems((prev) => [...prev, createEmptyItem(itemType)])}>
+                <button type="button" className={styles.addBtn} disabled={itemsLocked} onClick={() => setItems((prev) => [...prev, createEmptyItem(itemType)])}>
                     + Добавить пункт
                 </button>
             </div>
