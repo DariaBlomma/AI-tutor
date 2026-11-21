@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useWorkExecution } from '@/student/hooks/useWorkExecution';
 import { BackLink } from '@/tasks/ui/widgets/BackLink/BackLink';
@@ -41,26 +41,27 @@ export function WorkExecutionView({ workId }: WorkExecutionViewProps) {
         nextItem,
         completeWork,
         isSubmitting,
+        isCompleting,
     } = useWorkExecution(Number(workId));
+
+    const isLastItem = currentItemIndex === totalItems - 1;
+
+    const handleNextOrComplete = async () => {
+        if (isLastItem) {
+            await completeWork();
+            navigate({
+                to: '/student/work/$workId/report',
+                params: { workId: String(workId) },
+            });
+        } else {
+            nextItem();
+        }
+    };
 
     // Автостарт при монтировании
     useEffect(() => {
         startWork();
     }, [startWork]);
-
-    // Редирект на результаты когда все пункты решены
-    const allItemsSolvedRef = useRef(false);
-    useEffect(() => {
-        if (solvedItems >= totalItems && totalItems > 0 && !allItemsSolvedRef.current) {
-            allItemsSolvedRef.current = true;
-            completeWork().then(() => {
-                navigate({
-                    to: '/student/work/$workId/report',
-                    params: { workId: String(workId) },
-                });
-            });
-        }
-    }, [solvedItems, totalItems, navigate, workId, completeWork]);
 
     if (isLoading) {
         return (
@@ -82,22 +83,13 @@ export function WorkExecutionView({ workId }: WorkExecutionViewProps) {
         );
     }
 
-    // Работа завершена — редирект на результаты
-    if (workDetail?.status === 'COMPLETED') {
+    // Fallback: currentItemIndex вышел за границы (например, после обновления страницы)
+    if (!currentItem) {
         navigate({
             to: '/student/work/$workId/report',
             params: { workId: String(workId) },
         });
         return null;
-    }
-
-    if (!currentItem) {
-        return (
-            <div className={styles.page}>
-                <BackLink to="/" label="К заданиям" />
-                <p>Задание не найдено</p>
-            </div>
-        );
     }
 
     return (
@@ -240,9 +232,10 @@ export function WorkExecutionView({ workId }: WorkExecutionViewProps) {
                     <button
                         type="button"
                         className={`${styles.btn} ${styles.btnPrimary}`}
-                        onClick={nextItem}
+                        onClick={handleNextOrComplete}
+                        disabled={isCompleting}
                     >
-                        Далее
+                        {isCompleting ? 'Завершение...' : (isLastItem ? 'Завершить' : 'Далее')}
                     </button>
                 ) : previousAnswers.length >= 3 ? (
                     <>
@@ -252,9 +245,10 @@ export function WorkExecutionView({ workId }: WorkExecutionViewProps) {
                         <button
                             type="button"
                             className={`${styles.btn} ${styles.btnPrimary}`}
-                            onClick={nextItem}
+                            onClick={handleNextOrComplete}
+                            disabled={isCompleting}
                         >
-                            Далее
+                            {isCompleting ? 'Завершение...' : (isLastItem ? 'Завершить' : 'Далее')}
                         </button>
                     </>
                 ) : (

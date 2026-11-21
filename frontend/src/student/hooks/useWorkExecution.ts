@@ -199,16 +199,6 @@ export function useWorkExecution(workId: number): UseWorkExecutionResult {
         setCurrentItemIndex((prev) => prev + 1);
     }, []);
 
-    // Навигация на результаты когда все пункты решены
-    useEffect(() => {
-        if (workDetail && currentItemIndex >= workDetail.items.length) {
-            navigate({
-                to: '/student/work/$workId/report',
-                params: { workId: String(workId) },
-            });
-        }
-    }, [currentItemIndex, workDetail, navigate, workId]);
-
     const workIdRef = useRef(workId);
     useEffect(() => { workIdRef.current = workId; }, [workId]);
 
@@ -216,8 +206,9 @@ export function useWorkExecution(workId: number): UseWorkExecutionResult {
     const completeMutation = useMutation({
         mutationFn: () => StudentWorkService.completeWork(workIdRef.current),
         onSuccess: () => {
-            // Инвалидируем query дашборда, чтобы обновить статус и статистику
+            // Инвалидируем query дашборда и report, чтобы обновить статус и статистику
             queryClient.invalidateQueries({ queryKey: ['student', 'dashboard'] });
+            queryClient.invalidateQueries({ queryKey: ['student', 'work'] });
         },
     });
 
