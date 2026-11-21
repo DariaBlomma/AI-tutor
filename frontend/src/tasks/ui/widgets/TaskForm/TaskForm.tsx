@@ -134,6 +134,23 @@ export function TaskForm({
 
     return (
         <>
+            <div className={styles.sectionTitle}>Название</div>
+
+            <div className={styles.field}>
+                <BaseInputText
+                    id="task-name"
+                    value={name}
+                    maxLength={TASK_NAME_MAX_LENGTH}
+                    placeholder="Например: Phrasal verbs — Travel"
+                    error={showErrors ? errors.name : undefined}
+                    disabled={contentLocked}
+                    readOnly={contentLocked}
+                    onChange={(e) => setName(e.target.value)}
+                />
+                <div className={`${styles.counter} ${name.length > TASK_NAME_MAX_LENGTH ? styles.over : ''}`}>
+                    {name.length} / {TASK_NAME_MAX_LENGTH}
+                </div>
+            </div>
             {/* ТИП ЗАДАНИЯ */}
             <div className={styles.section}>
                 <div className={styles.sectionTitle}>Тип задания</div>
@@ -158,27 +175,8 @@ export function TaskForm({
                 disabled={contentLocked}
             />
 
-            {/* ОСНОВНОЕ */}
             <div className={styles.section}>
-                <div className={styles.sectionTitle}>Основное</div>
-
-                <div className={styles.field}>
-                    <BaseInputText
-                        id="task-name"
-                        value={name}
-                        maxLength={TASK_NAME_MAX_LENGTH}
-                        placeholder="Например: Phrasal verbs — Travel"
-                        error={showErrors ? errors.name : undefined}
-                        disabled={contentLocked}
-                        readOnly={contentLocked}
-                        onChange={(e) => setName(e.target.value)}
-                    />
-                    <div className={`${styles.counter} ${name.length > TASK_NAME_MAX_LENGTH ? styles.over : ''}`}>
-                        {name.length} / {TASK_NAME_MAX_LENGTH}
-                    </div>
-                </div>
-
-                <div className={styles.field}>
+                        <div className={styles.field}>
                     <BaseSelectMulti
                         options={CEFR_LEVEL_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
                         value={levels}

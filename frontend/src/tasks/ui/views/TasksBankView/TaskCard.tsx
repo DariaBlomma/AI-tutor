@@ -93,7 +93,11 @@ export function TaskCard({
                 <Link to="/tasks-bank/$publicId" params={{ publicId: task.publicId }} className={`${styles.publicId} ${styles.publicIdLink}`}>
                     {task.publicId}
                 </Link>
-                <TaskStudentsBadge key={`${task.id}-${assignmentsReloadToken ?? 0}`} taskId={task.id} />
+                <TaskStudentsBadge 
+                    className={styles.assignedUsersBadge}
+                    key={`${task.id}-${assignmentsReloadToken ?? 0}`}
+                    taskId={task.id}
+                />
                 {canManage && (
                     <div className={styles.rightActions}>
                         <Link
