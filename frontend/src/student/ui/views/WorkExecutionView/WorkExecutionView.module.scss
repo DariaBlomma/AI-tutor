@@ -211,6 +211,13 @@
     }
 }
 
+.attemptsLimitMessage {
+    font-size: 13px;
+    color: var(--err);
+    text-align: center;
+    font-weight: 600;
+}
+
 .actions {
     display: flex;
     flex-direction: column;

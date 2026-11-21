@@ -21,7 +21,7 @@ export function TaskAssignmentItem({ card, showProgress }: TaskAssignmentItemPro
 
     const handleClick = () => {
         if (card.status === 'ASSIGNED' || card.status === 'IN_PROGRESS') {
-            navigate({ to: '/student/work/$workId', params: { workId: String(card.id) } });
+            navigate({ to: '/student/work/$workId/execution', params: { workId: String(card.id) } });
         } else if (card.status === 'COMPLETED') {
             navigate({ to: '/student/work/$workId/report', params: { workId: String(card.id) } });
         }

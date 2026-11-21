@@ -178,7 +178,7 @@ export function WorkExecutionView({ workId }: WorkExecutionViewProps) {
                     placeholder="Введите ответ"
                     value={answer}
                     onChange={(e) => setAnswer(e.target.value)}
-                    disabled={isSubmitting || (feedback?.correct ?? false)}
+                    disabled={isSubmitting || (feedback?.correct ?? false) || previousAnswers.length >= 3}
                     error={feedback && !feedback.correct ? 'Неверный ответ' : undefined}
                     variant="full"
                 />
@@ -233,6 +233,19 @@ export function WorkExecutionView({ workId }: WorkExecutionViewProps) {
                     >
                         Далее
                     </button>
+                ) : previousAnswers.length >= 3 ? (
+                    <>
+                        <div className={styles.attemptsLimitMessage}>
+                            Попытки исчерпаны
+                        </div>
+                        <button
+                            type="button"
+                            className={`${styles.btn} ${styles.btnPrimary}`}
+                            onClick={nextItem}
+                        >
+                            Далее
+                        </button>
+                    </>
                 ) : (
                     <button
                         type="button"
