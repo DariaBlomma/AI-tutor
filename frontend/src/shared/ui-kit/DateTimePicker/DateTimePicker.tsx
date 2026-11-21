@@ -68,11 +68,13 @@ export function DateTimePicker({ value, onChange, onClear }: DateTimePickerProps
                 <button type="button" className={styles.trigger} aria-label="Выбрать дату и время">
                     <span className={styles.triggerText}>{displayValue}</span>
                     {hasValue && (
-                        <button type="button" className={styles.clearButton} onClick={handleClear} aria-label="Очистить">
+                        <span className={styles.clearButton} onClick={handleClear} aria-label="Очистить" role="button" tabIndex={0} onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') handleClear(e as unknown as React.MouseEvent);
+                        }}>
                             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M3.5 3.5L10.5 10.5M10.5 3.5L3.5 10.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                             </svg>
-                        </button>
+                        </span>
                     )}
                     <CalendarIcon />
                 </button>
