@@ -8,3 +8,5 @@ export * from './IconCopy';
 export * from './IconTrianglesFrame';
 export * from './IconTrapezoidShape';
 export * from './IconAlert';
+export * from './IconCheck';
+export * from './IconCross';

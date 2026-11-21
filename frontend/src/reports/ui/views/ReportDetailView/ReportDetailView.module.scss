@@ -1,0 +1,33 @@
+@use '@/shared/styles/variables' as *;
+
+.page {
+    padding: 20px;
+    padding-bottom: 80px;
+    min-height: 100vh;
+    color: var(--c1);
+}
+
+.section {
+    margin-bottom: 24px;
+}
+
+.sectionTitle {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(157, 124, 242, 0.2);
+    color: var(--c1);
+}
+
+.positionsList {
+    display: flex;
+    flex-direction: column;
+}
+
+.error {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--err);
+    font-size: 16px;
+}

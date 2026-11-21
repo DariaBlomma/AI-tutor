@@ -1,1 +1,0 @@
-export { WorkResultsView } from './WorkResultsView';

@@ -203,7 +203,7 @@ export function useWorkExecution(workId: number): UseWorkExecutionResult {
     useEffect(() => {
         if (workDetail && currentItemIndex >= workDetail.items.length) {
             navigate({
-                to: '/student/work/$workId/results',
+                to: '/student/work/$workId/report',
                 params: { workId: String(workId) },
             });
         }

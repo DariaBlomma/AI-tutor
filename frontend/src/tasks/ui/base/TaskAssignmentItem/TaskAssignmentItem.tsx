@@ -23,7 +23,7 @@ export function TaskAssignmentItem({ card, showProgress }: TaskAssignmentItemPro
         if (card.status === 'ASSIGNED' || card.status === 'IN_PROGRESS') {
             navigate({ to: '/student/work/$workId', params: { workId: String(card.id) } });
         } else if (card.status === 'COMPLETED') {
-            navigate({ to: '/student/work/$workId/results', params: { workId: String(card.id) } });
+            navigate({ to: '/student/work/$workId/report', params: { workId: String(card.id) } });
         }
     };
 

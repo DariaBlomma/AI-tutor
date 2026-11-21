@@ -55,7 +55,7 @@ export function WorkExecutionView({ workId }: WorkExecutionViewProps) {
             allItemsSolvedRef.current = true;
             completeWork().then(() => {
                 navigate({
-                    to: '/student/work/$workId/results',
+                    to: '/student/work/$workId/report',
                     params: { workId: String(workId) },
                 });
             });
@@ -85,7 +85,7 @@ export function WorkExecutionView({ workId }: WorkExecutionViewProps) {
     // Работа завершена — редирект на результаты
     if (workDetail?.status === 'COMPLETED') {
         navigate({
-            to: '/student/work/$workId/results',
+            to: '/student/work/$workId/report',
             params: { workId: String(workId) },
         });
         return null;

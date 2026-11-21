@@ -1,8 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { WorkResultsView } from '@/student/ui/views/WorkResultsView/WorkResultsView';
+import { ReportDetailView } from '@/reports/ui/views/ReportDetailView/ReportDetailView';
+import { StudentReportsService } from '@/reports/services/StudentReportsService';
 import { AuthService } from '@/auth/services/AuthService';
 
-export const Route = createFileRoute('/student/work/$workId/results')({
+export const Route = createFileRoute('/student/work/$workId/report')({
     loader: async ({ params }) => {
         const role = AuthService.getUserRole();
         if (role !== 'STUDENT') {
@@ -14,12 +15,8 @@ export const Route = createFileRoute('/student/work/$workId/results')({
         }
         return { workId };
     },
-    errorComponent: () => {
-        return (
-            <div style={{ padding: 20, color: 'var(--err)', textAlign: 'center' }}>
-                <p>Страница не найдена</p>
-            </div>
-        );
+    component: () => {
+        const { workId } = Route.useLoaderData();
+        return <ReportDetailView fetcher={() => StudentReportsService.getWorkReportDetail(workId)} />;
     },
-    component: () => <WorkResultsView workId={Number(Route.useParams().workId)} />,
 });

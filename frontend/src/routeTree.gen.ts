@@ -26,7 +26,8 @@ import { Route as TeacherReportsRouteImport } from './routes/teacher/reports'
 import { Route as StudentWorkWorkIdRouteImport } from './routes/student/work.$workId'
 import { Route as TasksBankEditPublicIdRouteImport } from './routes/tasks-bank/edit.$publicId'
 import { Route as StudentWorkWorkIdExecutionRouteImport } from './routes/student/work.$workId.execution'
-import { Route as StudentWorkWorkIdResultsRouteImport } from './routes/student/work.$workId.results'
+import { Route as StudentWorkWorkIdReportRouteImport } from './routes/student/work.$workId.report'
+import { Route as TeacherStudentsStudentIdWorkWorkIdReportRouteImport } from './routes/teacher/students/$studentId/work/$workId.report'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -114,11 +115,16 @@ const StudentWorkWorkIdExecutionRoute =
     path: '/execution',
     getParentRoute: () => StudentWorkWorkIdRoute,
   } as any)
-const StudentWorkWorkIdResultsRoute =
-  StudentWorkWorkIdResultsRouteImport.update({
-    id: '/results',
-    path: '/results',
-    getParentRoute: () => StudentWorkWorkIdRoute,
+const StudentWorkWorkIdReportRoute = StudentWorkWorkIdReportRouteImport.update({
+  id: '/report',
+  path: '/report',
+  getParentRoute: () => StudentWorkWorkIdRoute,
+} as any)
+const TeacherStudentsStudentIdWorkWorkIdReportRoute =
+  TeacherStudentsStudentIdWorkWorkIdReportRouteImport.update({
+    id: '/teacher/students/$studentId/work/$workId/report',
+    path: '/teacher/students/$studentId/work/$workId/report',
+    getParentRoute: () => rootRouteImport,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -139,7 +145,8 @@ export interface FileRoutesByFullPath {
   '/student/work/$workId': typeof StudentWorkWorkIdRouteWithChildren
   '/tasks-bank/edit/$publicId': typeof TasksBankEditPublicIdRoute
   '/student/work/$workId/execution': typeof StudentWorkWorkIdExecutionRoute
-  '/student/work/$workId/results': typeof StudentWorkWorkIdResultsRoute
+  '/student/work/$workId/report': typeof StudentWorkWorkIdReportRoute
+  '/teacher/students/$studentId/work/$workId/report': typeof TeacherStudentsStudentIdWorkWorkIdReportRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -159,7 +166,8 @@ export interface FileRoutesByTo {
   '/student/work/$workId': typeof StudentWorkWorkIdRouteWithChildren
   '/tasks-bank/edit/$publicId': typeof TasksBankEditPublicIdRoute
   '/student/work/$workId/execution': typeof StudentWorkWorkIdExecutionRoute
-  '/student/work/$workId/results': typeof StudentWorkWorkIdResultsRoute
+  '/student/work/$workId/report': typeof StudentWorkWorkIdReportRoute
+  '/teacher/students/$studentId/work/$workId/report': typeof TeacherStudentsStudentIdWorkWorkIdReportRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -180,7 +188,8 @@ export interface FileRoutesById {
   '/student/work/$workId': typeof StudentWorkWorkIdRouteWithChildren
   '/tasks-bank/edit/$publicId': typeof TasksBankEditPublicIdRoute
   '/student/work/$workId/execution': typeof StudentWorkWorkIdExecutionRoute
-  '/student/work/$workId/results': typeof StudentWorkWorkIdResultsRoute
+  '/student/work/$workId/report': typeof StudentWorkWorkIdReportRoute
+  '/teacher/students/$studentId/work/$workId/report': typeof TeacherStudentsStudentIdWorkWorkIdReportRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -202,7 +211,8 @@ export interface FileRouteTypes {
     | '/student/work/$workId'
     | '/tasks-bank/edit/$publicId'
     | '/student/work/$workId/execution'
-    | '/student/work/$workId/results'
+    | '/student/work/$workId/report'
+    | '/teacher/students/$studentId/work/$workId/report'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -222,7 +232,8 @@ export interface FileRouteTypes {
     | '/student/work/$workId'
     | '/tasks-bank/edit/$publicId'
     | '/student/work/$workId/execution'
-    | '/student/work/$workId/results'
+    | '/student/work/$workId/report'
+    | '/teacher/students/$studentId/work/$workId/report'
   id:
     | '__root__'
     | '/'
@@ -242,7 +253,8 @@ export interface FileRouteTypes {
     | '/student/work/$workId'
     | '/tasks-bank/edit/$publicId'
     | '/student/work/$workId/execution'
-    | '/student/work/$workId/results'
+    | '/student/work/$workId/report'
+    | '/teacher/students/$studentId/work/$workId/report'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -258,6 +270,7 @@ export interface RootRouteChildren {
   TasksBankIndexRoute: typeof TasksBankIndexRoute
   StudentWorkWorkIdRoute: typeof StudentWorkWorkIdRouteWithChildren
   TasksBankEditPublicIdRoute: typeof TasksBankEditPublicIdRoute
+  TeacherStudentsStudentIdWorkWorkIdReportRoute: typeof TeacherStudentsStudentIdWorkWorkIdReportRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -381,12 +394,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentWorkWorkIdExecutionRouteImport
       parentRoute: typeof StudentWorkWorkIdRoute
     }
-    '/student/work/$workId/results': {
-      id: '/student/work/$workId/results'
-      path: '/results'
-      fullPath: '/student/work/$workId/results'
-      preLoaderRoute: typeof StudentWorkWorkIdResultsRouteImport
+    '/student/work/$workId/report': {
+      id: '/student/work/$workId/report'
+      path: '/report'
+      fullPath: '/student/work/$workId/report'
+      preLoaderRoute: typeof StudentWorkWorkIdReportRouteImport
       parentRoute: typeof StudentWorkWorkIdRoute
+    }
+    '/teacher/students/$studentId/work/$workId/report': {
+      id: '/teacher/students/$studentId/work/$workId/report'
+      path: '/teacher/students/$studentId/work/$workId/report'
+      fullPath: '/teacher/students/$studentId/work/$workId/report'
+      preLoaderRoute: typeof TeacherStudentsStudentIdWorkWorkIdReportRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -411,12 +431,12 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
 
 interface StudentWorkWorkIdRouteChildren {
   StudentWorkWorkIdExecutionRoute: typeof StudentWorkWorkIdExecutionRoute
-  StudentWorkWorkIdResultsRoute: typeof StudentWorkWorkIdResultsRoute
+  StudentWorkWorkIdReportRoute: typeof StudentWorkWorkIdReportRoute
 }
 
 const StudentWorkWorkIdRouteChildren: StudentWorkWorkIdRouteChildren = {
   StudentWorkWorkIdExecutionRoute: StudentWorkWorkIdExecutionRoute,
-  StudentWorkWorkIdResultsRoute: StudentWorkWorkIdResultsRoute,
+  StudentWorkWorkIdReportRoute: StudentWorkWorkIdReportRoute,
 }
 
 const StudentWorkWorkIdRouteWithChildren =
@@ -435,6 +455,8 @@ const rootRouteChildren: RootRouteChildren = {
   TasksBankIndexRoute: TasksBankIndexRoute,
   StudentWorkWorkIdRoute: StudentWorkWorkIdRouteWithChildren,
   TasksBankEditPublicIdRoute: TasksBankEditPublicIdRoute,
+  TeacherStudentsStudentIdWorkWorkIdReportRoute:
+    TeacherStudentsStudentIdWorkWorkIdReportRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

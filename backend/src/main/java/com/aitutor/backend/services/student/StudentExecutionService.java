@@ -1,5 +1,7 @@
 package com.aitutor.backend.services.student;
 
+import com.aitutor.backend.dto.report.WorkItemAnswerDto;
+import com.aitutor.backend.dto.report.WorkReportDetailDto;
 import com.aitutor.backend.dto.student.StudentItemProgressDto;
 import com.aitutor.backend.dto.student.StudentSubmitAnswerRequest;
 import com.aitutor.backend.dto.student.StudentSubmitAnswerResponse;
@@ -11,9 +13,13 @@ import com.aitutor.backend.dto.tasktype.TaskTypeResponse;
 import com.aitutor.backend.dto.topic.TopicResponse;
 import com.aitutor.backend.entities.StudentWork;
 import com.aitutor.backend.entities.StudentWorkItemProgress;
+import com.aitutor.backend.entities.Task;
 import com.aitutor.backend.entities.TaskItem;
+import com.aitutor.backend.entities.TaskType;
+import com.aitutor.backend.entities.Topic;
 import com.aitutor.backend.enums.ItemProgressStatus;
 import com.aitutor.backend.enums.WorkStatus;
+import com.aitutor.backend.exceptions.ConflictException;
 import com.aitutor.backend.exceptions.ConflictException;
 import com.aitutor.backend.exceptions.InvalidRequestException;
 import com.aitutor.backend.exceptions.ResourceNotFoundException;
@@ -239,6 +245,47 @@ public class StudentExecutionService {
                 .build();
     }
 
+    /**
+     * Детали выполненной работы для студента: текст задания с эталонами + ответы ученика.
+     * Только COMPLETED — на другую работу 409.
+     */
+    @Transactional(readOnly = true)
+    public WorkReportDetailDto getWorkReport(Long studentId, Long workId) {
+        StudentWork work = loadOwnedWork(studentId, workId);
+        if (work.getStatus() != WorkStatus.COMPLETED) {
+            throw new ConflictException("Детали доступны только для выполненных работ. Текущий статус: "
+                    + work.getStatus());
+        }
+
+        Task task = work.getTask();
+        List<StudentWorkItemProgress> progresses = progressRepository.findByWorkIdWithItem(workId);
+        int errors = countFinalErrors(progresses);
+
+        List<WorkItemAnswerDto> items = progresses.stream()
+                .sorted(Comparator.comparing(p -> p.getTaskItem().getPosition()))
+                .map(p -> toItemAnswer(p, p.getTaskItem()))
+                .toList();
+
+        return WorkReportDetailDto.builder()
+                .workId(work.getId())
+                .studentId(work.getStudent().getId())
+                .studentName(displayName(work.getStudent()))
+                .taskId(task.getId())
+                .taskPublicId(task.getPublicId())
+                .taskName(task.getName())
+                .topics(topicNames(task.getTopics()))
+                .taskTypes(taskTypeNames(task.getTaskTypes()))
+                .isMixed(task.getIsMixed())
+                .context(task.getContext())
+                .startedAt(work.getStartedAt())
+                .completedAt(work.getCompletedAt())
+                .durationSeconds(durationSeconds(work))
+                .errorsCount(errors)
+                .items(items)
+                .aiComment(null)
+                .build();
+    }
+
     // ---------- helpers ----------
 
     /** Работа существует, не удалена и принадлежит именно этому ученику. */
@@ -403,6 +450,58 @@ public class StudentExecutionService {
     }
 
     /** Для пункта без начатой работы отдаём виртуальный NOT_STARTED с нулями. */
+    /** Ошибки: позиции, где ФИНАЛЬНЫЙ ответ не совпал с эталоном. */
+    private int countFinalErrors(List<StudentWorkItemProgress> progresses) {
+        return (int) progresses.stream()
+                .filter(p -> {
+                    String correct = p.getTaskItem().getCorrectAnswer();
+                    String answer = p.getStudentAnswer();
+                    return correct != null && (answer == null
+                            || !correct.trim().equalsIgnoreCase(answer.trim()));
+                })
+                .count();
+    }
+
+    private WorkItemAnswerDto toItemAnswer(StudentWorkItemProgress progress, TaskItem item) {
+        String correct = item.getCorrectAnswer();
+        String answer = progress.getStudentAnswer();
+        boolean isCorrect = correct != null && answer != null
+                && correct.trim().equalsIgnoreCase(answer.trim());
+        return WorkItemAnswerDto.builder()
+                .taskItemId(item.getId())
+                .position(item.getPosition())
+                .itemType(item.getItemType().name())
+                .prompt(item.getPrompt())
+                .content(item.getContent())
+                .correctAnswer(correct)
+                .studentAnswer(answer)
+                .correct(isCorrect)
+                .attemptsCount(progress.getAnswerAttempts())
+                .hintsGiven(progress.getHintsGiven())
+                .build();
+    }
+
+    private Long durationSeconds(StudentWork work) {
+        if (work.getStartedAt() == null || work.getCompletedAt() == null) {
+            return null;
+        }
+        return java.time.Duration.between(work.getStartedAt(), work.getCompletedAt()).getSeconds();
+    }
+
+    private List<String> topicNames(Set<Topic> topics) {
+        return topics.stream().map(Topic::getName).sorted().toList();
+    }
+
+    private List<String> taskTypeNames(Set<TaskType> types) {
+        return types.stream().map(TaskType::getName).sorted().toList();
+    }
+
+    private String displayName(com.aitutor.backend.entities.User user) {
+        String full = ((user.getFirstName() == null ? "" : user.getFirstName()) + " "
+                + (user.getLastName() == null ? "" : user.getLastName())).trim();
+        return full.isEmpty() ? user.getUserName() : full;
+    }
+
     private StudentItemProgressDto toProgressDto(TaskItem item, StudentWorkItemProgress progress) {
         if (progress == null) {
             return StudentItemProgressDto.builder()

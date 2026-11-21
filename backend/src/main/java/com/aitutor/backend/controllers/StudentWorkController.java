@@ -1,5 +1,6 @@
 package com.aitutor.backend.controllers;
 
+import com.aitutor.backend.dto.report.WorkReportDetailDto;
 import com.aitutor.backend.dto.student.AssignTasksRequest;
 import com.aitutor.backend.dto.student.AssignmentResultResponse;
 import com.aitutor.backend.dto.student.StudentProgressOverviewResponse;
@@ -134,5 +135,12 @@ public class StudentWorkController {
     public StudentWorkSummaryResponse getSummary(@PathVariable Long workId,
                                                  @AuthenticationPrincipal CustomUserDetails userDetails) {
         return studentExecutionService.getSummary(userDetails.getId(), workId);
+    }
+
+    /** Детали выполненной работы: текст задания с эталонами + ответы ученика. Только COMPLETED. */
+    @GetMapping("/student/work/{workId}/report")
+    public WorkReportDetailDto getWorkReport(@PathVariable Long workId,
+                                             @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return studentExecutionService.getWorkReport(userDetails.getId(), workId);
     }
 }

@@ -1,0 +1,80 @@
+@use '@/shared/styles/variables' as *;
+
+.positionItem {
+    padding: 16px;
+    background: rgba(157, 124, 242, 0.05);
+    border: 1px solid rgba(157, 124, 242, 0.2);
+    border-radius: 6px;
+    margin-bottom: 12px;
+}
+
+.positionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.positionNum {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--c1);
+}
+
+.status {
+    font-size: 18px;
+}
+
+.correct {
+    color: var(--ok);
+}
+
+.wrong {
+    color: var(--err);
+}
+
+.prompt {
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    background: rgba(157, 124, 242, 0.08);
+    color: var(--c1);
+    border-radius: 4px;
+}
+
+.answers {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.answerRow {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    font-size: 13px;
+    border-radius: 4px;
+}
+
+.wrongAnswer {
+    background: rgba(255, 107, 107, 0.08);
+    border-left: 2px solid var(--err);
+}
+
+.correctAnswer {
+    background: rgba(107, 203, 119, 0.08);
+    border-left: 2px solid var(--ok);
+}
+
+.answerLabel {
+    color: var(--c3);
+    font-size: 11px;
+    margin-right: 8px;
+}
+
+.answerValue {
+    font-weight: 500;
+    color: var(--c1);
+}
