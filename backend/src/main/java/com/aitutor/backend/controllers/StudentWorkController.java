@@ -66,6 +66,7 @@ public class StudentWorkController {
      * Пагинация и сортировка (deadline | status | createdAt, direction asc|desc).
      * Фильтрация по статусу (status), дедлайну (deadlineFrom / deadlineTo / deadlineExcludeFrom)
      * и createdAt (createdAtFrom) — для UI-пресетов.
+     * Для COMPLETED: completedAtFrom / completedAtTo — фильтрация по дате выполнения.
      * Без параметров — поведение как раньше: все работы, свежие сверху (createdAt desc).
      */
     @GetMapping("/student/work")
@@ -78,9 +79,11 @@ public class StudentWorkController {
                                                @RequestParam(required = false) Instant deadlineFrom,
                                                @RequestParam(required = false) Instant deadlineTo,
                                                @RequestParam(required = false) Instant deadlineExcludeFrom,
-                                               @RequestParam(required = false) Instant createdAtFrom) {
+                                               @RequestParam(required = false) Instant createdAtFrom,
+                                               @RequestParam(required = false) Instant completedAtFrom,
+                                               @RequestParam(required = false) Instant completedAtTo) {
         return studentWorkService.getMyWorkPage(userDetails.getId(), page, size, sort, direction, status,
-                deadlineFrom, deadlineTo, deadlineExcludeFrom, createdAtFrom);
+                deadlineFrom, deadlineTo, deadlineExcludeFrom, createdAtFrom, completedAtFrom, completedAtTo);
     }
 
     /**

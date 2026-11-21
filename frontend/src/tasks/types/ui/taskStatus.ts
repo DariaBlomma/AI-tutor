@@ -56,6 +56,8 @@ export interface BackendFilterParams {
     deadlineTo?: () => string;
     deadlineExcludeFrom?: () => string;
     createdAtFrom?: () => string;
+    completedAtFrom?: () => string;
+    completedAtTo?: () => string;
 }
 
 /**

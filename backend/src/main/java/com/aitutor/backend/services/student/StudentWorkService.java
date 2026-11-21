@@ -160,6 +160,7 @@ public class StudentWorkService {
      * Второй ключ createdAt DESC — детерминированная раздача одинаковых значений.
      * Фильтрация по статусу, дедлайну (deadlineFrom / deadlineTo / deadlineExcludeFrom)
      * и createdAt (createdAtFrom) — для UI-пресетов.
+     * Для COMPLETED: completedAtFrom / completedAtTo — фильтрация по дате выполнения.
      */
     @Transactional(readOnly = true)
     public Page<StudentWorkResponse> getMyWorkPage(Long studentId, int page, int size,
@@ -167,7 +168,8 @@ public class StudentWorkService {
                                                    WorkStatus status,
                                                    Instant deadlineFrom, Instant deadlineTo,
                                                    Instant deadlineExcludeFrom,
-                                                   Instant createdAtFrom) {
+                                                   Instant createdAtFrom,
+                                                   Instant completedAtFrom, Instant completedAtTo) {
         String property = SORT_WHITELIST.get(sort == null ? "createdAt" : sort);
         if (property == null) {
             throw new InvalidRequestException("Недопустимое поле сортировки: " + sort
@@ -213,6 +215,14 @@ public class StudentWorkService {
         if (createdAtFrom != null) {
             final Instant cf = createdAtFrom;
             spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("createdAt"), cf));
+        }
+        if (completedAtFrom != null) {
+            final Instant caf = completedAtFrom;
+            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("completedAt"), caf));
+        }
+        if (completedAtTo != null) {
+            final Instant cat = completedAtTo;
+            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("completedAt"), cat));
         }
 
         return studentWorkRepository.findAll(spec, request)

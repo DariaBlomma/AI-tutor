@@ -15,6 +15,8 @@ export interface TaskApiFilters {
     deadlineTo?: string | null;
     deadlineExcludeFrom?: string | null;
     createdAtFrom?: string | null;
+    completedAtFrom?: string | null;
+    completedAtTo?: string | null;
     datePreset?: DatePreset;
 }
 
@@ -65,9 +67,11 @@ export function useTaskFilters(pageSize: number = 10): UseTaskFiltersResult {
             ? UI_STATUS_TO_BACKEND[statusFilter]
             : {};
 
-        // Если статус не задаёт deadline — используем datePreset
-        const deadlineFrom = statusParams.deadlineFrom?.() ?? fallbackFrom;
-        const deadlineTo = statusParams.deadlineTo?.() ?? fallbackTo;
+        // Для COMPLETED — фильтруем по completedAt из datePreset/dateRange,
+        // для остальных — по deadline из UI_STATUS_TO_BACKEND
+        const isCompleted = statusParams.status === 'COMPLETED';
+        const deadlineFrom = isCompleted ? undefined : (statusParams.deadlineFrom?.() ?? fallbackFrom);
+        const deadlineTo = isCompleted ? undefined : (statusParams.deadlineTo?.() ?? fallbackTo);
 
         return {
             page,
@@ -79,6 +83,8 @@ export function useTaskFilters(pageSize: number = 10): UseTaskFiltersResult {
             deadlineTo,
             deadlineExcludeFrom: statusParams.deadlineExcludeFrom?.(),
             createdAtFrom: statusParams.createdAtFrom?.(),
+            completedAtFrom: isCompleted ? fallbackFrom : statusParams.completedAtFrom?.(),
+            completedAtTo: isCompleted ? fallbackTo : statusParams.completedAtTo?.(),
             datePreset,
         };
     }, [page, statusFilter, datePreset, pageSize]);

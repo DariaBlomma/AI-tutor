@@ -42,6 +42,8 @@ export interface HomeworkFilters {
     deadlineTo?: string | null;
     deadlineExcludeFrom?: string | null;
     createdAtFrom?: string | null;
+    completedAtFrom?: string | null;
+    completedAtTo?: string | null;
 }
 
 /**
@@ -63,6 +65,8 @@ export class StudentDashboardService {
         if (filters?.deadlineTo) params.append('deadlineTo', filters.deadlineTo);
         if (filters?.deadlineExcludeFrom) params.append('deadlineExcludeFrom', filters.deadlineExcludeFrom);
         if (filters?.createdAtFrom) params.append('createdAtFrom', filters.createdAtFrom);
+        if (filters?.completedAtFrom) params.append('completedAtFrom', filters.completedAtFrom);
+        if (filters?.completedAtTo) params.append('completedAtTo', filters.completedAtTo);
 
         const response = await api.get<StudentWorkPage>(`${STUDENT_PATH}/work`, {
             params: Object.fromEntries(params),
