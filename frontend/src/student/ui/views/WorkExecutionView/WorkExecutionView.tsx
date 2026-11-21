@@ -5,7 +5,7 @@ import { BackLink } from '@/tasks/ui/widgets/BackLink/BackLink';
 import { TaskPreviewChips } from '@/tasks/ui/widgets/TaskPreviewChips/TaskPreviewChips';
 import { Loader } from '@/shared/ui-kit/Loader/Loader';
 import { BaseInputText } from '@/shared/ui-kit/BaseInputText/BaseInputText';
-import { parseWordFormationContent } from '@/tasks/lib/parseTaskContent';
+import { parseWordFormationContent, parseGapFillContent } from '@/tasks/lib/parseTaskContent';
 import type { CefrLevel, ItemType } from '@/tasks/types';
 import styles from './WorkExecutionView.module.scss';
 
@@ -165,6 +165,17 @@ export function WorkExecutionView({ workId }: WorkExecutionViewProps) {
                                     {(() => {
                                         const content = parseWordFormationContent(currentItem.content);
                                         return content?.base ? `(${content.base})` : '';
+                                    })()}
+                                </span>
+                            </>
+                        )}
+                        {currentItem.itemType === 'GAP_FILL' && (
+                            <>
+                                {' '}
+                                <span className={styles.baseWord}>
+                                    {(() => {
+                                        const content = parseGapFillContent(currentItem.content);
+                                        return content?.options?.length ? `(${content.options.join(', ')})` : '';
                                     })()}
                                 </span>
                             </>
