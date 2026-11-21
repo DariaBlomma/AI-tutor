@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { TaskPreviewChips } from '@/tasks/ui/widgets/TaskPreviewChips/TaskPreviewChips';
-import { TaskStudentsBadge } from '@/tasks/ui/widgets/TaskStudentsBadge/TaskStudentsBadge';
+import { TaskStudentsBadge } from '@/tasks/ui/widgets/TaskStudentsBadge/TaskStudentsBadge.tsx';
 import type { TaskSummary } from '@/tasks/types';
 import styles from './TasksBankView.module.scss';
 
@@ -93,11 +93,12 @@ export function TaskCard({
                 <Link to="/tasks-bank/$publicId" params={{ publicId: task.publicId }} className={`${styles.publicId} ${styles.publicIdLink}`}>
                     {task.publicId}
                 </Link>
-                <TaskStudentsBadge 
-                    className={styles.assignedUsersBadge}
-                    key={`${task.id}-${assignmentsReloadToken ?? 0}`}
-                    taskId={task.id}
-                />
+                <div className={styles.assignedUsersBadge}>
+                    <TaskStudentsBadge
+                        key={`${task.id}-${assignmentsReloadToken ?? 0}`}
+                        taskId={task.id}
+                    />
+                </div>
                 {canManage && (
                     <div className={styles.rightActions}>
                         <Link
