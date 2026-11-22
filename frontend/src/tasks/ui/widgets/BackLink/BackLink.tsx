@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import styles from './BackLink.module.scss';
 
-interface BackLinkProps {
+export interface BackLinkProps {
     /** Куда возвращаться; по умолчанию — банк заданий. */
     to?: string;
     /** Текст ссылки; по умолчанию — «К банку заданий». */
