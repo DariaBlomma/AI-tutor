@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { StudentWorkService } from '@/student/services/StudentWorkService';
 import { extractErrorMessage } from '@/core/api/utils/errors';
@@ -25,6 +24,9 @@ export interface PreviousAnswer {
     correct: boolean;
 }
 
+/** Результат ответа по пункту (для UI-окраски). */
+export type ItemResult = 'correct' | 'incorrect' | null;
+
 export interface UseWorkExecutionResult {
     /** Детальная информация о работе. */
     workDetail: StudentWorkDetailResponse | null;
@@ -44,6 +46,8 @@ export interface UseWorkExecutionResult {
     elapsedSeconds: number;
     /** Предыдущие ответы на текущем пункте. */
     previousAnswers: PreviousAnswer[];
+    /** Результат ответа по каждому пункту (для UI-окраски). */
+    itemResults: ItemResult[];
     /** Показать подсказку. */
     showHint: boolean;
     /** Переключить подсказку. */
@@ -66,10 +70,10 @@ export interface UseWorkExecutionResult {
     isCompleting: boolean;
 }
 
-/** Вычисляет текущий пункт из массива прогресса (первый нерешённый). */
+/** Вычисляет текущий пункт из массива прогресса (первый нерешённый, пропускает SOLVED и FAILED). */
 function computeCurrentItemIndex(progress: Array<{ status: ItemProgressStatus }>): number {
     for (let i = 0; i < progress.length; i++) {
-        if (progress[i].status !== 'SOLVED') {
+        if (progress[i].status !== 'SOLVED' && progress[i].status !== 'FAILED') {
             return i;
         }
     }
@@ -87,13 +91,13 @@ function computeSolvedItems(progress: Array<{ status: ItemProgressStatus }>): nu
  * Управляет состоянием текущего пункта, ответами, фидбеком и навигацией.
  */
 export function useWorkExecution(workId: number): UseWorkExecutionResult {
-    const navigate = useNavigate();
     const queryClient = useQueryClient();
 
     // Состояние ответа и фидбека
     const [answer, setAnswer] = useState('');
     const [feedback, setFeedback] = useState<FeedbackState | null>(null);
     const [previousAnswers, setPreviousAnswers] = useState<PreviousAnswer[]>([]);
+    const [itemResults, setItemResults] = useState<ItemResult[]>([]);
     const [showHint, setShowHint] = useState(false);
 
     // Загрузка work detail
@@ -162,7 +166,7 @@ export function useWorkExecution(workId: number): UseWorkExecutionResult {
             return StudentWorkService.submitAnswer(workId, currentItem.id, data);
         },
         onSuccess: (response: StudentSubmitAnswerResponse, variables) => {
-            // Добавляем ответ в историю ТОЛЬКО после успешного ответа бэка, с правильным флагом
+            // Добавляем ответ в историю текущего пункта
             setPreviousAnswers((prev) => [
                 ...prev,
                 {
@@ -172,11 +176,31 @@ export function useWorkExecution(workId: number): UseWorkExecutionResult {
                 },
             ]);
 
+            // Записываем результат для текущего пункта (для UI-окраски)
+            setItemResults((prev) => {
+                const next = [...prev];
+                next[currentItemIndexRef.current] = response.correct ? 'correct' : 'incorrect';
+                return next;
+            });
+
             setFeedback({
                 correct: response.correct,
                 attemptsCount: response.attemptsCount,
                 hint: response.hint ?? null,
                 allItemsSolved: response.allItemsSolved,
+            });
+
+            // Обновляем workDetail в кэше, чтобы прогресс-бар и done-класс обновились сразу
+            queryClient.setQueryData(['student', 'work', workId], (old: StudentWorkDetailResponse | undefined) => {
+                if (!old) return old;
+                return {
+                    ...old,
+                    progress: old.progress.map((p) =>
+                        p.taskItemId === response.taskItemId
+                            ? { ...p, status: response.status as ItemProgressStatus }
+                            : p,
+                    ),
+                };
             });
 
             // Если все пункты решены — редиректим на результаты (completeWork вызовется из view)
@@ -191,7 +215,7 @@ export function useWorkExecution(workId: number): UseWorkExecutionResult {
 
     // Next item
     const nextItem = useCallback(() => {
-        // Очищаем состояние ДО смены индекса, чтобы не было флеша старого
+        // Очищаем состояние текущего пункта, но сохраняем itemResults
         setPreviousAnswers([]);
         setAnswer('');
         setFeedback(null);
@@ -205,7 +229,7 @@ export function useWorkExecution(workId: number): UseWorkExecutionResult {
     // Complete work
     const completeMutation = useMutation({
         mutationFn: () => StudentWorkService.completeWork(workIdRef.current),
-        onSuccess: () => {
+        onSuccess: (data) => {
             // Инвалидируем query дашборда и report, чтобы обновить статус и статистику
             queryClient.invalidateQueries({ queryKey: ['student', 'dashboard'] });
             queryClient.invalidateQueries({ queryKey: ['student', 'work'] });
@@ -213,7 +237,7 @@ export function useWorkExecution(workId: number): UseWorkExecutionResult {
     });
 
     const completeWork = useCallback(async () => {
-        await completeMutation.mutateAsync();
+        return await completeMutation.mutateAsync();
     }, [completeMutation]);
 
     // Сброс состояния при смене пункта
@@ -236,6 +260,7 @@ export function useWorkExecution(workId: number): UseWorkExecutionResult {
         solvedItems,
         elapsedSeconds,
         previousAnswers,
+        itemResults,
         showHint,
         toggleHint,
         answer,

@@ -76,10 +76,28 @@
         color: var(--ok);
     }
 
+    &.failed {
+        border-color: rgba(255, 107, 107, 0.4);
+        background: rgba(255, 107, 107, 0.08);
+        color: var(--err);
+    }
+
     &.current {
         border-color: var(--p);
         background: rgba(157, 124, 242, 0.15);
         color: var(--p);
+    }
+
+    &.correct {
+        border-color: rgba(107, 203, 119, 0.4);
+        background: rgba(107, 203, 119, 0.08);
+        color: var(--ok);
+    }
+
+    &.incorrect {
+        border-color: rgba(255, 107, 107, 0.4);
+        background: rgba(255, 107, 107, 0.08);
+        color: var(--err);
     }
 }
 

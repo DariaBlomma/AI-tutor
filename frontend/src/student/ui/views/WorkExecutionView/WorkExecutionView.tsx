@@ -32,6 +32,7 @@ export function WorkExecutionView({ workId }: WorkExecutionViewProps) {
         solvedItems,
         elapsedSeconds,
         previousAnswers,
+        itemResults,
         currentItem,
         answer,
         setAnswer,
@@ -48,7 +49,9 @@ export function WorkExecutionView({ workId }: WorkExecutionViewProps) {
 
     const handleNextOrComplete = async () => {
         if (isLastItem) {
+            // Ждем завершения работы и получаем ответ
             await completeWork();
+            // Переход на страницу report - статус уже должен быть COMPLETED
             navigate({
                 to: '/student/work/$workId/report',
                 params: { workId: String(workId) },
@@ -130,15 +133,20 @@ export function WorkExecutionView({ workId }: WorkExecutionViewProps) {
                 {/* Position nav */}
                 <div className={styles.positionNav}>
                     {Array.from({ length: totalItems }, (_, i) => {
-                        const isSolved = i < solvedItems;
+                        const progressItem = workDetail?.progress[i];
+                        const isSolved = progressItem?.status === 'SOLVED';
+                        const isFailed = progressItem?.status === 'FAILED';
                         const isCurrent = i === currentItemIndex;
+                        const isCorrect = itemResults[i] === 'correct';
+                        const isIncorrect = itemResults[i] === 'incorrect';
                         return (
                             <div
                                 key={i}
-                                className={`${styles.posCell} ${isSolved ? styles.done : ''} ${isCurrent ? styles.current : ''}`}
+                                className={`${styles.posCell} ${isSolved ? styles.done : ''} ${isFailed ? styles.failed : ''} ${isCurrent ? styles.current : ''} ${isCorrect ? styles.correct : ''} ${isIncorrect ? styles.incorrect : ''}`}
                             >
                                 {i + 1}
                                 {isSolved && <span className={styles.posCheck}>✓</span>}
+                                {isFailed && <span className={styles.posCheck}>✗</span>}
                             </div>
                         );
                     })}
@@ -181,7 +189,7 @@ export function WorkExecutionView({ workId }: WorkExecutionViewProps) {
                     placeholder="Введите ответ"
                     value={answer}
                     onChange={(e) => setAnswer(e.target.value)}
-                    disabled={isSubmitting || (feedback?.correct ?? false) || previousAnswers.length >= 3}
+                    disabled={isSubmitting || (feedback?.correct ?? false) || itemResults[currentItemIndex] === 'incorrect'}
                     error={feedback && !feedback.correct ? 'Неверный ответ' : undefined}
                     variant="full"
                 />
@@ -237,7 +245,7 @@ export function WorkExecutionView({ workId }: WorkExecutionViewProps) {
                     >
                         {isCompleting ? 'Завершение...' : (isLastItem ? 'Завершить' : 'Далее')}
                     </button>
-                ) : previousAnswers.length >= 3 ? (
+                ) : itemResults[currentItemIndex] === 'incorrect' ? (
                     <>
                         <div className={styles.attemptsLimitMessage}>
                             Попытки исчерпаны

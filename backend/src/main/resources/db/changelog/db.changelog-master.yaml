@@ -43,3 +43,5 @@ databaseChangeLog:
       file: db/changelog/changes/022-task-levels-drop-order.sql
   - include:
       file: db/changelog/changes/023-fix-student-work-active-unique-index.sql
+  - include:
+      file: db/changelog/changes/024-add-failed-status-to-progress-check.sql

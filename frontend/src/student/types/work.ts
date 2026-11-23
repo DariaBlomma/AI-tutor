@@ -5,7 +5,7 @@ export type WorkStatus = 'ASSIGNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' 
 export type WorkItemType = 'WORD_FORMATION' | 'GAP_FILL' | 'TFNS' | 'MATCHING';
 
 /** Зеркалит com.aitutor.backend.enums.ItemProgressStatus. */
-export type ItemProgressStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'SOLVED';
+export type ItemProgressStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'SOLVED' | 'FAILED';
 
 /** Ответ GET /student/work — карточка работы для списка.
  * Зеркалит com.aitutor.backend.dto.student.StudentWorkResponse. */

@@ -55,6 +55,9 @@ public class StudentExecutionService {
     /** Бизнес-лимит подсказок на один пункт (формат Word Formation). */
     private static final int MAX_HINTS = 3;
 
+    /** Максимальное количество попыток на один пункт. */
+    private static final int MAX_ATTEMPTS = 3;
+
     private final StudentWorkRepository studentWorkRepository;
     private final StudentWorkItemProgressRepository progressRepository;
     private final List<AnswerChecker> checkers;
@@ -88,9 +91,7 @@ public class StudentExecutionService {
      * (ExactMatchChecker; позже — та же точка входа для ИИ).
      * Повторная сдача по уже решённому пункту запрещена (409): решение финально,
      * попытки/статистика не мутируются задним числом.
-     * При верном ответе — SOLVED; при исчерпании лимита подсказок — пункт тоже
-     * закрывается SOLVED, но эталон НЕ выдаётся и в student_answer НЕ пишется
-     * (статистика остаётся честной: видно расхождение с эталоном).
+     * При верном ответе — SOLVED; при исчерпании лимита подсказок и неверном ответе — FAILED.
      */
     @Transactional
     public StudentSubmitAnswerResponse submit(Long studentId, Long workId, Long taskItemId,
@@ -103,8 +104,9 @@ public class StudentExecutionService {
         StudentWorkItemProgress progress = findOrCreateProgress(work, item);
 
         // Пункт уже закрыт — защита от повторных попыток: решение финально.
-        if (progress.getStatus() == ItemProgressStatus.SOLVED) {
-            throw new ConflictException("Пункт уже решён, повторная сдача невозможна");
+        if (progress.getStatus() == ItemProgressStatus.SOLVED
+                || progress.getStatus() == ItemProgressStatus.FAILED) {
+            throw new ConflictException("Пункт уже закрыт, повторная сдача невозможна");
         }
 
         CheckResult result = pickChecker(item).check(item, request.getAnswer());
@@ -118,14 +120,14 @@ public class StudentExecutionService {
         progress.setStudentAnswer(result.normalizedStudentAnswer());
 
         boolean hintLimitReached = progress.getHintsGiven() >= MAX_HINTS;
+        boolean attemptLimitReached = attempts >= MAX_ATTEMPTS;
         if (result.correct()) {
             progress.setStatus(ItemProgressStatus.SOLVED);
             progress.setFirstTryCorrect(attempts == 1);
             progress.setSolvedAt(Instant.now());
-        } else if (hintLimitReached) {
-            // Исчерпаны все подсказки, ответ всё ещё неверный: пункт закрываем SOLVED
-            // (решение по фиче), first_try_correct остаётся false — метрика не искажается.
-            progress.setStatus(ItemProgressStatus.SOLVED);
+        } else if (hintLimitReached || attemptLimitReached) {
+            // Исчерпан лимит подсказок или попыток, ответ неверный — пункт закрываем как FAILED.
+            progress.setStatus(ItemProgressStatus.FAILED);
             progress.setSolvedAt(Instant.now());
         } else {
             progress.setStatus(ItemProgressStatus.IN_PROGRESS);
@@ -147,7 +149,7 @@ public class StudentExecutionService {
     /**
      * Завершение работы: статус COMPLETED, completedAt, агрегированная статистика
      * в student_work (first_try_correct / correct_after_hints / total_hints_given).
-     * Разрешено только когда ВСЕ пункты закрыты (SOLVED) — флага force нет (решение по фиче).
+     * Разрешено только когда ВСЕ пункты закрыты (SOLVED или FAILED) — флага force нет.
      * Идемпотентно: повторный вызов возвращает уже сохранённую статистику.
      */
     @Transactional
@@ -164,13 +166,14 @@ public class StudentExecutionService {
 
         List<TaskItem> items = sortedItems(work);
         Map<Long, StudentWorkItemProgress> byItemId = progressByItem(work.getId());
-        long solved = items.stream()
+        long completed = items.stream()
                 .map(i -> byItemId.get(i.getId()))
-                .filter(p -> p != null && p.getStatus() == ItemProgressStatus.SOLVED)
+                .filter(p -> p != null && (p.getStatus() == ItemProgressStatus.SOLVED
+                        || p.getStatus() == ItemProgressStatus.FAILED))
                 .count();
-        if (solved < items.size()) {
+        if (completed < items.size()) {
             throw new ConflictException(
-                    "Нельзя завершить работу: решено %d из %d пунктов".formatted(solved, items.size()));
+                    "Нельзя завершить работу: завершено %d из %d пунктов".formatted(completed, items.size()));
         }
 
         List<StudentWorkItemProgress> solvedProgresses = items.stream()
@@ -357,7 +360,8 @@ public class StudentExecutionService {
         Map<Long, StudentWorkItemProgress> byItemId = progressByItem(work.getId());
         return items.stream().allMatch(i -> {
             StudentWorkItemProgress p = byItemId.get(i.getId());
-            return p != null && p.getStatus() == ItemProgressStatus.SOLVED;
+            return p != null && (p.getStatus() == ItemProgressStatus.SOLVED
+                    || p.getStatus() == ItemProgressStatus.FAILED);
         });
     }
 
