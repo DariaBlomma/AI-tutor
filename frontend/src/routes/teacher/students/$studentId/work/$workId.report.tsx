@@ -18,6 +18,10 @@ export const Route = createFileRoute('/teacher/students/$studentId/work/$workId/
     },
     component: () => {
         const { studentId, workId } = Route.useLoaderData();
-        return <ReportDetailView fetcher={() => ReportsService.getWorkReportDetail(studentId, workId)} showStudentName={false} />;
+        return <ReportDetailView
+            workId={workId}
+            fetcher={() => ReportsService.getWorkReportDetail(studentId, workId)}
+            showStudentName={false}
+        />;
     },
 });

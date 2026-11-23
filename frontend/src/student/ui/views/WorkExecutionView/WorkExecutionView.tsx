@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useWorkExecution } from '@/student/hooks/useWorkExecution';
 import { BackLink } from '@/tasks/ui/widgets/BackLink/BackLink';
@@ -23,49 +23,69 @@ interface WorkExecutionViewProps {
 export function WorkExecutionView({ workId }: WorkExecutionViewProps) {
     const navigate = useNavigate();
     const {
-        workDetail,
-        isLoading,
-        isError,
-        error,
-        currentItemIndex,
-        totalItems,
-        solvedItems,
-        elapsedSeconds,
-        previousAnswers,
-        itemResults,
-        remainingAttempts,
-        currentItem,
-        answer,
-        setAnswer,
-        feedback,
-        startWork,
-        submitAnswer,
-        nextItem,
-        completeWork,
-        isSubmitting,
-        isCompleting,
+    workDetail,
+    isLoading,
+    isError,
+    error,
+    currentItemIndex,
+    totalItems,
+    solvedItems,
+    elapsedSeconds,
+    previousAnswers,
+    itemResults,
+    remainingAttempts,
+    currentItem,
+    answer,
+    setAnswer,
+    feedback,
+    startWork,
+    submitAnswer,
+    nextItem,
+    completeWork,
+    isSubmitting,
+    isCompleting,
     } = useWorkExecution(Number(workId));
 
     const isLastItem = currentItemIndex === totalItems - 1;
+    const allItemsSolved = currentItemIndex === totalItems;
 
-    const handleNextOrComplete = async () => {
-        if (isLastItem) {
-            // Ждем завершения работы и получаем ответ
-            await completeWork();
-            // Переход на страницу report - статус уже должен быть COMPLETED
-            navigate({
-                to: '/student/work/$workId/report',
-                params: { workId: String(workId) },
-            });
-        } else {
-            nextItem();
-        }
-    };
+    // Ref гарантирует, что процесс завершения запустится только один раз
+    const completionStartedRef = useRef(false);
 
     // Автостарт при монтировании
     useEffect(() => {
         startWork();
     }, [startWork]);
+
+    // ГЛАВНОЕ ИСПРАВЛЕНИЕ: Автоматическое завершение работы через useEffect
+    useEffect(() => {
+        if (allItemsSolved && !completionStartedRef.current && !isLoading && !isCompleting) {
+            completionStartedRef.current = true;
+
+            const finalizeWork = async () => {
+                try {
+                    // Ждем реального ответа от сервера о смене статуса на COMPLETED
+                    await completeWork();
+                } catch (err) {
+                    console.error('Ошибка при завершении работы:', err);
+                } finally {
+                    // Переходим на отчет только ПОСЛЕ того, как сервер подтвердил завершение
+                    navigate({
+                        to: '/student/work/$workId/report',
+                        params: { workId: String(workId) },
+                    });
+                }
+            };
+
+            finalizeWork();
+        }
+    }, [allItemsSolved, isLoading, isCompleting, completeWork, navigate, workId]);
+
+    const handleNext = () => {
+        // Просто инвалидируем кэш. Если это был последний вопрос,
+        // useEffect выше сам заметит это и корректно завершит работу.
+        nextItem();
+    };
 
     if (isLoading) {
         return (
@@ -87,13 +107,17 @@ export function WorkExecutionView({ workId }: WorkExecutionViewProps) {
         );
     }
 
-    // Fallback: currentItemIndex вышел за границы (например, после обновления страницы)
-    if (!currentItem) {
-        navigate({
-            to: '/student/work/$workId/report',
-            params: { workId: String(workId) },
-        });
-        return null;
+    // Если все вопросы решены, показываем лоадер завершения вместо формы.
+    // Это защищает от ошибок рендера (currentItem === null) и дает время отработать useEffect.
+    if (allItemsSolved) {
+        return (
+            <div className={styles.page}>
+                <Loader />
+                <p style={{ textAlign: 'center', marginTop: '20px', color: '#666' }}>
+                    Завершение работы и подготовка отчета...
+                </p>
+            </div>
+        );
     }
 
     return (
@@ -105,7 +129,7 @@ export function WorkExecutionView({ workId }: WorkExecutionViewProps) {
                 <h1>{workDetail.taskName}</h1>
             </div>
 
-            {/* Meta chips — полный список как на странице банка заданий */}
+            {/* Meta chips */}
             <TaskPreviewChips
                 grammarTypes={workDetail.taskTypes ?? []}
                 topics={workDetail.topics ?? []}
@@ -134,57 +158,57 @@ export function WorkExecutionView({ workId }: WorkExecutionViewProps) {
                 {/* Position nav */}
                 <div className={styles.positionNav}>
                     {Array.from({ length: totalItems }, (_, i) => {
-                        const progressItem = workDetail?.progress[i];
-                        const isSolved = progressItem?.status === 'SOLVED';
-                        const isFailed = progressItem?.status === 'FAILED';
-                        const isCurrent = i === currentItemIndex;
-                        const isCorrect = itemResults[i] === 'correct';
-                        const isIncorrect = itemResults[i] === 'incorrect';
-                        const failedByAttempts = isCurrent && feedback && !feedback.correct && feedback.attemptsCount >= 3;
-                        const showFailed = isFailed || failedByAttempts;
-                        return (
-                            <div
-                                key={i}
-                                className={`${styles.posCell} ${isSolved ? styles.done : ''} ${showFailed ? styles.failed : ''} ${isCurrent ? styles.current : ''} ${isCorrect ? styles.correct : ''} ${isIncorrect ? styles.incorrect : ''}`}
-                            >
-                                {i + 1}
-                                {isSolved && <span className={styles.posCheck}>✓</span>}
-                                {showFailed && <span className={styles.posCheck}>✗</span>}
-                            </div>
-                        );
-                    })}
+                    const progressItem = workDetail?.progress[i];
+                    const isSolved = progressItem?.status === 'SOLVED';
+                    const isFailed = progressItem?.status === 'FAILED';
+                    const isCurrent = i === currentItemIndex;
+                    const isCorrect = itemResults[i] === 'correct';
+                    const isIncorrect = itemResults[i] === 'incorrect';
+                    const failedByAttempts = isCurrent && feedback && !feedback.correct && feedback.attemptsCount >= 3;
+                    const showFailed = isFailed || failedByAttempts;
+                    return (
+                        <div
+                            key={i}
+                            className={`${styles.posCell} ${isSolved ? styles.done : ''} ${showFailed ? styles.failed : ''} ${isCurrent ? styles.current : ''} ${isCorrect ? styles.correct : ''} ${isIncorrect ? styles.incorrect : ''}`}
+                        >
+                            {i + 1}
+                            {isSolved && <span className={styles.posCheck}>✓</span>}
+                            {showFailed && <span className={styles.posCheck}>✗</span>}
+                        </div>
+                    );
+                })}
                 </div>
             </div>
 
             {/* Position Card */}
             <div className={styles.positionCard}>
                 {currentItem.prompt && (
-                    <p className={styles.prompt}>
-                        {currentItem.prompt}
-                        {currentItem.itemType === 'WORD_FORMATION' && (
-                            <>
-                                {' '}
-                                <span className={styles.baseWord}>
-                                    {(() => {
-                                        const content = parseWordFormationContent(currentItem.content);
-                                        return content?.base ? `(${content.base})` : '';
-                                    })()}
-                                </span>
-                            </>
-                        )}
-                        {currentItem.itemType === 'GAP_FILL' && (
-                            <>
-                                {' '}
-                                <span className={styles.baseWord}>
-                                    {(() => {
-                                        const content = parseGapFillContent(currentItem.content);
-                                        return content?.options?.length ? `(${content.options.join(', ')})` : '';
-                                    })()}
-                                </span>
-                            </>
-                        )}
-                    </p>
+                <p className={styles.prompt}>
+                    {currentItem.prompt}
+                    {currentItem.itemType === 'WORD_FORMATION' && (
+                    <>
+                        {' '}
+                        <span className={styles.baseWord}>
+                            {(() => {
+                            const content = parseWordFormationContent(currentItem.content);
+                            return content?.base ? `(${content.base})` : '';
+                        })()}
+                        </span>
+                    </>
                 )}
+                    {currentItem.itemType === 'GAP_FILL' && (
+                    <>
+                        {' '}
+                        <span className={styles.baseWord}>
+                            {(() => {
+                            const content = parseGapFillContent(currentItem.content);
+                            return content?.options?.length ? `(${content.options.join(', ')})` : '';
+                        })()}
+                        </span>
+                    </>
+                )}
+                </p>
+            )}
 
                 {/* Answer Input */}
                 <BaseInputText
@@ -200,84 +224,83 @@ export function WorkExecutionView({ workId }: WorkExecutionViewProps) {
 
             {/* Feedback — неверный ответ */}
             {feedback && !feedback.correct && feedback.hint && (
-                <div className={styles.feedback}>
-                    <span className={styles.feedbackMark}>✗</span>
-                    <div>
-                        <div className={styles.feedbackTitle}>Неверно</div>
-                        <div className={styles.feedbackText}>{feedback.hint}</div>
-                    </div>
+            <div className={styles.feedback}>
+                <span className={styles.feedbackMark}>✗</span>
+                <div>
+                    <div className={styles.feedbackTitle}>Неверно</div>
+                    <div className={styles.feedbackText}>{feedback.hint}</div>
                 </div>
-            )}
+            </div>
+        )}
 
             {/* Feedback — верный ответ */}
             {feedback && feedback.correct && (
-                <div className={`${styles.feedback} ${styles.feedbackCorrect}`}>
-                    <span className={`${styles.feedbackMark} ${styles.feedbackMarkCorrect}`}>✓</span>
-                    <div>
-                        <div className={`${styles.feedbackTitle} ${styles.feedbackTitleCorrect}`}>Верно</div>
-                    </div>
+            <div className={`${styles.feedback} ${styles.feedbackCorrect}`}>
+                <span className={`${styles.feedbackMark} ${styles.feedbackMarkCorrect}`}>✓</span>
+                <div>
+                    <div className={`${styles.feedbackTitle} ${styles.feedbackTitleCorrect}`}>Верно</div>
                 </div>
-            )}
+            </div>
+        )}
 
             {/* Attempts history */}
             {previousAnswers.length > 0 && (
-                <div className={styles.attempts}>
-                    <div className={styles.attemptsTitle}>Попытки</div>
-                    {previousAnswers.map((prev) => (
-                        <div key={prev.attempt} className={styles.attemptItem}>
-                            <span className={styles.attemptNum}>
-                                Попытка {prev.attempt}
-                            </span>
-                            <span className={styles.attemptValue}>{prev.value}</span>
-                            <span className={`${styles.attemptMark} ${prev.correct ? styles.attemptMarkCorrect : ''}`}>
-                                {prev.correct ? '✓' : '✗'}
-                            </span>
-                        </div>
-                    ))}
-                    {/* Remaining attempts */}
-                    {remainingAttempts > 0 && (
-                        <div className={styles.remainingAttempts}>
-                            Осталось попыток: {remainingAttempts}
-                        </div>
-                    )}
+            <div className={styles.attempts}>
+                <div className={styles.attemptsTitle}>Попытки</div>
+                {previousAnswers.map((prev) => (
+                <div key={prev.attempt} className={styles.attemptItem}>
+                    <span className={styles.attemptNum}>
+                        Попытка {prev.attempt}
+                    </span>
+                    <span className={styles.attemptValue}>{prev.value}</span>
+                    <span className={`${styles.attemptMark} ${prev.correct ? styles.attemptMarkCorrect : ''}`}>
+                        {prev.correct ? '✓' : '✗'}
+                    </span>
+                </div>
+            ))}
+                {remainingAttempts > 0 && (
+                <div className={styles.remainingAttempts}>
+                    Осталось попыток: {remainingAttempts}
                 </div>
             )}
+            </div>
+        )}
 
             {/* Action Buttons */}
             <div className={styles.actions}>
                 {feedback && feedback.correct ? (
+                <button
+                    type="button"
+                    className={`${styles.btn} ${styles.btnPrimary}`}
+                    onClick={handleNext}
+                    disabled={isCompleting}
+                >
+                    {isLastItem ? 'Завершить' : 'Далее'}
+                </button>
+            ) : feedback && !feedback.correct && feedback.attemptsCount >= 3 ? (
+                <>
+                    <div className={styles.attemptsLimitMessage}>
+                        Попытки исчерпаны
+                    </div>
                     <button
                         type="button"
                         className={`${styles.btn} ${styles.btnPrimary}`}
-                        onClick={handleNextOrComplete}
+                        onClick={handleNext}
                         disabled={isCompleting}
                     >
-                        {isCompleting ? 'Завершение...' : (isLastItem ? 'Завершить' : 'Далее')}
+                        {isLastItem ? 'Завершить' : 'Далее'}
                     </button>
-                ) : feedback && !feedback.correct && feedback.attemptsCount >= 3 ? (
-                    <>
-                        <div className={styles.attemptsLimitMessage}>
-                            Попытки исчерпаны
-                        </div>
-                        <button
-                            type="button"
-                            className={`${styles.btn} ${styles.btnPrimary}`}
-                            onClick={handleNextOrComplete}
-                            disabled={isCompleting}
-                        >
-                            {isCompleting ? 'Завершение...' : (isLastItem ? 'Завершить' : 'Далее')}
-                        </button>
-                    </>
-                ) : (
-                    <button
-                        type="button"
-                        className={`${styles.btn} ${styles.btnPrimary}`}
-                        onClick={submitAnswer}
-                        disabled={!answer.trim() || isSubmitting}
-                    >
-                        {isSubmitting ? 'Проверка...' : 'Проверить'}
-                    </button>
-                )}
+                </>
+            ) : (
+                <button
+                    type="button"
+                    className={`${styles.btn} ${styles.btnPrimary}`}
+                    onClick={submitAnswer}
+                    disabled={!answer.trim() || isSubmitting}
+                >
+                    {isSubmitting ? 'Проверка...' : 'Проверить'}
+                </button>
+            )}
             </div>
         </div>
     );

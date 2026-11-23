@@ -19,6 +19,7 @@ export const Route = createFileRoute('/student/work/$workId/report')({
         const { workId } = Route.useLoaderData();
         return (
             <ReportDetailView
+                workId={workId}
                 fetcher={() => StudentReportsService.getWorkReportDetail(workId)}
                 backLinkProps={{ to: '/student/homework', label: 'К домашним заданиям' }}
             />

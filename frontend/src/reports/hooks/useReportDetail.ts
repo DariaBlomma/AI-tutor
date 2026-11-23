@@ -1,44 +1,25 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import type { WorkReportDetailDto } from '@/reports/types';
 
-interface UseReportDetailResult {
-    report: WorkReportDetailDto | null;
-    isLoading: boolean;
-    isError: boolean;
-}
-
 export function useReportDetail(
-    fetcher: () => Promise<WorkReportDetailDto> | null,
-): UseReportDetailResult {
-    const [report, setReport] = useState<WorkReportDetailDto | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isError, setIsError] = useState(false);
+    workId: number | string,
+    fetcher: () => Promise<WorkReportDetailDto>
+) {
+    return useQuery({
+        // Уникальный ключ кэша. Для учителя можно добавить studentId в ключ, если нужно
+        queryKey: ['work-report', String(workId)],
+        queryFn: fetcher, // <-- Используем переданную функцию!
 
-    useEffect(() => {
-        let active = true;
+        // ГЛАВНОЕ ИСПРАВЛЕНИЕ: Лечим 409 Conflict
+        retry: (failureCount, error: any) => {
+            if (error?.status === 409 && failureCount < 3) {
+                console.warn(`Отчет еще не готов (409), повторная попытка ${failureCount + 1}...`);
+                return true;
+            }
+            return false;
+        },
+        retryDelay: 600, // Ждем 600мс между попытками
 
-        const fn = fetcher();
-        if (!fn) {
-            setIsLoading(false);
-            return;
-        }
-
-        fn
-            .then((data) => {
-                if (!active) return;
-                setReport(data);
-            })
-            .catch(() => {
-                if (active) setIsError(true);
-            })
-            .finally(() => {
-                if (active) setIsLoading(false);
-            });
-
-        return () => {
-            active = false;
-        };
-    }, [fetcher]);
-
-    return { report, isLoading, isError };
+        enabled: !!workId, // Не делаем запрос, если ID еще нет
+    });
 }
