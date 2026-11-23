@@ -48,6 +48,8 @@ export interface UseWorkExecutionResult {
     previousAnswers: PreviousAnswer[];
     /** Результат ответа по каждому пункту (для UI-окраски). */
     itemResults: ItemResult[];
+    /** Количество оставшихся попыток на текущем пункте. */
+    remainingAttempts: number;
     /** Показать подсказку. */
     showHint: boolean;
     /** Переключить подсказку. */
@@ -99,6 +101,7 @@ export function useWorkExecution(workId: number): UseWorkExecutionResult {
     const [previousAnswers, setPreviousAnswers] = useState<PreviousAnswer[]>([]);
     const [itemResults, setItemResults] = useState<ItemResult[]>([]);
     const [showHint, setShowHint] = useState(false);
+    const [remainingAttempts, setRemainingAttempts] = useState(0);
 
     // Загрузка work detail
     const { data: workDetail, isLoading, isError, error } = useQuery({
@@ -158,6 +161,50 @@ export function useWorkExecution(workId: number): UseWorkExecutionResult {
         }
     }, [workDetail]);
 
+    // Восстанавливаем previousAnswers из progress при загрузке workDetail или при смене currentItemIndex
+    useEffect(() => {
+        console.log('[useWorkExecution] useEffect для restore previousAnswers', {
+            workDetailId: workDetail?.workId,
+            currentItemIndex,
+            progressLength: workDetail?.progress.length,
+            progress: workDetail?.progress[currentItemIndex],
+        });
+        if (workDetail && workDetail.progress.length > 0 && currentItemIndex < workDetail.progress.length) {
+            const currentProgress = workDetail.progress[currentItemIndex];
+            console.log('[useWorkExecution] currentProgress:', currentProgress);
+            if (currentProgress && currentProgress.answerAttempts > 0) {
+                // Восстанавливаем историю попыток из progress
+                // создаем массив previousAnswers с lastAnswer
+                const restoredAnswers: PreviousAnswer[] = [];
+                for (let i = 1; i < currentProgress.answerAttempts; i++) {
+                    restoredAnswers.push({
+                        attempt: i,
+                        value: '',
+                        correct: false,
+                    });
+                }
+                // Добавляем последний ответ
+                if (currentProgress.lastAnswer) {
+                    restoredAnswers.push({
+                        attempt: currentProgress.answerAttempts,
+                        value: currentProgress.lastAnswer,
+                        correct: currentProgress.answerAttempts === 3 ? false : false, // не знаем, верный или нет
+                    });
+                }
+                console.log('[useWorkExecution] restoredAnswers:', restoredAnswers);
+                setPreviousAnswers(restoredAnswers);
+                // Оставшиеся попытки = 3 - answerAttempts
+                setRemainingAttempts(Math.max(0, 3 - currentProgress.answerAttempts));
+            } else {
+                console.log('[useWorkExecution] no attempts or no currentProgress');
+                setPreviousAnswers([]);
+                setRemainingAttempts(3);
+            }
+        } else {
+            console.log('[useWorkExecution] no workDetail or progress empty or index out of bounds');
+        }
+    }, [workDetail, currentItemIndex]);
+
     // Submit answer
     const submitMutation = useMutation({
         mutationFn: (data: StudentSubmitAnswerRequest) => {
@@ -177,9 +224,17 @@ export function useWorkExecution(workId: number): UseWorkExecutionResult {
             ]);
 
             // Записываем результат для текущего пункта (для UI-окраски)
+            // Не помечаем как incorrect сразу - только если исчерпаны попытки (attemptsCount >= 3) или верно
             setItemResults((prev) => {
                 const next = [...prev];
-                next[currentItemIndexRef.current] = response.correct ? 'correct' : 'incorrect';
+                // Если верно - помечаем как correct
+                if (response.correct) {
+                    next[currentItemIndexRef.current] = 'correct';
+                } else if (response.attemptsCount >= 3) {
+                    // Если неверно и попытки исчерпаны (максимум 3) - помечаем как incorrect
+                    next[currentItemIndexRef.current] = 'incorrect';
+                }
+                // Если неверно и попытки еще есть - оставляем null (не окрашиваем)
                 return next;
             });
 
@@ -221,7 +276,10 @@ export function useWorkExecution(workId: number): UseWorkExecutionResult {
         setFeedback(null);
         setShowHint(false);
         setCurrentItemIndex((prev) => prev + 1);
-    }, []);
+        
+        // Инвалидируем query workDetail, чтобы данные обновились при следующем пункте
+        queryClient.invalidateQueries({ queryKey: ['student', 'work', workId] });
+    }, [workId, queryClient]);
 
     const workIdRef = useRef(workId);
     useEffect(() => { workIdRef.current = workId; }, [workId]);
@@ -261,6 +319,7 @@ export function useWorkExecution(workId: number): UseWorkExecutionResult {
         elapsedSeconds,
         previousAnswers,
         itemResults,
+        remainingAttempts,
         showHint,
         toggleHint,
         answer,

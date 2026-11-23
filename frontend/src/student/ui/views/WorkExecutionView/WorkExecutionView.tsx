@@ -33,6 +33,7 @@ export function WorkExecutionView({ workId }: WorkExecutionViewProps) {
         elapsedSeconds,
         previousAnswers,
         itemResults,
+        remainingAttempts,
         currentItem,
         answer,
         setAnswer,
@@ -139,14 +140,16 @@ export function WorkExecutionView({ workId }: WorkExecutionViewProps) {
                         const isCurrent = i === currentItemIndex;
                         const isCorrect = itemResults[i] === 'correct';
                         const isIncorrect = itemResults[i] === 'incorrect';
+                        const failedByAttempts = isCurrent && feedback && !feedback.correct && feedback.attemptsCount >= 3;
+                        const showFailed = isFailed || failedByAttempts;
                         return (
                             <div
                                 key={i}
-                                className={`${styles.posCell} ${isSolved ? styles.done : ''} ${isFailed ? styles.failed : ''} ${isCurrent ? styles.current : ''} ${isCorrect ? styles.correct : ''} ${isIncorrect ? styles.incorrect : ''}`}
+                                className={`${styles.posCell} ${isSolved ? styles.done : ''} ${showFailed ? styles.failed : ''} ${isCurrent ? styles.current : ''} ${isCorrect ? styles.correct : ''} ${isIncorrect ? styles.incorrect : ''}`}
                             >
                                 {i + 1}
                                 {isSolved && <span className={styles.posCheck}>✓</span>}
-                                {isFailed && <span className={styles.posCheck}>✗</span>}
+                                {showFailed && <span className={styles.posCheck}>✗</span>}
                             </div>
                         );
                     })}
@@ -189,7 +192,7 @@ export function WorkExecutionView({ workId }: WorkExecutionViewProps) {
                     placeholder="Введите ответ"
                     value={answer}
                     onChange={(e) => setAnswer(e.target.value)}
-                    disabled={isSubmitting || (feedback?.correct ?? false) || itemResults[currentItemIndex] === 'incorrect'}
+                    disabled={isSubmitting || (feedback?.correct ?? false) || (feedback && !feedback.correct && feedback.attemptsCount >= 3)}
                     error={feedback && !feedback.correct ? 'Неверный ответ' : undefined}
                     variant="full"
                 />
@@ -231,6 +234,12 @@ export function WorkExecutionView({ workId }: WorkExecutionViewProps) {
                             </span>
                         </div>
                     ))}
+                    {/* Remaining attempts */}
+                    {remainingAttempts > 0 && (
+                        <div className={styles.remainingAttempts}>
+                            Осталось попыток: {remainingAttempts}
+                        </div>
+                    )}
                 </div>
             )}
 
@@ -245,7 +254,7 @@ export function WorkExecutionView({ workId }: WorkExecutionViewProps) {
                     >
                         {isCompleting ? 'Завершение...' : (isLastItem ? 'Завершить' : 'Далее')}
                     </button>
-                ) : itemResults[currentItemIndex] === 'incorrect' ? (
+                ) : feedback && !feedback.correct && feedback.attemptsCount >= 3 ? (
                     <>
                         <div className={styles.attemptsLimitMessage}>
                             Попытки исчерпаны

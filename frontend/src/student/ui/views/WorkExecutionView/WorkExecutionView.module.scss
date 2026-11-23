@@ -229,6 +229,17 @@
     }
 }
 
+.remainingAttempts {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--c1);
+    padding: 8px 12px;
+    background: rgba(157, 124, 242, 0.05);
+    border-radius: var(--r);
+    margin-top: 8px;
+    text-align: center;
+}
+
 .attemptsLimitMessage {
     font-size: 13px;
     color: var(--err);
