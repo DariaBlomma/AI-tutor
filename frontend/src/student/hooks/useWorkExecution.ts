@@ -1,15 +1,14 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { StudentWorkService } from '@/student/services/StudentWorkService';
 import { extractErrorMessage } from '@/core/api/utils/errors';
 import type {
-    StudentWorkDetailResponse,
-    StudentSubmitAnswerRequest,
-    StudentSubmitAnswerResponse,
-    ItemProgressStatus,
+StudentWorkDetailResponse,
+StudentSubmitAnswerRequest,
+StudentSubmitAnswerResponse,
+ItemProgressStatus,
 } from '@/student/types/work';
 
-/** Состояние фидбека после проверки ответа. */
 export interface FeedbackState {
     correct: boolean;
     attemptsCount: number;
@@ -17,53 +16,32 @@ export interface FeedbackState {
     allItemsSolved: boolean;
 }
 
-/** Предыдущий ответ на текущем пункте. */
 export interface PreviousAnswer {
     attempt: number;
     value: string;
     correct: boolean;
 }
 
-/** Результат ответа по пункту (для UI-окраски). */
 export type ItemResult = 'correct' | 'incorrect' | null;
 
 export interface UseWorkExecutionResult {
-    /** Детальная информация о работе. */
     workDetail: StudentWorkDetailResponse | null;
     isLoading: boolean;
     isError: boolean;
     error: string | null;
-
-    /** Индекс текущего пункта. */
     currentItemIndex: number;
-    /** Текущий пункт (null если все решены). */
     currentItem: StudentWorkDetailResponse['items'][number] | null;
-    /** Общее количество пунктов. */
     totalItems: number;
-    /** Количество решённых пунктов. */
     solvedItems: number;
-    /** Прошедшие секунды с начала работы. */
     elapsedSeconds: number;
-    /** Предыдущие ответы на текущем пункте. */
     previousAnswers: PreviousAnswer[];
-    /** Результат ответа по каждому пункту (для UI-окраски). */
     itemResults: ItemResult[];
-    /** Количество оставшихся попыток на текущем пункте. */
     remainingAttempts: number;
-    /** Показать подсказку. */
     showHint: boolean;
-    /** Переключить подсказку. */
     toggleHint: () => void;
-
-    /** Текст ответа студента. */
     answer: string;
     setAnswer: (value: string) => void;
-
-    /** Фидбек после последней проверки (null = нет фидбека). */
     feedback: FeedbackState | null;
-    setFeedback: (fb: FeedbackState | null) => void;
-
-    /** Мутации. */
     startWork: () => Promise<void>;
     submitAnswer: () => Promise<void>;
     nextItem: () => void;
@@ -72,240 +50,155 @@ export interface UseWorkExecutionResult {
     isCompleting: boolean;
 }
 
-/** Вычисляет текущий пункт из массива прогресса (первый нерешённый, пропускает SOLVED и FAILED). */
-function computeCurrentItemIndex(progress: Array<{ status: ItemProgressStatus }>): number {
-    for (let i = 0; i < progress.length; i++) {
-        if (progress[i].status !== 'SOLVED' && progress[i].status !== 'FAILED') {
-            return i;
-        }
-    }
-    return progress.length;
-}
+const MAX_ATTEMPTS = 3;
 
-/** Вычисляет количество решённых пунктов. */
-function computeSolvedItems(progress: Array<{ status: ItemProgressStatus }>): number {
-    return progress.filter((p) => p.status === 'SOLVED').length;
-}
-
-/**
- * Хук для управления выполнением работы студентом.
- * При монтировании автоматически стартует работу (если не начата).
- * Управляет состоянием текущего пункта, ответами, фидбеком и навигацией.
- */
 export function useWorkExecution(workId: number): UseWorkExecutionResult {
     const queryClient = useQueryClient();
+    const queryKey = ['student', 'work', workId];
 
-    // Состояние ответа и фидбека
-    const [answer, setAnswer] = useState('');
-    const [feedback, setFeedback] = useState<FeedbackState | null>(null);
-    const [previousAnswers, setPreviousAnswers] = useState<PreviousAnswer[]>([]);
-    const [itemResults, setItemResults] = useState<ItemResult[]>([]);
-    const [showHint, setShowHint] = useState(false);
-    const [remainingAttempts, setRemainingAttempts] = useState(0);
-
-    // Загрузка work detail
+    // 1. ЕДИНЫЙ ИСТОЧНИК ИСТИНЫ
     const { data: workDetail, isLoading, isError, error } = useQuery({
-        queryKey: ['student', 'work', workId],
+        queryKey,
         queryFn: () => StudentWorkService.getWorkDetail(workId),
         staleTime: 0,
         retry: false,
     });
 
-    // Вычисляемые значения из прогресса
     const totalItems = workDetail?.items.length ?? 0;
-    const solvedItems = workDetail ? computeSolvedItems(workDetail.progress) : 0;
-    const [currentItemIndex, setCurrentItemIndex] = useState(
-        workDetail ? computeCurrentItemIndex(workDetail.progress) : 0,
-    );
 
-    // Ref для актуальных значений мутации — замыкание mutationFn берёт из ref, а не из render-scope
-    const workDetailRef = useRef(workDetail);
-    const currentItemIndexRef = useRef(currentItemIndex);
-    useEffect(() => { workDetailRef.current = workDetail; }, [workDetail]);
-    useEffect(() => { currentItemIndexRef.current = currentItemIndex; }, [currentItemIndex]);
+    // Вычисляем индекс динамически. Никаких useState для синхронизации с сервером!
+    const currentItemIndex = useMemo(() => {
+        if (!workDetail) return 0;
+        const index = workDetail.progress.findIndex(
+        (p) => p.status !== 'SOLVED' && p.status !== 'FAILED'
+        );
+        return index === -1 ? workDetail.progress.length : index;
+    }, [workDetail]);
 
-    // Elapsed time с начала работы
+    const currentItem = workDetail?.items[currentItemIndex] ?? null;
+    const currentProgress = workDetail?.progress[currentItemIndex];
+
+    const solvedItems = useMemo(() => {
+        if (!workDetail) return 0;
+        return workDetail.progress.filter((p) => p.status === 'SOLVED').length;
+    }, [workDetail]);
+
+    // История попыток вычисляется "на лету" из прогресса
+    const previousAnswers = useMemo<PreviousAnswer[]>(() => {
+        if (!currentProgress || currentProgress.answerAttempts === 0) return [];
+
+        const answers: PreviousAnswer[] = [];
+        for (let i = 1; i < currentProgress.answerAttempts; i++) {
+            answers.push({ attempt: i, value: '***', correct: false });
+        }
+        if (currentProgress.lastAnswer) {
+            answers.push({
+                attempt: currentProgress.answerAttempts,
+                value: currentProgress.lastAnswer,
+                correct: false,
+            });
+        }
+        return answers;
+    }, [currentProgress]);
+
+    const remainingAttempts = useMemo(() => {
+        if (!currentProgress) return MAX_ATTEMPTS;
+        return Math.max(0, MAX_ATTEMPTS - currentProgress.answerAttempts);
+    }, [currentProgress]);
+
+    const itemResults = useMemo<ItemResult[]>(() => {
+        if (!workDetail) return [];
+        return workDetail.progress.map((p) => {
+            if (p.status === 'SOLVED') return 'correct';
+            if (p.status === 'FAILED') return 'incorrect';
+            return null;
+        });
+    }, [workDetail]);
+
+    // 2. ЛОКАЛЬНЫЙ СТЕЙТ ТОЛЬКО ДЛЯ UI-ФОРМЫ
+    const [answer, setAnswer] = useState('');
+    const [showHint, setShowHint] = useState(false);
+    const [lastFeedback, setLastFeedback] = useState<FeedbackState | null>(null);
+
+    // БЕЗОПАСНЫЙ сброс формы при переходе к новому вопросу
+    useEffect(() => {
+        setAnswer('');
+        setLastFeedback(null);
+        setShowHint(false);
+    }, [currentItemIndex]);
+
+    // Таймер с корректным интервалом
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
     useEffect(() => {
         if (!workDetail?.startedAt) return;
         const start = new Date(workDetail.startedAt).getTime();
+
+        // Устанавливаем сразу, чтобы не ждать 1 секунду до первого тика
+        setElapsedSeconds(Math.floor((Date.now() - start) / 1000));
+
         const interval = setInterval(() => {
             setElapsedSeconds(Math.floor((Date.now() - start) / 1000));
         }, 1000);
+
         return () => clearInterval(interval);
     }, [workDetail?.startedAt]);
 
-    // Toggle hint
-    const toggleHint = useCallback(() => {
-        setShowHint((prev) => !prev);
-    }, []);
-
-    // Автостарт при монтировании
+    // 3. МУТАЦИИ (без useRef, передаем данные явно через аргументы)
     const startMutation = useMutation({
         mutationFn: () => StudentWorkService.startWork(workId),
-        onSuccess: (data) => {
-            setCurrentItemIndex(computeCurrentItemIndex(data.progress));
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey });
         },
     });
 
     const startWork = useCallback(async () => {
-        if (!startMutation.data && !startMutation.isPending) {
+        // Не стартуем, если уже начата или идет процесс
+        if (workDetail?.startedAt) return;
+        if (!startMutation.isPending && !startMutation.data) {
             await startMutation.mutateAsync();
         }
-    }, [startMutation]);
+    }, [workDetail?.startedAt, startMutation]);
 
-    // Обновляем currentItemIndex когда workDetail изменился (например, после submit)
-    useEffect(() => {
-        if (workDetail) {
-            setCurrentItemIndex(computeCurrentItemIndex(workDetail.progress));
-        }
-    }, [workDetail]);
-
-    // Восстанавливаем previousAnswers из progress при загрузке workDetail или при смене currentItemIndex
-    useEffect(() => {
-        console.log('[useWorkExecution] useEffect для restore previousAnswers', {
-            workDetailId: workDetail?.workId,
-            currentItemIndex,
-            progressLength: workDetail?.progress.length,
-            progress: workDetail?.progress[currentItemIndex],
-        });
-        if (workDetail && workDetail.progress.length > 0 && currentItemIndex < workDetail.progress.length) {
-            const currentProgress = workDetail.progress[currentItemIndex];
-            console.log('[useWorkExecution] currentProgress:', currentProgress);
-            if (currentProgress && currentProgress.answerAttempts > 0) {
-                // Восстанавливаем историю попыток из progress
-                // создаем массив previousAnswers с lastAnswer
-                const restoredAnswers: PreviousAnswer[] = [];
-                for (let i = 1; i < currentProgress.answerAttempts; i++) {
-                    restoredAnswers.push({
-                        attempt: i,
-                        value: '',
-                        correct: false,
-                    });
-                }
-                // Добавляем последний ответ
-                if (currentProgress.lastAnswer) {
-                    restoredAnswers.push({
-                        attempt: currentProgress.answerAttempts,
-                        value: currentProgress.lastAnswer,
-                        correct: currentProgress.answerAttempts === 3 ? false : false, // не знаем, верный или нет
-                    });
-                }
-                console.log('[useWorkExecution] restoredAnswers:', restoredAnswers);
-                setPreviousAnswers(restoredAnswers);
-                // Оставшиеся попытки = 3 - answerAttempts
-                setRemainingAttempts(Math.max(0, 3 - currentProgress.answerAttempts));
-            } else {
-                console.log('[useWorkExecution] no attempts or no currentProgress');
-                setPreviousAnswers([]);
-                setRemainingAttempts(3);
-            }
-        } else {
-            console.log('[useWorkExecution] no workDetail or progress empty or index out of bounds');
-        }
-    }, [workDetail, currentItemIndex]);
-
-    // Submit answer
     const submitMutation = useMutation({
-        mutationFn: (data: StudentSubmitAnswerRequest) => {
-            const currentItem = workDetailRef.current?.items[currentItemIndexRef.current];
-            if (!currentItem) throw new Error('Current item not found');
-            return StudentWorkService.submitAnswer(workId, currentItem.id, data);
+        // Передаем itemId явно, чтобы избежать stale closure
+        mutationFn: ({ itemId, answerText }: { itemId: number; answerText: string }) => {
+            return StudentWorkService.submitAnswer(workId, itemId, { answer: answerText });
         },
-        onSuccess: (response: StudentSubmitAnswerResponse, variables) => {
-            // Добавляем ответ в историю текущего пункта
-            setPreviousAnswers((prev) => [
-                ...prev,
-                {
-                    attempt: prev.length + 1,
-                    value: variables.answer,
-                    correct: response.correct,
-                },
-            ]);
-
-            // Записываем результат для текущего пункта (для UI-окраски)
-            // Не помечаем как incorrect сразу - только если исчерпаны попытки (attemptsCount >= 3) или верно
-            setItemResults((prev) => {
-                const next = [...prev];
-                // Если верно - помечаем как correct
-                if (response.correct) {
-                    next[currentItemIndexRef.current] = 'correct';
-                } else if (response.attemptsCount >= 3) {
-                    // Если неверно и попытки исчерпаны (максимум 3) - помечаем как incorrect
-                    next[currentItemIndexRef.current] = 'incorrect';
-                }
-                // Если неверно и попытки еще есть - оставляем null (не окрашиваем)
-                return next;
-            });
-
-            setFeedback({
+        onSuccess: (response) => {
+            setLastFeedback({
                 correct: response.correct,
                 attemptsCount: response.attemptsCount,
                 hint: response.hint ?? null,
                 allItemsSolved: response.allItemsSolved,
             });
-
-            // Обновляем workDetail в кэше, чтобы прогресс-бар и done-класс обновились сразу
-            queryClient.setQueryData(['student', 'work', workId], (old: StudentWorkDetailResponse | undefined) => {
-                if (!old) return old;
-                return {
-                    ...old,
-                    progress: old.progress.map((p) =>
-                        p.taskItemId === response.taskItemId
-                            ? { ...p, status: response.status as ItemProgressStatus }
-                            : p,
-                    ),
-                };
-            });
-
-            // Если все пункты решены — редиректим на результаты (completeWork вызовется из view)
-            // Redirection handled by view useEffect when allItemsSolved
+            // Инвалидация заставит пересчитать currentItemIndex, если ответ был верным
+            queryClient.invalidateQueries({ queryKey });
         },
     });
 
     const submitAnswer = useCallback(async () => {
-        if (!answer.trim()) return;
-        await submitMutation.mutateAsync({ answer: answer.trim() });
-    }, [answer, submitMutation]);
+        if (!answer.trim() || !currentItem) return;
+        await submitMutation.mutateAsync({ itemId: currentItem.id, answerText: answer.trim() });
+    }, [answer, currentItem, submitMutation]);
 
-    // Next item
     const nextItem = useCallback(() => {
-        // Очищаем состояние текущего пункта, но сохраняем itemResults
-        setPreviousAnswers([]);
-        setAnswer('');
-        setFeedback(null);
-        setShowHint(false);
-        setCurrentItemIndex((prev) => prev + 1);
-        
-        // Инвалидируем query workDetail, чтобы данные обновились при следующем пункте
-        queryClient.invalidateQueries({ queryKey: ['student', 'work', workId] });
-    }, [workId, queryClient]);
+        // Принудительно обновляем данные. Если ответ был верным, сервер уже
+        // пометил элемент как SOLVED, и следующий запрос вернет новый currentItemIndex.
+        queryClient.invalidateQueries({ queryKey });
+    }, [queryClient, queryKey]);
 
-    const workIdRef = useRef(workId);
-    useEffect(() => { workIdRef.current = workId; }, [workId]);
-
-    // Complete work
     const completeMutation = useMutation({
-        mutationFn: () => StudentWorkService.completeWork(workIdRef.current),
-        onSuccess: (data) => {
-            // Инвалидируем query дашборда и report, чтобы обновить статус и статистику
+        mutationFn: () => StudentWorkService.completeWork(workId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey });
             queryClient.invalidateQueries({ queryKey: ['student', 'dashboard'] });
-            queryClient.invalidateQueries({ queryKey: ['student', 'work'] });
+            queryClient.invalidateQueries({ queryKey: ['student', 'work', workId, 'report'] });
         },
     });
 
     const completeWork = useCallback(async () => {
-        return await completeMutation.mutateAsync();
+        await completeMutation.mutateAsync();
     }, [completeMutation]);
-
-    // Сброс состояния при смене пункта
-    useEffect(() => {
-        setAnswer('');
-        setFeedback(null);
-    }, [currentItemIndex]);
-
-    // Текущий пункт
-    const currentItem = workDetail?.items[currentItemIndex] ?? null;
 
     return {
         workDetail: workDetail ?? null,
@@ -321,11 +214,10 @@ export function useWorkExecution(workId: number): UseWorkExecutionResult {
         itemResults,
         remainingAttempts,
         showHint,
-        toggleHint,
+        toggleHint: useCallback(() => setShowHint((p) => !p), []),
         answer,
         setAnswer,
-        feedback,
-        setFeedback,
+        feedback: lastFeedback,
         startWork,
         submitAnswer,
         nextItem,
