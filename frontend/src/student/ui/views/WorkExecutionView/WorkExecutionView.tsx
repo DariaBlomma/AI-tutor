@@ -120,6 +120,11 @@ export function WorkExecutionView({ workId }: WorkExecutionViewProps) {
         );
     }
 
+    // Обязательная проверка для TypeScript (currentItem может быть null, но это не может произойти здесь)
+    if (!currentItem) {
+        return null;
+    }
+
     return (
         <div className={styles.page}>
             <BackLink to="/" label="К заданиям" />

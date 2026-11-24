@@ -2,12 +2,7 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { StudentWorkService } from '@/student/services/StudentWorkService';
 import { extractErrorMessage } from '@/core/api/utils/errors';
-import type {
-StudentWorkDetailResponse,
-StudentSubmitAnswerRequest,
-StudentSubmitAnswerResponse,
-ItemProgressStatus,
-} from '@/student/types/work';
+import type { StudentWorkDetailResponse } from '@/student/types/work';
 
 export interface FeedbackState {
     correct: boolean;
@@ -16,6 +11,7 @@ export interface FeedbackState {
     allItemsSolved: boolean;
 }
 
+// Убрали id. attempt (1, 2, 3) и так уникален в рамках одного вопроса
 export interface PreviousAnswer {
     attempt: number;
     value: string;
@@ -56,7 +52,6 @@ export function useWorkExecution(workId: number): UseWorkExecutionResult {
     const queryClient = useQueryClient();
     const queryKey = ['student', 'work', workId];
 
-    // 1. ЕДИНЫЙ ИСТОЧНИК ИСТИНЫ
     const { data: workDetail, isLoading, isError, error } = useQuery({
         queryKey,
         queryFn: () => StudentWorkService.getWorkDetail(workId),
@@ -66,7 +61,6 @@ export function useWorkExecution(workId: number): UseWorkExecutionResult {
 
     const totalItems = workDetail?.items.length ?? 0;
 
-    // Вычисляем индекс динамически. Никаких useState для синхронизации с сервером!
     const currentItemIndex = useMemo(() => {
         if (!workDetail) return 0;
         const index = workDetail.progress.findIndex(
@@ -83,24 +77,28 @@ export function useWorkExecution(workId: number): UseWorkExecutionResult {
         return workDetail.progress.filter((p) => p.status === 'SOLVED').length;
     }, [workDetail]);
 
-    // История попыток вычисляется "на лету" из прогресса
-    const previousAnswers = useMemo<PreviousAnswer[]>(() => {
-        if (!currentProgress || currentProgress.answerAttempts === 0) return [];
+    // 1. ЛОКАЛЬНАЯ ИСТОРИЯ ТОЛЬКО ДЛЯ ТЕКУЩЕЙ СЕССИИ
+    const [sessionAttempts, setSessionAttempts] = useState<PreviousAnswer[]>([]);
 
-        const answers: PreviousAnswer[] = [];
-        for (let i = 1; i < currentProgress.answerAttempts; i++) {
-            answers.push({ attempt: i, value: '***', correct: false });
+    // 2. ПРОСТАЯ И ПОНИТНАЯ ЛОГИКА СБОРА ПОПЫТОК
+    const previousAnswers = useMemo<PreviousAnswer[]>(() => {
+        // Если есть данные текущей сессии, показываем их (они содержат реальные тексты ответов)
+        if (sessionAttempts.length > 0) {
+            return sessionAttempts;
         }
-        if (currentProgress.lastAnswer) {
-            answers.push({
+        // Фолбэк после перезагрузки страницы: показываем только последнюю попытку,
+        // так как бэкенд хранит только lastAnswer
+        if (currentProgress && currentProgress.answerAttempts > 0 && currentProgress.lastAnswer) {
+            return [{
                 attempt: currentProgress.answerAttempts,
                 value: currentProgress.lastAnswer,
-                correct: false,
-            });
+                correct: false, // При перезагрузке мы не знаем точно, но раз мы всё еще на этом шаге, скорее всего нет
+            }];
         }
-        return answers;
-    }, [currentProgress]);
+        return [];
+    }, [sessionAttempts, currentProgress]);
 
+    // 3. ОСТАВШИЕСЯ ПОПЫТКИ СЧИТАЕМ СТРОГО ПО ДАННЫМ БЭКЕНДА
     const remainingAttempts = useMemo(() => {
         if (!currentProgress) return MAX_ATTEMPTS;
         return Math.max(0, MAX_ATTEMPTS - currentProgress.answerAttempts);
@@ -115,44 +113,35 @@ export function useWorkExecution(workId: number): UseWorkExecutionResult {
         });
     }, [workDetail]);
 
-    // 2. ЛОКАЛЬНЫЙ СТЕЙТ ТОЛЬКО ДЛЯ UI-ФОРМЫ
     const [answer, setAnswer] = useState('');
     const [showHint, setShowHint] = useState(false);
     const [lastFeedback, setLastFeedback] = useState<FeedbackState | null>(null);
 
-    // БЕЗОПАСНЫЙ сброс формы при переходе к новому вопросу
+    // Сброс всех локальных состояний при переходе к новому вопросу
     useEffect(() => {
         setAnswer('');
         setLastFeedback(null);
         setShowHint(false);
+        setSessionAttempts([]); // <-- Очищаем историю попыток для нового вопроса
     }, [currentItemIndex]);
 
-    // Таймер с корректным интервалом
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
     useEffect(() => {
         if (!workDetail?.startedAt) return;
         const start = new Date(workDetail.startedAt).getTime();
-
-        // Устанавливаем сразу, чтобы не ждать 1 секунду до первого тика
         setElapsedSeconds(Math.floor((Date.now() - start) / 1000));
-
         const interval = setInterval(() => {
             setElapsedSeconds(Math.floor((Date.now() - start) / 1000));
         }, 1000);
-
         return () => clearInterval(interval);
     }, [workDetail?.startedAt]);
 
-    // 3. МУТАЦИИ (без useRef, передаем данные явно через аргументы)
     const startMutation = useMutation({
         mutationFn: () => StudentWorkService.startWork(workId),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey });
-        },
+        onSuccess: () => queryClient.invalidateQueries({ queryKey }),
     });
 
     const startWork = useCallback(async () => {
-        // Не стартуем, если уже начата или идет процесс
         if (workDetail?.startedAt) return;
         if (!startMutation.isPending && !startMutation.data) {
             await startMutation.mutateAsync();
@@ -160,18 +149,27 @@ export function useWorkExecution(workId: number): UseWorkExecutionResult {
     }, [workDetail?.startedAt, startMutation]);
 
     const submitMutation = useMutation({
-        // Передаем itemId явно, чтобы избежать stale closure
         mutationFn: ({ itemId, answerText }: { itemId: number; answerText: string }) => {
             return StudentWorkService.submitAnswer(workId, itemId, { answer: answerText });
         },
-        onSuccess: (response) => {
+        onSuccess: (response, variables) => {
             setLastFeedback({
                 correct: response.correct,
                 attemptsCount: response.attemptsCount,
                 hint: response.hint ?? null,
                 allItemsSolved: response.allItemsSolved,
             });
-            // Инвалидация заставит пересчитать currentItemIndex, если ответ был верным
+
+            // ДОБАВЛЯЕМ реальный ответ пользователя в историю сессии
+            setSessionAttempts((prev) => [
+            ...prev,
+            {
+                attempt: response.attemptsCount,
+                value: variables.answerText, // <-- Берем текст из запроса
+                correct: response.correct,
+            },
+            ]);
+
             queryClient.invalidateQueries({ queryKey });
         },
     });
@@ -182,8 +180,6 @@ export function useWorkExecution(workId: number): UseWorkExecutionResult {
     }, [answer, currentItem, submitMutation]);
 
     const nextItem = useCallback(() => {
-        // Принудительно обновляем данные. Если ответ был верным, сервер уже
-        // пометил элемент как SOLVED, и следующий запрос вернет новый currentItemIndex.
         queryClient.invalidateQueries({ queryKey });
     }, [queryClient, queryKey]);
 
