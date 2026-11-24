@@ -1,6 +1,6 @@
 import { getInitials } from '@/shared/utils/getInitials';
-import { TaskPreviewChips } from '@/tasks/ui/widgets/TaskPreviewChips/TaskPreviewChips';
-import type { ItemType } from '@/tasks/types';
+import { TaskPreviewChips } from '@/task/ui/widgets/TaskPreviewChips/TaskPreviewChips';
+import type { ItemType } from '@/task/types';
 import type { WorkReportDetailDto } from '@/reports/types';
 import styles from './ReportSummary.module.scss';
 

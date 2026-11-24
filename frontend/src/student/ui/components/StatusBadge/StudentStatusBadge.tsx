@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import type { UITaskStatus } from '@/tasks/types/ui';
-import { UITASK_STATUS_LABELS } from '@/tasks/types/ui';
+import type { UITaskStatus } from '@/task/types/ui';
+import { UITASK_STATUS_LABELS } from '@/task/types/ui';
 import styles from './StudentStatusBadge.module.scss';
 
 interface StudentStatusBadgeProps {

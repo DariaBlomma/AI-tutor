@@ -1,5 +1,5 @@
 import type { StudentWorkCard } from '@/student/types/models/studentWorkCard';
-import { TaskAssignmentItem } from '@/tasks/ui/base/TaskAssignmentItem';
+import { TaskAssignmentItem } from '@/task/ui/base/TaskAssignmentItem';
 import { Loader } from '@/shared/ui-kit/Loader/Loader';
 import { Section } from './Section';
 import styles from './StudentAssignmentList.module.scss';

@@ -1,0 +1,108 @@
+import { useCallback, useState } from 'react';
+import { extractErrorMessage } from '@/core/api/utils/errors';
+import { TasksBankService } from '@/task/services/TasksBankService';
+import { buildTaskPayload } from '@/task/lib/buildTaskPayload';
+import { isFormValid, validateTaskForm } from '@/task/lib/validateTaskForm';
+import type { CefrLevel, ExamType, ItemType, TaskItemDraft } from '@/task/types';
+
+export interface CreateTaskFormState {
+    name: string;
+    /** Необязательная инструкция для ученика (tasks.instruction). */
+    instruction: string;
+    topicIds: number[];
+    grammarTypeIds: number[];
+    /** Механика всего задания (выбирается до конструктора пунктов). */
+    itemType: ItemType;
+    /** Уровни CEFR (enum CefrLevel), минимум один — серверный фильтр банка заданий. */
+    levels: CefrLevel[];
+    /** Тип экзамена (enum ExamType: OGE/EGE), null = не указан. */
+    examType: ExamType | null;
+    materialTitle: string;
+    materialText: string;
+    items: TaskItemDraft[];
+    /** Курсы, в которые добавляется задание. */
+    courseIds: number[];
+}
+
+interface UseTaskSubmitResult {
+    submit: (form: CreateTaskFormState) => Promise<boolean>;
+    isSubmitting: boolean;
+    /** Сообщение об ошибке (локальная валидация или ответ бэка). */
+    error: string | null;
+}
+
+/** Результат useUpdateTask: submit принимает id задания (PUT /api/tasks/{id}). */
+interface UseTaskUpdateSubmitResult {
+    submit: (id: number, form: CreateTaskFormState) => Promise<boolean>;
+    isSubmitting: boolean;
+    error: string | null;
+}
+
+// Отправка POST /api/tasks: сначала локальная валидация (зеркалит бэка),
+// затем запрос; текст 400 от валидатора контента показываем как есть.
+export function useCreateTask(onSuccess: () => void): UseTaskSubmitResult {
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const submit = useCallback(
+        async (form: CreateTaskFormState): Promise<boolean> => {
+            const errors = validateTaskForm(form);
+            if (!isFormValid(errors, form.grammarTypeIds.length > 0)) {
+                setError('Проверьте выделенные поля — форма заполнена не полностью.');
+                return false;
+            }
+
+            try {
+                setIsSubmitting(true);
+                setError(null);
+                await TasksBankService.createTask(buildTaskPayload(form));
+                onSuccess();
+                return true;
+            } catch (e) {
+                setError(extractErrorMessage(e as Error));
+                return false;
+            } finally {
+                setIsSubmitting(false);
+            }
+        },
+        [onSuccess],
+    );
+
+    return { submit, isSubmitting, error };
+}
+
+/**
+ * PUT /api/tasks/{id}: та же форма и валидация, что при создании; payload собирается
+ * тем же buildTaskPayload (TaskUpdateRequest зеркалит TaskCreateRequest).
+ * id передаётся в момент отправки — экран редактирования грузит карточку асинхронно.
+ */
+export function useUpdateTask(onSuccess: () => void): UseTaskUpdateSubmitResult {
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const submit = useCallback(
+        async (id: number, form: CreateTaskFormState): Promise<boolean> => {
+            const errors = validateTaskForm(form);
+            if (!isFormValid(errors, form.grammarTypeIds.length > 0)) {
+                setError('Проверьте выделенные поля — форма заполнена не полностью.');
+                return false;
+            }
+
+            try {
+                setIsSubmitting(true);
+                setError(null);
+                await TasksBankService.updateTask(id, buildTaskPayload(form));
+                onSuccess();
+                return true;
+            } catch (e) {
+                setError(extractErrorMessage(e as Error));
+                return false;
+            } finally {
+                setIsSubmitting(false);
+            }
+        },
+        [onSuccess],
+    );
+
+    return { submit, isSubmitting, error };
+}

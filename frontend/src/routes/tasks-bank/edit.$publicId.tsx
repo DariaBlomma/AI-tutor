@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import { AuthService } from '@/auth/services/AuthService.ts';
-import { TaskEditView } from '@/tasks/ui/views/TaskEditView/TaskEditView';
+import { TaskEditView } from '@/task/ui/views/TaskEditView/TaskEditView';
 
 // Страница редактирования задания: доступна только учителю (бэк дополнительно
 // проверяет владение — чужое задание даст 403 при сохранении).

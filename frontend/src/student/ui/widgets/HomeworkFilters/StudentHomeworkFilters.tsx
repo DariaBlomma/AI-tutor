@@ -1,8 +1,8 @@
 import { useMemo, useCallback } from 'react';
 import type { DatePreset, DateRange } from '@/student/lib/datePresets';
 import { PRESET_LABELS } from '@/student/lib/datePresets';
-import type { FilterChipType } from '@/tasks/types/ui';
-import { FILTER_CHIP_LABELS, UITaskStatus } from '@/tasks/types/ui';
+import type { FilterChipType } from '@/task/types/ui';
+import { FILTER_CHIP_LABELS, UITaskStatus } from '@/task/types/ui';
 import { DateTimePicker } from '@/shared/ui-kit/DateTimePicker/DateTimePicker';
 import styles from './StudentHomeworkFilters.module.scss';
 

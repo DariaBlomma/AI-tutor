@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
-import { TaskCreateView } from '@/tasks/ui/views/TaskCreateView/TaskCreateView';
+import { TaskCreateView } from '@/task/ui/views/TaskCreateView/TaskCreateView';
 import { AuthService } from '@/auth/services/AuthService.ts';
 
 export const Route = createFileRoute('/tasks-bank/create')({

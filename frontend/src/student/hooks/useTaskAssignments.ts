@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { extractErrorMessage } from '@/core/api/utils/errors';
-import { TasksBankService } from '@/tasks/services/TasksBankService';
-import type { TaskAssignmentDto } from '@/tasks/types';
+import { TasksBankService } from '@/task/services/TasksBankService';
+import type { TaskAssignmentDto } from '@/task/types';
 
 export interface UseTaskAssignmentsResult {
     /** Список учеников с активными назначениями для задания; null до загрузки. */

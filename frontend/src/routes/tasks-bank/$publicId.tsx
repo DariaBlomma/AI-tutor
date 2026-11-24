@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import { AuthService } from '@/auth/services/AuthService.ts';
-import { TaskDetailView } from '@/tasks/ui/views/TaskDetailView/TaskDetailView';
+import { TaskDetailView } from '@/task/ui/views/TaskDetailView/TaskDetailView';
 
 // Страница просмотра задания: открывается по клику на publicId в банке заданий.
 export const Route = createFileRoute('/tasks-bank/$publicId')({

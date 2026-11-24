@@ -1,14 +1,14 @@
 import { useCallback } from 'react';
 import { StudentHomeworkFilters } from '@/student/ui/widgets/HomeworkFilters/StudentHomeworkFilters';
-import { TaskAssignmentItem } from '@/tasks/ui/base/TaskAssignmentItem';
+import { TaskAssignmentItem } from '@/task/ui/base/TaskAssignmentItem';
 import { StudentHomeworkProgressBar } from '@/student/ui/base/HomeworkProgressBar/StudentHomeworkProgressBar';
-import { useTaskFilters } from '@/tasks/hooks/useTaskFilters';
+import { useTaskFilters } from '@/task/hooks/useTaskFilters';
 import { useStudentHomeworkData } from '@/student/hooks/useStudentHomeworkData';
 import { useMappedHomework } from '@/student/hooks/useMappedHomework';
 import { Loader } from '@/shared/ui-kit/Loader/Loader';
 import { Pagination } from '@/shared/ui-kit/Pagination/Pagination';
 import type { DatePreset } from '@/student/lib/datePresets';
-import type { FilterChipType } from '@/tasks/types/ui';
+import type { FilterChipType } from '@/task/types/ui';
 import styles from './StudentHomeworkView.module.scss';
 
 export function StudentHomeworkView() {

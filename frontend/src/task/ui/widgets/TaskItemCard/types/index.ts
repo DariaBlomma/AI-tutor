@@ -1,0 +1,16 @@
+import type { TaskItemDraft } from '@/task/types';
+
+export interface TaskItemCardProps {
+    item: TaskItemDraft;
+    index: number;
+    isFirst: boolean;
+    isLast: boolean;
+    /** Текст ошибки валидации пункта (подсветка карточки), если есть. */
+    error?: string;
+    onChange: (id: number, patch: Partial<TaskItemDraft>) => void;
+    onMoveUp: (index: number) => void;
+    onMoveDown: (index: number) => void;
+    onRemove: (index: number) => void;
+    /** Блокировка правки пункта (текст/ответы), если задание уже назначено/решено учениками. */
+    disabled?: boolean;
+}

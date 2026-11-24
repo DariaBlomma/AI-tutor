@@ -1,6 +1,6 @@
 import type { StudentWorkCard } from '@/student/types/models/studentWorkCard';
-import type { UITaskStatus } from '@/tasks/types/ui';
-import { mapBackendStatusToUI } from '@/tasks/types/ui';
+import type { UITaskStatus } from '@/task/types/ui';
+import { mapBackendStatusToUI } from '@/task/types/ui';
 
 /**
  * Определяет UI-статус задачи на основе бэкенд-данных.
