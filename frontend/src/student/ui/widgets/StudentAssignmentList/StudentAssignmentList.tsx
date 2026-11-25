@@ -1,14 +1,8 @@
-import type { StudentWorkCard } from '@/student/types/models/studentWorkCard.ts';
 import { TaskAssignmentItem } from '@/task/ui/base/TaskAssignmentItem/TaskAssignmentItem.tsx';
 import { Loader } from '@/shared/ui-kit/Loader/Loader.tsx';
 import { StudentSection } from '@/student/ui/base/StudentSection/StudentSection.tsx';
+import type { StudentAssignmentListProps } from '@/student/types/ui';
 import styles from './StudentAssignmentList.module.scss';
-
-interface StudentAssignmentListProps {
-    block1: StudentWorkCard[]; // «Нужно сделать»
-    block2: StudentWorkCard[]; // «Новые задания»
-    isLoading: boolean;
-}
 
 export function StudentAssignmentList({ block1, block2, isLoading }: StudentAssignmentListProps) {
     const hasItems = block1.length > 0 || block2.length > 0;

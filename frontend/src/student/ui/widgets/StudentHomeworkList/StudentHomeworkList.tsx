@@ -1,15 +1,9 @@
 import { StudentHomeworkItem } from '@/student/ui/base/StudentHomeworkItem/StudentHomeworkItem.tsx';
 import { Loader } from '@/shared/ui-kit/Loader/Loader.tsx';
-import type { StudentWorkResponse } from '@/student/services/StudentDashboardService.ts';
 import styles from './StudentHomeworkList.module.scss';
+import {StudentHomeworkListProps} from "@/student/types/ui";
 
-export interface HomeworkListProps {
-    works: StudentWorkResponse[];
-    isLoading: boolean;
-    onItemPress: (workId: number) => void;
-}
-
-export function StudentHomeworkList({ works, isLoading, onItemPress }: HomeworkListProps) {
+export function StudentHomeworkList({ works, isLoading, onItemPress }: StudentHomeworkListProps) {
     if (isLoading) {
         return (
             <div className={styles.loading}>

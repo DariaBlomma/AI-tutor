@@ -1,9 +1,5 @@
+import type { StudentHomeworkProgressBarProps } from '@/student/types/ui';
 import styles from './StudentHomeworkProgressBar.module.scss';
-
-export interface StudentHomeworkProgressBarProps {
-    completed: number;
-    total: number;
-}
 
 export function StudentHomeworkProgressBar({ completed, total }: StudentHomeworkProgressBarProps) {
     const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;

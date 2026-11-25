@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { BaseModal } from '@/shared/ui-kit/BaseModal/BaseModal';
-import { CourseSelectMulti } from '@/task/ui/widgets/CourseSelectMulti/CourseSelectMulti';
+import { CourseSelectMulti } from '@/task/ui/widgets/CourseSelectMulti/CourseSelectMulti.tsx';
 import { LoadingWidget } from '@/shared/ui-kit/Loader/LoadingWidget';
 import { useTeacherCourses } from '@/teacher/hooks/useTeacherCourses';
 import { CoursesService } from '@/teacher/services/CoursesService';

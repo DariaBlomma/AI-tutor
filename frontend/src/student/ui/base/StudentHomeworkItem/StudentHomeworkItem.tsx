@@ -1,7 +1,7 @@
 import { StudentStatusBadge } from '@/student/ui/base/StudentStatusBadge/StudentStatusBadge.tsx';
 import { StudentHomeworkProgressBar } from '@/student/ui/base/StudentHomeworkProgressBar/StudentHomeworkProgressBar.tsx';
 import { formatDeadline } from '@/student/utils';
-import type { StudentWorkResponse } from '@/student/services/StudentDashboardService.ts';
+import type { StudentHomeworkItemProps } from '@/student/types/ui';
 import { UITaskStatus } from '@/task/types/ui';
 import styles from './StudentHomeworkItem.module.scss';
 
@@ -13,11 +13,6 @@ const STATUS_LABELS: Record<string, string> = {
     CANCELLED: 'Отменено',
     EXPIRED: 'Просрочено',
 };
-
-export interface StudentHomeworkItemProps {
-    work: StudentWorkResponse;
-    onClick: () => void;
-}
 
 export function StudentHomeworkItem({ work, onClick }: StudentHomeworkItemProps) {
     const completedItems = work.completedItems ?? 0;

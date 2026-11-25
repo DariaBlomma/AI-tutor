@@ -1,7 +1,7 @@
 import { Outlet, useLocation } from '@tanstack/react-router';
 import { AuthService } from '@/auth/services/AuthService.ts';
 import { AppBottomNav } from '@/shared/widgets/AppBottomNav/AppBottomNav';
-import { AppSidebar } from '@/shared/widgets/AppSidebar/AppSidebar';
+import { AppSidebar } from '@/shared/widgets/AppSidebar/AppSidebar.tsx';
 import { useSidebar } from '@/shared/hooks/useSidebar';
 import { PageLayout } from '@/shared/layouts/PageLayout';
 import type { AppBottomNavActive } from '@/shared/widgets/AppBottomNav/types';

@@ -1,23 +1,12 @@
 import { useMemo, useCallback } from 'react';
-import type { DatePreset, DateRange } from '@/student/utils/datePresets.ts';
 import { PRESET_LABELS } from '@/student/utils/datePresets.ts';
-import type { FilterChipType } from '@/task/types/ui';
 import { FILTER_CHIP_LABELS, UITaskStatus } from '@/task/types/ui';
 import { DateTimePicker } from '@/shared/ui-kit/DateTimePicker/DateTimePicker';
+import type { StudentHomeworkFiltersProps } from '@/student/types/ui';
 import styles from './StudentHomeworkFilters.module.scss';
 
 /** Статусы, для которых datePreset показывается (только для завершённых). */
 const PRESET_STATUSES: FilterChipType[] = [UITaskStatus.COMPLETED, UITaskStatus.OVERDUE];
-
-export interface StudentHomeworkFiltersProps {
-    statusFilter: FilterChipType;
-    onStatusChange: (status: FilterChipType) => void;
-    datePreset: DatePreset;
-    onDatePresetChange: (preset: DatePreset) => void;
-    onDatePresetClear: () => void;
-    dateRange: DateRange;
-    onDateRangeChange: (range: DateRange) => void;
-}
 
 const STATUS_OPTIONS: Array<{ value: FilterChipType; label: string }> = [
     { value: 'all', label: 'Все' },

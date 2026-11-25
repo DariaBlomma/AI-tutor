@@ -1,4 +1,4 @@
-export * from './taskStatus';
+export * from './task-status';
 
 import type { ItemType } from '../models';
 

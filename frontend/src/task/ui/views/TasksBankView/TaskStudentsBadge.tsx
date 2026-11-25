@@ -1,4 +1,4 @@
-import { StudentsBadge } from '@/task/ui/widgets/StudentsBadge';
+import { StudentsBadge } from '@/task/ui/widgets/StudentsBadge/StudentsBadge.tsx';
 import { useTaskAssignments } from '@/task/hooks/useTaskAssignments';
 
 interface TaskStudentsBadgeProps {

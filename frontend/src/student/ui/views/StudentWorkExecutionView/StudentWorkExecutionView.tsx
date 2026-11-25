@@ -1,12 +1,13 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useWorkExecution } from '@/student/hooks/useWorkExecution';
-import { BackLink } from '@/task/ui/widgets/BackLink/BackLink';
+import { BackLink } from '@/task/ui/widgets/BackLink/BackLink.tsx';
 import { TaskPreviewChips } from '@/task/ui/widgets/TaskPreviewChips/TaskPreviewChips';
 import { Loader } from '@/shared/ui-kit/Loader/Loader';
 import { BaseInputText } from '@/shared/ui-kit/BaseInputText/BaseInputText';
 import { parseWordFormationContent, parseGapFillContent } from '@/task/utils/parseTaskContent';
 import type { CefrLevel, ItemType } from '@/task/types';
+import type { WorkExecutionViewProps } from '@/student/types/ui';
 import styles from './StudentWorkExecutionView.module.scss';
 
 /** Форматирует секунды в «3 мин 12 с». */
@@ -14,10 +15,6 @@ function formatElapsed(seconds: number): string {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${m} мин ${s} с`;
-}
-
-interface WorkExecutionViewProps {
-    workId: string;
 }
 
 export function StudentWorkExecutionView({ workId }: WorkExecutionViewProps) {

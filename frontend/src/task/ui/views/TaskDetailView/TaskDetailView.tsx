@@ -1,7 +1,7 @@
 import { useMemo, useEffect, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { useTeacherCourses } from '@/teacher/hooks/useTeacherCourses';
-import { CourseSelectMulti } from '@/task/ui/widgets/CourseSelectMulti/CourseSelectMulti';
+import { CourseSelectMulti } from '@/task/ui/widgets/CourseSelectMulti/CourseSelectMulti.tsx';
 import { useTaskDetail } from '@/task/hooks/useTaskDetail';
 import { useTaskDetailCourses } from '@/task/hooks/useTaskDetailCourses';
 import { useIsTeacher } from '@/task/hooks/useIsTeacher';

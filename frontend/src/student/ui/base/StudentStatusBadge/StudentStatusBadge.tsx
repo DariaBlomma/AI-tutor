@@ -1,12 +1,6 @@
-import type { ReactNode } from 'react';
-import type { UITaskStatus } from '@/task/types/ui';
+import type { StudentStatusBadgeProps } from '@/student/types/ui';
 import { UITASK_STATUS_LABELS } from '@/task/types/ui';
 import styles from './StudentStatusBadge.module.scss';
-
-interface StudentStatusBadgeProps {
-    type: UITaskStatus;
-    children?: ReactNode;
-}
 
 export function StudentStatusBadge({ type, children }: StudentStatusBadgeProps) {
     return (

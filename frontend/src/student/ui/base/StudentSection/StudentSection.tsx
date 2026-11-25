@@ -1,12 +1,7 @@
+import type { StudentSectionProps } from '@/student/types/ui';
 import styles from './StudentSection.module.scss';
 
-interface SectionProps {
-    title: string;
-    count: number;
-    children: React.ReactNode;
-}
-
-export function StudentSection({ title, count, children }: SectionProps) {
+export function StudentSection({ title, count, children }: StudentSectionProps) {
     return (
         <div className={styles.section}>
             <div className={styles.sectionHeader}>
