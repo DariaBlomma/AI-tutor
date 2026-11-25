@@ -1,5 +1,6 @@
-import { StudentsBadge } from '@/task/ui/widgets/StudentsBadge/StudentsBadge.tsx';
+import { StudentAssignmentBadgeBase } from '@/student/ui/base/StudentAssignmentBadgeBase/StudentAssignmentBadgeBase.tsx';
 import { useTaskAssignments } from '@/task/hooks/useTaskAssignments';
+import type { StudentAssignmentBadgeItem } from '@/student/types/ui/student-assignment-badge-base.ts';
 
 interface TaskDetailViewStudentsBadgeProps {
     taskId: number;
@@ -14,10 +15,16 @@ export function TaskDetailViewStudentsBadge({ taskId }: TaskDetailViewStudentsBa
 
     const count = assignments?.length ?? 0;
 
+    const items: StudentAssignmentBadgeItem[] | null = assignments?.map((a) => ({
+        studentId: a.studentId,
+        studentName: a.studentName,
+        lastName: a.lastName ?? undefined,
+    })) ?? null;
+
     return (
-        <StudentsBadge
+        <StudentAssignmentBadgeBase
             count={count}
-            assignments={assignments}
+            assignments={items}
             isLoading={isLoading}
         />
     );

@@ -10,7 +10,7 @@ import { TaskPreviewChips } from '@/task/ui/widgets/TaskPreviewChips/TaskPreview
 import { TaskAssignPopup } from '@/task/ui/widgets/TaskAssignPopup/TaskAssignPopup';
 import { BackLink } from '@/shared/widgets/BackLink/BackLink.tsx';
 import { TaskDetailItem } from '@/task/ui/widgets/TaskDetailItem/TaskDetailItem';
-import { TaskStudentsBadge } from '@/task/ui/widgets/TaskStudentsBadge/TaskStudentsBadge';
+import { StudentAssignmentBadgeContainer } from '@/student/ui/widgets/StudentAssignmentBadgeContainer/StudentAssignmentBadgeContainer.tsx';
 import { parseTaskContext } from '@/task/utils/parseTaskContent';
 import styles from './TaskDetailView.module.scss';
 
@@ -93,7 +93,7 @@ export function TaskDetailView({ publicId }: TaskDetailViewProps) {
                         <button type="button" className={styles.actionBtn} onClick={() => setAssignPopupOpen(true)}>
                             Назначить ученику
                         </button>
-                        <TaskStudentsBadge taskId={task.id} />
+                        <StudentAssignmentBadgeContainer taskId={task.id} />
                     </div>
                     {/* Переход на страницу редактирования (роут /tasks-bank/edit/$publicId). */}
                     <Link to="/tasks-bank/edit/$publicId" params={{ publicId: task.publicId }} className={styles.actionBtn}>

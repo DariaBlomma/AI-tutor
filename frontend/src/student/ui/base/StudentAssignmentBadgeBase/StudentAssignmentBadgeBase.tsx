@@ -1,23 +1,14 @@
 import * as Popover from '@radix-ui/react-popover';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getInitials } from '@/shared/utils/getInitials';
-import type { TaskAssignmentDto } from '@/task/types';
-import styles from './StudentsBadge.module.scss';
-
-export interface StudentsBadgeProps {
-    /** Количество активных назначений. */
-    count: number;
-    /** Список учеников с активными назначениями. */
-    assignments?: TaskAssignmentDto[] | null;
-    /** Флаг загрузки списка. */
-    isLoading?: boolean;
-}
+import type { StudentAssignmentBadgeBaseProps } from '@/student/types/ui/student-assignment-badge-base.ts';
+import styles from './StudentAssignmentBadgeBase.module.scss';
 
 /**
  * Компонент-бейдж: иконка людей + число активных назначений.
  * На десктопе — попап по hover, на мобильном — по клику.
  */
-export function StudentsBadge({ count, assignments, isLoading }: StudentsBadgeProps) {
+export function StudentAssignmentBadgeBase({ count, assignments, isLoading }: StudentAssignmentBadgeBaseProps) {
     const [open, setOpen] = useState(false);
     const hoverRef = useRef<HTMLButtonElement>(null);
 

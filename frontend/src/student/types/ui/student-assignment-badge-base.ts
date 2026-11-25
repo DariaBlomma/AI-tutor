@@ -1,10 +1,14 @@
-import type { TaskAssignmentDto } from '@/task/types';
+export interface StudentAssignmentBadgeItem {
+    studentId: number;
+    studentName: string;
+    lastName?: string;
+}
 
-export interface StudentsBadgeProps {
+export interface StudentAssignmentBadgeBaseProps {
     /** Число активных назначений (для иконки). */
     count: number;
     /** Список учеников с активными назначениями (для попапа). */
-    assignments: TaskAssignmentDto[] | null;
+    assignments: StudentAssignmentBadgeItem[] | null;
     /** Загрузка данных. */
     isLoading: boolean;
 }
