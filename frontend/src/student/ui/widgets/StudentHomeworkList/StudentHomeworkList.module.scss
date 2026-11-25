@@ -1,0 +1,23 @@
+@use '@/shared/styles/variables' as *;
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.loading {
+    display: flex;
+    justify-content: center;
+    padding: 40px 0;
+}
+
+.empty {
+    text-align: center;
+    padding: 40px 20px;
+    background: rgba(157, 124, 242, 0.03);
+    border: 1px dashed rgba(157, 124, 242, 0.2);
+    border-radius: $radius;
+    color: $c3;
+    font-size: 14px;
+}
