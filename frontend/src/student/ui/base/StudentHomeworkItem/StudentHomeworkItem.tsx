@@ -2,8 +2,8 @@ import { StudentStatusBadge } from '@/student/ui/base/StudentStatusBadge/Student
 import { StudentHomeworkProgressBar } from '@/student/ui/base/StudentHomeworkProgressBar/StudentHomeworkProgressBar.tsx';
 import { formatDeadline } from '@/student/utils';
 import type { StudentWorkResponse } from '@/student/services/StudentDashboardService.ts';
+import { UITaskStatus } from '@/task/types/ui';
 import styles from './StudentHomeworkItem.module.scss';
-import type {UITaskStatus} from "@/task/types";
 
 /** Маппинг статуса на отображаемый текст */
 const STATUS_LABELS: Record<string, string> = {
@@ -27,7 +27,7 @@ export function StudentHomeworkItem({ work, onClick }: StudentHomeworkItemProps)
         <div className={styles.item} onClick={onClick}>
             <div className={styles.header}>
                 <div className={styles.title}>{work.taskName}</div>
-                <StudentStatusBadge type="new">
+                <StudentStatusBadge type={UITaskStatus.NEW}>
                     {STATUS_LABELS[work.status] || work.status}
                 </StudentStatusBadge>
             </div>
