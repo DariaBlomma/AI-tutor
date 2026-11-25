@@ -1,4 +1,4 @@
-import { HomeworkItem } from '@/student/ui/components/HomeworkItem/HomeworkItem';
+import { StudentHomeworkItem } from '@/student/ui/base/StudentHomeworkItem/StudentHomeworkItem.tsx';
 import { Loader } from '@/shared/ui-kit/Loader/Loader.tsx';
 import type { StudentWorkResponse } from '@/student/services/StudentDashboardService.ts';
 import styles from './HomeworkList.module.scss';
@@ -29,7 +29,7 @@ export function StudentHomeworkList({ works, isLoading, onItemPress }: HomeworkL
     return (
         <div className={styles.list}>
             {works.map((work) => (
-                <HomeworkItem
+                <StudentHomeworkItem
                     key={work.id}
                     work={work}
                     onClick={() => onItemPress(work.id)}

@@ -1,4 +1,4 @@
-import styles from '../StudentAssignmentList/StudentAssignmentList.module.scss';
+import styles from '../../widgets/StudentAssignmentList/StudentAssignmentList.module.scss';
 
 interface SectionProps {
     title: string;

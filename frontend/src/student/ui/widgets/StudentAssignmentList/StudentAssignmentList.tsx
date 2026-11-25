@@ -1,7 +1,7 @@
 import type { StudentWorkCard } from '@/student/types/models/studentWorkCard.ts';
 import { TaskAssignmentItem } from '@/task/ui/base/TaskAssignmentItem';
 import { Loader } from '@/shared/ui-kit/Loader/Loader.tsx';
-import { StudentSection } from '../StudentSection/StudentSection.tsx';
+import { StudentSection } from '@/student/ui/base/StudentSection/StudentSection.tsx';
 import styles from './StudentAssignmentList.module.scss';
 
 interface StudentAssignmentListProps {
