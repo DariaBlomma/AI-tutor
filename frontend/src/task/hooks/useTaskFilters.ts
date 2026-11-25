@@ -1,8 +1,8 @@
 import { useState, useCallback, useMemo } from 'react';
 import type { WorkStatus } from '@/student/types/work';
-import type { FilterChipType, DatePreset, DateRange, BackendFilterParams } from '@/task/types/ui';
+import type { FilterChipType, DatePreset, DateRange } from '@/task/types/ui';
 import { getDateRange } from '@/student/utils/datePresets.ts';
-import { UI_STATUS_TO_BACKEND, UITaskStatus } from '@/task/types/ui';
+import { UI_STATUS_TO_BACKEND } from '@/task/types/ui';
 
 /** Параметры фильтрации для API. */
 export interface TaskApiFilters {

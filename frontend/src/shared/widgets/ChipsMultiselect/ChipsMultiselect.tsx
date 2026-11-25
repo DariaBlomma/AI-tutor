@@ -1,5 +1,5 @@
 import { BasePlusButtonLink } from '@/shared/ui-kit/BasePlusButtonLink/BasePlusButtonLink';
-import type { ChipsMultiselectProps } from './types';
+import type { ChipsMultiselectProps, ChipItem } from '@/task/types/ui';
 import styles from './ChipsMultiselect.module.scss';
 
 // Мультивыбор чипов по id справочника (темы / грамматические типы).
@@ -8,7 +8,7 @@ import styles from './ChipsMultiselect.module.scss';
 // в режиме single он активен, когда ничего не выбрано (пустой фильтр = «Все»).
 // Кнопка «+» справа — ссылка на страницу управления соответствующим справочником
 // (создание/редактирование/удаление).
-export function ChipsMultiselect({ items, selectedIds, onChange, manageTo, single, onClear, clearLabel, ariaLabel }: ChipsMultiselectProps) {
+export function ChipsMultiselect({ items, selectedIds, onChange, manageTo, single, onClear, clearLabel }: ChipsMultiselectProps) {
     const toggle = (id: number) => {
         if (single) {
             onChange(selectedIds.includes(id) ? [] : [id]);
@@ -16,7 +16,7 @@ export function ChipsMultiselect({ items, selectedIds, onChange, manageTo, singl
         }
         onChange(
             selectedIds.includes(id)
-                ? selectedIds.filter((selected) => selected !== id)
+                ? selectedIds.filter((selected: number) => selected !== id)
                 : [...selectedIds, id],
         );
     };
@@ -36,7 +36,7 @@ export function ChipsMultiselect({ items, selectedIds, onChange, manageTo, singl
                         {clearLabel ?? 'Все'}
                     </button>
                 )}
-                {items.map((item) => (
+                {items.map((item: ChipItem) => (
                     <button
                         key={item.id}
                         type="button"

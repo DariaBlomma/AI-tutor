@@ -51,3 +51,6 @@ export interface StudentHomeworkListProps {
 export interface WorkExecutionViewProps {
     workId: string;
 }
+
+export type { DatePreset, DateRange } from '@/student/utils/datePresets.ts';
+export type { FilterChipType } from '@/task/types/ui';

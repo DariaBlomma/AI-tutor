@@ -1,8 +1,8 @@
 import { useMemo, useCallback } from 'react';
 import { PRESET_LABELS } from '@/student/utils/datePresets.ts';
-import { FILTER_CHIP_LABELS, UITaskStatus } from '@/task/types/ui';
+import { UITaskStatus, type FilterChipType } from '@/task/types/ui';
 import { DateTimePicker } from '@/shared/ui-kit/DateTimePicker/DateTimePicker';
-import type { StudentHomeworkFiltersProps } from '@/student/types/ui';
+import type { StudentHomeworkFiltersProps, DatePreset, DateRange } from '@/student/types/ui';
 import styles from './StudentHomeworkFilters.module.scss';
 
 /** Статусы, для которых datePreset показывается (только для завершённых). */

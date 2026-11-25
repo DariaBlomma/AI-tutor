@@ -24,7 +24,7 @@ export function TaskRefCrudPanel({ title, items, hasDescription, onCreate, onRen
         }
     };
 
-    const startEdit = (item: RefItem) => {
+    const startEdit = (item: TaskRefItem) => {
         setEditingId(item.id);
         setEditName(item.name);
         setEditDescription('description' in item && item.description ? item.description : '');
