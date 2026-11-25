@@ -1,5 +1,6 @@
 import { api } from '@/core/api/AxiosInstance';
 import type { WorkStatus } from '@/student/types/work';
+import type { DatePreset } from '@/task/types/ui';
 
 const STUDENT_PATH = '/student';
 
@@ -44,6 +45,7 @@ export interface HomeworkFilters {
     createdAtFrom?: string | null;
     completedAtFrom?: string | null;
     completedAtTo?: string | null;
+    datePreset?: DatePreset;
 }
 
 /**

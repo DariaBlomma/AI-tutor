@@ -44,8 +44,8 @@ export class StudentWorkService {
     }
 
     /** POST /api/student/work/{workId}/complete — завершение работы (IN_PROGRESS → COMPLETED). */
-    static async completeWork(workId: number): Promise<StudentWorkCompleteResponse> {
-        const response = await api.post<StudentWorkCompleteResponse>(`${STUDENT_PATH}/work/${workId}/complete`);
+    static async completeWork(workId: number): Promise<StudentWorkDetailResponse> {
+        const response = await api.post<StudentWorkDetailResponse>(`${STUDENT_PATH}/work/${workId}/complete`);
         return response.data;
     }
 

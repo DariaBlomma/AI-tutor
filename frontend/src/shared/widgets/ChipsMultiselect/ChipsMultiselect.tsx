@@ -1,5 +1,5 @@
 import { BasePlusButtonLink } from '@/shared/ui-kit/BasePlusButtonLink/BasePlusButtonLink';
-import type { ChipsMultiselectProps, ChipItem } from '@/task/types/ui';
+import type { ChipsMultiselectProps, ChipItem } from './';
 import styles from './ChipsMultiselect.module.scss';
 
 // Мультивыбор чипов по id справочника (темы / грамматические типы).

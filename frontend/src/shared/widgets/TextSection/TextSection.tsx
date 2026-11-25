@@ -1,5 +1,5 @@
 import { BaseInputText } from '@/shared/ui-kit/BaseInputText/BaseInputText';
-import type { TextSectionProps } from './types';
+import type { TextSectionProps } from '@/shared/types/text-section';
 import styles from './TextSection.module.scss';
 
 // Блок «Текст» — материал задания для TFNS/MATCHING (tasks.context, type=TEXT).
