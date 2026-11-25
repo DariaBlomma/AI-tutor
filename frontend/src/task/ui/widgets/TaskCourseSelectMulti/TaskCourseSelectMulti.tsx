@@ -3,7 +3,7 @@ import CreatableSelect from 'react-select/creatable';
 import type { MultiValue, DropdownIndicatorProps } from 'react-select';
 import type { RSType, TaskCourseSelectMultiProps } from '@/task/types/ui';
 import { FormFieldLabel } from '@/shared/ui-kit/FormFieldLabel/FormFieldLabel';
-import styles from './CourseSelectMulti.module.scss';
+import styles from './TaskCourseSelectMulti.module.scss';
 
 export function TaskCourseSelectMulti({
                                       options,
