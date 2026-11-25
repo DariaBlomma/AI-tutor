@@ -8,7 +8,7 @@ import { useIsTeacher } from '@/task/hooks/useIsTeacher';
 import { Loader } from '@/shared/ui-kit/Loader/Loader';
 import { TaskPreviewChips } from '@/task/ui/widgets/TaskPreviewChips/TaskPreviewChips';
 import { TaskAssignPopup } from '@/task/ui/widgets/TaskAssignPopup/TaskAssignPopup';
-import { BackLink } from '@/task/ui/widgets/BackLink/BackLink';
+import { BackLink } from '@/shared/widgets/BackLink/BackLink.tsx';
 import { TaskDetailItem } from '@/task/ui/widgets/TaskDetailItem/TaskDetailItem';
 import { TaskStudentsBadge } from '@/task/ui/widgets/TaskStudentsBadge/TaskStudentsBadge';
 import { parseTaskContext } from '@/task/utils/parseTaskContent';
@@ -56,7 +56,7 @@ export function TaskDetailView({ publicId }: TaskDetailViewProps) {
     if (isLoading) {
         return (
             <div className={styles.page}>
-                <BackLink />
+                <BackLink to="/tasks" label="К заданиям" />
                 <Loader />
             </div>
         );
@@ -67,7 +67,7 @@ export function TaskDetailView({ publicId }: TaskDetailViewProps) {
     if (isError || !task) {
         return (
             <div className={styles.page}>
-                <BackLink />
+                <BackLink to="/tasks" label="К заданиям" />
                 <div className={isError ? styles.error : styles.notice}>{error ?? 'Задание не найдено.'}</div>
             </div>
         );
@@ -79,7 +79,7 @@ export function TaskDetailView({ publicId }: TaskDetailViewProps) {
 
     return (
         <div className={styles.page}>
-            <BackLink />
+            <BackLink to="/tasks" label="К заданиям" />
 
             <div className={styles.header}>
                 <h1>{task.name?.trim() || 'Без названия'}</h1>

@@ -1,6 +1,6 @@
 import { useReportDetail } from '@/reports/hooks/useReportDetail'; // Укажите ваш путь
 import { Loader } from '@/shared/ui-kit/Loader/Loader';
-import { BackLink } from '@/task/ui/widgets/BackLink/BackLink.tsx'; // Или ваш компонент ссылки
+import { BackLink } from '@/shared/widgets/BackLink/BackLink.tsx'; // Или ваш компонент ссылки
 import { ReportSummary } from '@/reports/ui/widgets/ReportSummary/ReportSummary';
 import { ReportTaskPreview } from '@/reports/ui/widgets/ReportTaskPreview/ReportTaskPreview';
 import { ReportPositionItem } from '@/reports/ui/widgets/ReportPositionItem/ReportPositionItem';
@@ -46,7 +46,7 @@ export function ReportDetailView({
 
     return (
         <div className={styles.page}>
-            <BackLink />
+            <BackLink to="/reports" label="К отчетам" />
 
             <ReportSummary report={report} showStudentName={showStudentName} />
 

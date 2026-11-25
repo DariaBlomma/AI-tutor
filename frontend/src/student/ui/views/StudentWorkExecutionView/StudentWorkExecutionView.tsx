@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useWorkExecution } from '@/student/hooks/useWorkExecution';
-import { BackLink } from '@/task/ui/widgets/BackLink/BackLink.tsx';
+import { BackLink } from '@/shared/widgets/BackLink/BackLink.tsx';
 import { TaskPreviewChips } from '@/task/ui/widgets/TaskPreviewChips/TaskPreviewChips';
 import { Loader } from '@/shared/ui-kit/Loader/Loader';
 import { BaseInputText } from '@/shared/ui-kit/BaseInputText/BaseInputText';
@@ -95,7 +95,7 @@ export function StudentWorkExecutionView({ workId }: WorkExecutionViewProps) {
     if (isError || !workDetail) {
         return (
             <div className={styles.page}>
-                <BackLink to="/" label="К заданиям" />
+                <BackLink to="/" label="К заданиям" ariaLabel="Назад к заданиям" />
                 <div className={styles.error}>
                     <p>Не удалось загрузить задание</p>
                     {error && <p className={styles.errorDetail}>{error}</p>}
@@ -124,7 +124,7 @@ export function StudentWorkExecutionView({ workId }: WorkExecutionViewProps) {
 
     return (
         <div className={styles.page}>
-            <BackLink to="/" label="К заданиям" />
+            <BackLink to="/" label="К заданиям" ariaLabel="Назад к заданиям" />
 
             {/* Header */}
             <div className={styles.header}>
