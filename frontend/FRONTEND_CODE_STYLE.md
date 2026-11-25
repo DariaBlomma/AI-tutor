@@ -5,8 +5,10 @@
 1. Файл .tsx = ТОЛЬКО JSX + вызовы хуков + минимальные props/state.
     - логика с React (fetch, подписки, эффекты) -> hooks/useX.ts
     - чистые функции без React (формат, подсчёт, маппинг, валидация) -> utils/
-2. Типы НЕ объявлять в .tsx. Типы живут в types/ (или в локальном types/ shared-компонента).
-   Импорт типов — из barrel types/, а НЕ из файла верстки.
+2. Типы НЕ объявлять в .tsx. Типы живут ТОЛЬКО в types/ на уровне модуля
+   (например, teacher/types/). В доменных компонентах (views/widgets/base/layouts)
+   папки types/ ЗАПРЕЩЕНЫ. (Исключение: локальный types/ допустим только внутри
+   shared-компонентов). Импорт типов — из barrel types/ модуля, а НЕ из файла верстки.
 3. Папки lib/ и components/ ЗАПРЕЩЕНЫ. Хелперы -> utils/, компоненты -> ui/.
 4. barrel index.ts создаётся ТОЛЬКО в папках, группирующих .ts-файлы
    (types, hooks, services, data, utils). В папках верстки
@@ -84,6 +86,9 @@ teacher/
 └── TeacherDashboardLayout.module.scss
 
 # Примечания к дереву:
+# - В доменных модулях (teacher/, student/ и т.д.) папки types/ внутри
+#   ui/views, ui/widgets, ui/base, ui/layouts ЗАПРЕЩЕНЫ. Все типы (включая Props)
+#   выносятся в teacher/types/ui/ или teacher/types/models/.
 # - Вложенные widgets/ внутри views/ ЗАПРЕЩЕНЫ. Все виджеты — только в ui/widgets/ модуля.
 # - shared-компонент со своими типами/данными: shared/widgets/AppBottomNav/
 #   содержит AppBottomNav.tsx + types/ + data/ (types/ и data/ имеют barrel, корень папки — нет).
@@ -156,7 +161,7 @@ teacher/
 3. Компонент? -> положить в ui/{views,widgets,base,layouts}/<Name>/<Name>.tsx + .module.scss,
    index.ts НЕ создавать. Виджеты — ТОЛЬКО в ui/widgets/ модуля, НЕ внутри views/.
 4. Тип? -> DTO бэка в types/models/, фронт-тип/Props в types/ui/, форма в types/forms.ts;
-   kebab-case; barrel на месте; НЕ объявлять в .tsx.
+   kebab-case; barrel на месте; НЕ объявлять в .tsx; НЕ создавать папку types/ внутри ui/.
 5. Есть логика с React? -> hooks/useX.ts. Чистая функция? -> utils/. Константа/объект? -> data/.
 6. Импорт вне папки через @/; типы через barrel types/;
    импорт конкретного файла — всегда с расширением (.tsx для верстки, .ts для логики/типов).
@@ -178,3 +183,5 @@ teacher/
 - ❌ import без расширения файла.
   ✅ import { View } from '@/teacher/ui/views/View/View.tsx' (с .tsx)
   ✅ import { useX } from '@/teacher/hooks/useX.ts' (с .ts)
+- teacher/ui/widgets/TeacherStatCards/types/teacher-stat-cards.ts 
+    ✅ teacher/types/ui/teacher-stat-cards.ts (все типы только на уровне модуля)
