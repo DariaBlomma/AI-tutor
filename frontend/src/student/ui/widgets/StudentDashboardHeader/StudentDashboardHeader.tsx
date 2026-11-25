@@ -1,4 +1,4 @@
-import { useUserProfile } from '@/user/hooks/useUserProfile';
+import { useUserProfile } from '@/user/hooks/useUserProfile.ts';
 import styles from './StudentDashboardHeader.module.scss';
 
 export function StudentDashboardHeader() {

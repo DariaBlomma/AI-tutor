@@ -1,6 +1,6 @@
 import { HomeworkItem } from '@/student/ui/components/HomeworkItem/HomeworkItem';
-import { Loader } from '@/shared/ui-kit/Loader/Loader';
-import type { StudentWorkResponse } from '@/student/services/StudentDashboardService';
+import { Loader } from '@/shared/ui-kit/Loader/Loader.tsx';
+import type { StudentWorkResponse } from '@/student/services/StudentDashboardService.ts';
 import styles from './HomeworkList.module.scss';
 
 export interface HomeworkListProps {

@@ -1,7 +1,7 @@
 import { Loader } from '@/shared/ui-kit/Loader/Loader';
 import { useStudentDashboard } from '@/student/hooks/useStudentDashboard';
-import { StudentDashboardHeader } from '@/student/ui/components/DashboardHeader/StudentDashboardHeader';
-import { StudentAssignmentList } from '@/student/ui/components/AssignmentList/StudentAssignmentList';
+import { StudentDashboardHeader } from '@/student/ui/widgets/StudentDashboardHeader/StudentDashboardHeader.tsx';
+import { StudentAssignmentList } from '@/student/ui/widgets/StudentAssignmentList/StudentAssignmentList.tsx';
 import styles from './StudentHomeView.module.scss';
 
 export function StudentHomeView() {

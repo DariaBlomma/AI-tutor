@@ -1,4 +1,4 @@
-import { StudentStatusBadge } from '@/student/ui/components/StatusBadge/StudentStatusBadge';
+import { StudentStatusBadge } from '@/student/ui/widgets/StudentStatusBadge/StudentStatusBadge.tsx';
 import { StudentHomeworkProgressBar } from '@/student/ui/base/HomeworkProgressBar/StudentHomeworkProgressBar';
 import { formatDeadline } from '@/student/utils';
 import type { StudentWorkResponse } from '@/student/services/StudentDashboardService';
