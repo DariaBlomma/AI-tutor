@@ -10,7 +10,7 @@ import { TaskItemCard } from '@/task/ui/widgets/TaskItemCard/TaskItemCard';
 import type { CreateTaskFormState } from '@/task/hooks/useCreateTask';
 import { useTaskRefs } from '@/task/hooks/useTaskRefs';
 import { useTeacherCourses } from '@/teacher/hooks/useTeacherCourses';
-import { needsText, validateTaskForm } from '@/task/lib/validateTaskForm';
+import { needsText, validateTaskForm } from '@/task/utils/validateTaskForm';
 import { INSTRUCTION_MAX_LENGTH, TASK_NAME_MAX_LENGTH } from '@/task/data';
 import { CEFR_LEVEL_OPTIONS, EXAM_TYPE_OPTIONS } from '@/task/types';
 import type { CefrLevel, ExamType, ItemType, TaskItemDraft } from '@/task/types';

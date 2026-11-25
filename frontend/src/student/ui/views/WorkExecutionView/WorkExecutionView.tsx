@@ -5,7 +5,7 @@ import { BackLink } from '@/task/ui/widgets/BackLink/BackLink';
 import { TaskPreviewChips } from '@/task/ui/widgets/TaskPreviewChips/TaskPreviewChips';
 import { Loader } from '@/shared/ui-kit/Loader/Loader';
 import { BaseInputText } from '@/shared/ui-kit/BaseInputText/BaseInputText';
-import { parseWordFormationContent, parseGapFillContent } from '@/task/lib/parseTaskContent';
+import { parseWordFormationContent, parseGapFillContent } from '@/task/utils/parseTaskContent';
 import type { CefrLevel, ItemType } from '@/task/types';
 import styles from './WorkExecutionView.module.scss';
 

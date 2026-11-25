@@ -4,8 +4,8 @@ import {
     parseGapFillContent,
     parseMatchingContent,
     parseExplanation,
-} from '@/task/lib/parseTaskContent';
-import { formatCorrectAnswer } from '@/task/lib/formatCorrectAnswer';
+} from '@/task/utils/parseTaskContent';
+import { formatCorrectAnswer } from '@/task/utils/formatCorrectAnswer';
 import styles from './TaskDetailItem.module.scss';
 
 interface TaskDetailItemProps {

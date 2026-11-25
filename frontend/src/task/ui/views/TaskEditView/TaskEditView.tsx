@@ -6,7 +6,7 @@ import { useUpdateTask } from '@/task/hooks/useCreateTask';
 import type { CreateTaskFormState } from '@/task/hooks/useCreateTask';
 import { useTaskDetail } from '@/task/hooks/useTaskDetail';
 import { useTaskUsage } from '@/task/hooks/useTaskUsage';
-import { taskToFormState } from '@/task/lib/taskFormHydration';
+import { taskToFormState } from '@/task/utils/taskFormHydration';
 import styles from './TaskEditView.module.scss';
 
 interface TaskEditViewProps {

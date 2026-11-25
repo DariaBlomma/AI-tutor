@@ -1,8 +1,8 @@
 import { useCallback, useState } from 'react';
 import { extractErrorMessage } from '@/core/api/utils/errors';
 import { TasksBankService } from '@/task/services/TasksBankService';
-import { buildTaskPayload } from '@/task/lib/buildTaskPayload';
-import { isFormValid, validateTaskForm } from '@/task/lib/validateTaskForm';
+import { buildTaskPayload } from '@/task/utils/buildTaskPayload';
+import { isFormValid, validateTaskForm } from '@/task/utils/validateTaskForm';
 import type { CefrLevel, ExamType, ItemType, TaskItemDraft } from '@/task/types';
 
 export interface CreateTaskFormState {

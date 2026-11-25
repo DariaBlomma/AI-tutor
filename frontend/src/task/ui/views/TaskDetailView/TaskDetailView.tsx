@@ -11,7 +11,7 @@ import { TaskAssignPopup } from '@/task/ui/widgets/TaskAssignPopup/TaskAssignPop
 import { BackLink } from '@/task/ui/widgets/BackLink/BackLink';
 import { TaskDetailItem } from '@/task/ui/widgets/TaskDetailItem/TaskDetailItem';
 import { TaskStudentsBadge } from '@/task/ui/widgets/TaskStudentsBadge/TaskStudentsBadge';
-import { parseTaskContext } from '@/task/lib/parseTaskContent';
+import { parseTaskContext } from '@/task/utils/parseTaskContent';
 import styles from './TaskDetailView.module.scss';
 
 interface TaskDetailViewProps {

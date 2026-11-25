@@ -1,4 +1,4 @@
-import { parseTaskContext } from '@/task/lib/parseTaskContent';
+import { parseTaskContext } from '@/task/utils/parseTaskContent';
 import type { WorkReportDetailDto } from '@/reports/types';
 import styles from './ReportTaskPreview.module.scss';
 
