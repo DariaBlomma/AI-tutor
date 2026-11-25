@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { BaseInputText } from '@/shared/ui-kit/BaseInputText/BaseInputText';
 import { REF_NAME_MAX_LENGTH } from '@/task/data';
 
-import type { RefCrudPanelProps, RefItem } from './types';
-import styles from './RefCrudPanel.module.scss';
+import type { TaskRefCrudPanelProps, TaskRefItem } from '@/task/types/ui';
+import styles from './TaskRefCrudPanel.module.scss';
 
 // Виджет управления справочником (темы / грамматические типы): создание, редактирование, удаление.
 // Используется на страницах /tasks-bank/topics и /tasks-bank/grammar-types. Только для учителя.
-export function RefCrudPanel({ title, items, hasDescription, onCreate, onRename, onRemove }: RefCrudPanelProps) {
+export function TaskRefCrudPanel({ title, items, hasDescription, onCreate, onRename, onRemove }: TaskRefCrudPanelProps) {
     const [newName, setNewName] = useState('');
     const [newDescription, setNewDescription] = useState('');
     const [editingId, setEditingId] = useState<number | null>(null);

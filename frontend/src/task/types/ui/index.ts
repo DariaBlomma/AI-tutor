@@ -2,6 +2,8 @@ export * from './task-status';
 export type { RSType, TaskCourseSelectMultiProps } from './task-course-select-multi';
 export type { TaskInstructionSectionProps } from './task-instruction-section';
 export type { TaskItemTypeSelectProps } from './task-item-type-select';
+export type { TaskRefItem, TaskRefCrudPanelProps } from './task-ref-crud-panel';
+export type { TaskBulkActionsBarProps } from './task-bulk-actions-bar';
 
 import type { ItemType } from '../models';
 

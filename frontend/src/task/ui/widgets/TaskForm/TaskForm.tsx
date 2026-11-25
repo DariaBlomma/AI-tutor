@@ -5,7 +5,7 @@ import { BaseSelectSingle } from '@/shared/ui-kit/BaseSelectSingle/BaseSelectSin
 import { TaskCourseSelectMulti } from '@/task/ui/widgets/TaskCourseSelectMulti/TaskCourseSelectMulti.tsx';
 import { TaskInstructionSection } from '@/task/ui/widgets/TaskInstructionSection/TaskInstructionSection.tsx';
 import { TaskItemTypeSelect } from '@/task/ui/widgets/TaskItemTypeSelect/TaskItemTypeSelect.tsx';
-import { TextSection } from '@/task/ui/widgets/TextSection/TextSection';
+import { TextSection } from '@/shared/widgets/TextSection/TextSection.tsx';
 import { TaskItemCard } from '@/task/ui/widgets/TaskItemCard/TaskItemCard';
 import type { CreateTaskFormState } from '@/task/hooks/useCreateTask';
 import { useTaskRefs } from '@/task/hooks/useTaskRefs';

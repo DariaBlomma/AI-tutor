@@ -7,7 +7,7 @@ import { useTaskRefs } from '@/task/hooks/useTaskRefs';
 import { Pagination } from '@/shared/ui-kit/Pagination/Pagination';
 import { LoadingWidget } from '@/shared/ui-kit/Loader/LoadingWidget';
 import { useTeacherCourses } from '@/teacher/hooks/useTeacherCourses';
-import { TasksBulkActionsBar } from '@/task/ui/widgets/TasksBulkActionsBar/TasksBulkActionsBar';
+import { TaskBulkActionsBar } from '@/task/ui/widgets/TaskBulkActionsBar/TaskBulkActionsBar.tsx';
 import { TaskDeletePopup } from '@/task/ui/widgets/TaskDeletePopup/TaskDeletePopup';
 import { TaskAssignPopup } from '@/task/ui/widgets/TaskAssignPopup/TaskAssignPopup';
 import { TaskCoursePopup } from '@/task/ui/widgets/TaskCoursePopup/TaskCoursePopup';
@@ -411,7 +411,7 @@ export function TasksBankView() {
             {/* Панель массовых действий — рендерится вне .page, чтобы position: fixed
                 работала на десктопе (иначе клиппируется overflow: hidden у .page). */}
             {selectedIds.size > 0 && (
-                <TasksBulkActionsBar selectedCount={selectedIds.size} onAction={setBulkAction} onClose={closeBulkAction} />
+                <TaskBulkActionsBar selectedCount={selectedIds.size} onAction={setBulkAction} onClose={closeBulkAction} />
             )}
         </div>
     );

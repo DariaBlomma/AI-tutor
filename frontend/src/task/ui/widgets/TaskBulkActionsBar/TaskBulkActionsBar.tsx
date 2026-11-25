@@ -1,9 +1,9 @@
 import type { TasksBulkAction } from '@/task/types';
 import { createPortal } from 'react-dom';
 
-import styles from './TasksBulkActionsBar.module.scss';
+import styles from './TaskBulkActionsBar.module.scss';
 
-interface TasksBulkActionsBarProps {
+interface TaskBulkActionsBarProps {
     selectedCount: number;
     onAction: (action: TasksBulkAction) => void;
     onClose: () => void;
@@ -11,7 +11,7 @@ interface TasksBulkActionsBarProps {
 
 // Нижняя панель массовых действий банка заданий (дизайн: fixed над нижним меню,
 // по центру, max-width 480). Рендерится виджетом только при выбранном > 0.
-export function TasksBulkActionsBar({ selectedCount, onAction, onClose }: TasksBulkActionsBarProps) {
+export function TaskBulkActionsBar({ selectedCount, onAction, onClose }: TaskBulkActionsBarProps) {
     return createPortal(
         <div className={styles.bar}>
             <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Закрыть">

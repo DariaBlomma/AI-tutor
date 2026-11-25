@@ -1,11 +1,11 @@
 import type { Topic, GrammarType } from '@/task/types';
 
 /** Элемент справочника: тема (только name) или грамматический тип (name + description). */
-export type RefItem = Topic | GrammarType;
+export type TaskRefItem = Topic | GrammarType;
 
-export interface RefCrudPanelProps {
+export interface TaskRefCrudPanelProps {
     title: string;
-    items: RefItem[];
+    items: TaskRefItem[];
     /** Показывать поле «Описание» (для грамматических типов; у тем описания нет). */
     hasDescription?: boolean;
     /** Создание элемента (POST /topics или /task-types). Описание — только для типов. */

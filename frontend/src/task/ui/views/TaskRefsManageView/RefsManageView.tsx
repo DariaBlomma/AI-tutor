@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import { Loader } from '@/shared/ui-kit/Loader/Loader';
 import { useTaskRefs } from '@/task/hooks/useTaskRefs';
-import { RefCrudPanel } from '@/task/ui/widgets/RefCrudPanel/RefCrudPanel';
+import { TaskRefCrudPanel } from '@/task/ui/widgets/TaskRefCrudPanel/TaskRefCrudPanel.tsx';
 import type { GrammarType, Topic } from '@/task/types';
 import styles from './RefsManageView.module.scss';
 
@@ -44,7 +44,7 @@ export function RefsManageView({ kind }: RefsManageViewProps) {
             {refs.isLoading && <Loader />}
 
             {!refs.isLoading && (
-                <RefCrudPanel
+                <TaskRefCrudPanel
                     title={copy.panelTitle}
                     items={items}
                     hasDescription={!isTopics}
