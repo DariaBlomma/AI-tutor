@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { WorkExecutionView } from '@/student/ui/views/WorkExecutionView/WorkExecutionView';
+import { WorkExecutionView } from '@/student/ui/views/StudentWorkExecutionView/WorkExecutionView';
 import { AuthService } from '@/auth/services/AuthService';
 
 export const Route = createFileRoute('/student/work/$workId/execution')({

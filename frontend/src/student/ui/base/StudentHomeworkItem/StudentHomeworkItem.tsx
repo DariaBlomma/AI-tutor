@@ -1,5 +1,5 @@
-import { StudentStatusBadge } from '@/student/ui/widgets/StudentStatusBadge/StudentStatusBadge.tsx';
-import { StudentHomeworkProgressBar } from '@/student/ui/base/HomeworkProgressBar/StudentHomeworkProgressBar';
+import { StudentStatusBadge } from '@/student/ui/base/StudentStatusBadge/StudentStatusBadge.tsx';
+import { StudentHomeworkProgressBar } from '@/student/ui/base/StudentHomeworkProgressBar/StudentHomeworkProgressBar';
 import { formatDeadline } from '@/student/utils';
 import type { StudentWorkResponse } from '@/student/services/StudentDashboardService';
 import styles from './StudentHomeworkItem.module.scss';

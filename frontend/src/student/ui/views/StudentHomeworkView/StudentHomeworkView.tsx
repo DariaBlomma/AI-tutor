@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { StudentHomeworkFilters } from '@/student/ui/widgets/StudentHomeworkFilters/StudentHomeworkFilters';
 import { TaskAssignmentItem } from '@/task/ui/base/TaskAssignmentItem';
-import { StudentHomeworkProgressBar } from '@/student/ui/base/HomeworkProgressBar/StudentHomeworkProgressBar';
+import { StudentHomeworkProgressBar } from '@/student/ui/base/StudentHomeworkProgressBar/StudentHomeworkProgressBar';
 import { useTaskFilters } from '@/task/hooks/useTaskFilters';
 import { useStudentHomeworkData } from '@/student/hooks/useStudentHomeworkData';
 import { useMappedHomework } from '@/student/hooks/useMappedHomework';
