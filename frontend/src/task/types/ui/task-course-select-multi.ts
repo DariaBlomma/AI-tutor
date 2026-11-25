@@ -3,7 +3,7 @@ export interface RSType {
     readonly label: string;
 }
 
-export interface CourseSelectMultiProps {
+export interface TaskCourseSelectMultiProps {
     /** Плоский список опций курсов. */
     options: ReadonlyArray<{ value: string; label: string }>;
     /** Значение — массив выбранных value. */

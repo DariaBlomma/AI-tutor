@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { BaseModal } from '@/shared/ui-kit/BaseModal/BaseModal';
-import { CourseSelectMulti } from '@/task/ui/widgets/CourseSelectMulti/CourseSelectMulti.tsx';
+import { TaskCourseSelectMulti } from '@/task/ui/widgets/TaskCourseSelectMulti/TaskCourseSelectMulti.tsx';
 import { LoadingWidget } from '@/shared/ui-kit/Loader/LoadingWidget';
 import { useTeacherCourses } from '@/teacher/hooks/useTeacherCourses';
 import { CoursesService } from '@/teacher/services/CoursesService';
@@ -74,7 +74,7 @@ export function TaskCoursePopup({ open, onClose, taskIds, onAdded }: TaskCourseP
                     <LoadingWidget active={isLoading} mode="overlay" dimContent>
                         <div className={styles.field}>
                             <span className={styles.fieldLabel}>Курсы</span>
-                            <CourseSelectMulti
+                            <TaskCourseSelectMulti
                                 options={options}
                                 value={selectedCourseIds}
                                 onChange={changeCourses}

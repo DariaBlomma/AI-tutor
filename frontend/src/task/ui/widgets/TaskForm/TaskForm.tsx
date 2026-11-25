@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { BaseInputText } from '@/shared/ui-kit/BaseInputText/BaseInputText';
 import { BaseSelectMulti } from '@/shared/ui-kit/BaseSelectMulti/BaseSelectMulti';
 import { BaseSelectSingle } from '@/shared/ui-kit/BaseSelectSingle/BaseSelectSingle';
-import { CourseSelectMulti } from '@/task/ui/widgets/CourseSelectMulti/CourseSelectMulti.tsx';
+import { TaskCourseSelectMulti } from '@/task/ui/widgets/TaskCourseSelectMulti/TaskCourseSelectMulti.tsx';
 import { InstructionSection } from '@/task/ui/widgets/InstructionSection/InstructionSection';
 import { ItemTypeSelect } from '@/task/ui/widgets/ItemTypeSelect/ItemTypeSelect';
 import { TextSection } from '@/task/ui/widgets/TextSection/TextSection';
@@ -228,7 +228,7 @@ export function TaskForm({
 
                 {/* Курсы — мультиселект с возможностью создания нового курса */}
                 <div className={styles.field}>
-                    <CourseSelectMulti
+                    <TaskCourseSelectMulti
                         options={courseOptions}
                         value={selectedCourseIds}
                         onChange={handleCourseChange}

@@ -1,7 +1,7 @@
 import { useMemo, useEffect, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { useTeacherCourses } from '@/teacher/hooks/useTeacherCourses';
-import { CourseSelectMulti } from '@/task/ui/widgets/CourseSelectMulti/CourseSelectMulti.tsx';
+import { TaskCourseSelectMulti } from '@/task/ui/widgets/TaskCourseSelectMulti/TaskCourseSelectMulti.tsx';
 import { useTaskDetail } from '@/task/hooks/useTaskDetail';
 import { useTaskDetailCourses } from '@/task/hooks/useTaskDetailCourses';
 import { useIsTeacher } from '@/task/hooks/useIsTeacher';
@@ -102,7 +102,7 @@ export function TaskDetailView({ publicId }: TaskDetailViewProps) {
                     <section className={styles.courseSelect}>
                         <h2 className={styles.sectionTitle}>Курсы</h2>
                         {actionError && <div className={styles.error}>{actionError}</div>}
-                        <CourseSelectMulti
+                        <TaskCourseSelectMulti
                             options={courseOptions}
                             value={selectedCourseIds}
                             onChange={handleCourseChange}

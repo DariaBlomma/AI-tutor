@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { BasePlusButtonLink } from '@/shared/ui-kit/BasePlusButtonLink/BasePlusButtonLink';
 import { BaseSelectSingle } from '@/shared/ui-kit/BaseSelectSingle/BaseSelectSingle';
 import { BaseSelectMulti } from '@/shared/ui-kit/BaseSelectMulti/BaseSelectMulti';
-import { CourseSelectMulti } from '@/task/ui/widgets/CourseSelectMulti/CourseSelectMulti.tsx';
+import { TaskCourseSelectMulti } from '@/task/ui/widgets/TaskCourseSelectMulti/TaskCourseSelectMulti.tsx';
 import { CEFR_LEVEL_OPTIONS, EXAM_TYPE_OPTIONS, ITEM_TYPE_OPTIONS } from '@/task/types';
 import type { CefrLevel, ExamType, ItemType } from '@/task/types';
 // todo: refactor to use its own styles or a common layout
@@ -164,7 +164,7 @@ export function TasksBankFilters({
 
             <div className={styles.filterBlock}>
                 <div className={styles.filterLabel}>Курсы</div>
-                <CourseSelectMulti
+                <TaskCourseSelectMulti
                     options={courseOptions}
                     value={courseIdsFilter}
                     onChange={changeCourseIds}
