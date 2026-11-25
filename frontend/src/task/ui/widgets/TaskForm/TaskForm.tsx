@@ -4,7 +4,7 @@ import { BaseSelectMulti } from '@/shared/ui-kit/BaseSelectMulti/BaseSelectMulti
 import { BaseSelectSingle } from '@/shared/ui-kit/BaseSelectSingle/BaseSelectSingle';
 import { TaskCourseSelectMulti } from '@/task/ui/widgets/TaskCourseSelectMulti/TaskCourseSelectMulti.tsx';
 import { TaskInstructionSection } from '@/task/ui/widgets/TaskInstructionSection/TaskInstructionSection.tsx';
-import { ItemTypeSelect } from '@/task/ui/widgets/ItemTypeSelect/ItemTypeSelect';
+import { TaskItemTypeSelect } from '@/task/ui/widgets/TaskItemTypeSelect/TaskItemTypeSelect.tsx';
 import { TextSection } from '@/task/ui/widgets/TextSection/TextSection';
 import { TaskItemCard } from '@/task/ui/widgets/TaskItemCard/TaskItemCard';
 import type { CreateTaskFormState } from '@/task/hooks/useCreateTask';
@@ -152,7 +152,7 @@ export function TaskForm({
             {/* ТИП ЗАДАНИЯ */}
             <div className={styles.section}>
                 <div className={styles.sectionTitle}>Тип задания</div>
-                <ItemTypeSelect value={itemType} onChange={handleItemTypeChange} disabled={editMode} label="Тип задания" isRequired />
+                <TaskItemTypeSelect value={itemType} onChange={handleItemTypeChange} disabled={editMode} label="Тип задания" isRequired />
                 {editMode && (
                     <div className={styles.warning}>Механику задания нельзя изменить после создания — она задаёт набор полей пунктов.</div>
                 )}

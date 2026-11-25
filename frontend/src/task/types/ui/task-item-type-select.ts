@@ -1,6 +1,6 @@
 import type { ItemType } from '@/task/types';
 
-export interface ItemTypeSelectProps {
+export interface TaskItemTypeSelectProps {
     value: ItemType;
     onChange: (itemType: ItemType) => void;
     /** Режим редактирования: механику задания менять нельзя (задаётся при создании). */
