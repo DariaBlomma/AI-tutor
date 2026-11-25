@@ -1,5 +1,5 @@
-import { Loader } from '@/shared/ui-kit/Loader/Loader';
-import { useStudentDashboard } from '@/student/hooks/useStudentDashboard';
+import { Loader } from '@/shared/ui-kit/Loader/Loader.tsx';
+import { useStudentDashboard } from '@/student/hooks/useStudentDashboard.ts';
 import { StudentDashboardHeader } from '@/student/ui/widgets/StudentDashboardHeader/StudentDashboardHeader.tsx';
 import { StudentAssignmentList } from '@/student/ui/widgets/StudentAssignmentList/StudentAssignmentList.tsx';
 import styles from './StudentHomeView.module.scss';

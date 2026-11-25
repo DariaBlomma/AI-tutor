@@ -1,31 +1,5 @@
 @use '@/shared/styles/variables' as *;
 
-.section {
-    margin-bottom: 32px;
-}
-
-.sectionHeader {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 16px;
-}
-
-.sectionTitle {
-    font-size: 18px;
-    font-weight: 600;
-    color: $c1;
-}
-
-.countBadge {
-    background: rgba(157, 124, 242, 0.15);
-    color: $p;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 10px;
-}
-
 .list {
     display: flex;
     flex-direction: column;

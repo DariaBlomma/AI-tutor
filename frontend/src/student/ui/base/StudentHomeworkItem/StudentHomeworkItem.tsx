@@ -1,8 +1,9 @@
 import { StudentStatusBadge } from '@/student/ui/base/StudentStatusBadge/StudentStatusBadge.tsx';
-import { StudentHomeworkProgressBar } from '@/student/ui/base/StudentHomeworkProgressBar/StudentHomeworkProgressBar';
+import { StudentHomeworkProgressBar } from '@/student/ui/base/StudentHomeworkProgressBar/StudentHomeworkProgressBar.tsx';
 import { formatDeadline } from '@/student/utils';
-import type { StudentWorkResponse } from '@/student/services/StudentDashboardService';
+import type { StudentWorkResponse } from '@/student/services/StudentDashboardService.ts';
 import styles from './StudentHomeworkItem.module.scss';
+import type {UITaskStatus} from "@/task/types";
 
 /** Маппинг статуса на отображаемый текст */
 const STATUS_LABELS: Record<string, string> = {

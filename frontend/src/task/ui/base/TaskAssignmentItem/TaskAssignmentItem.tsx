@@ -1,7 +1,7 @@
 import { useNavigate } from '@tanstack/react-router';
 import type { StudentWorkCard } from '@/student/types/models/studentWorkCard';
 import { StudentStatusBadge } from '@/student/ui/base/StudentStatusBadge/StudentStatusBadge.tsx';
-import { TaskAssignmentDate } from '@/task/ui/base/TaskAssignmentDate';
+import { TaskAssignmentDate } from '@/task/ui/base/TaskAssignmentDate/TaskAssignmentDate.tsx';
 import { getBadgeType } from '@/student/utils/assignmentStatus.ts';
 import styles from './TaskAssignmentItem.module.scss';
 import { formatDeadline, formatCompletedAt, formatAssignedAt } from '@/student/utils';
