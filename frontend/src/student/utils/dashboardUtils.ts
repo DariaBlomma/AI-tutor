@@ -1,5 +1,5 @@
-import type { StudentWorkResponse } from '@/student/services/StudentDashboardService';
-import type { StudentWorkCard } from '@/student/types/models/studentWorkCard';
+import type { StudentWorkResponse } from '@/student/services/StudentDashboardService.ts';
+import type { StudentWorkCard } from '@/student/types/models/studentWorkCard.ts';
 
 // Преобразовать StudentWorkResponse → StudentWorkCard.
 export function mapToStudentWorkCard(work: StudentWorkResponse): StudentWorkCard {

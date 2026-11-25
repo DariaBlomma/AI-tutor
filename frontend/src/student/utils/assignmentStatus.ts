@@ -1,4 +1,4 @@
-import type { StudentWorkCard } from '@/student/types/models/studentWorkCard';
+import type { StudentWorkCard } from '@/student/types/models/studentWorkCard.ts';
 import type { UITaskStatus } from '@/task/types/ui';
 import { mapBackendStatusToUI } from '@/task/types/ui';
 

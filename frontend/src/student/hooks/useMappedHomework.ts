@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import type { StudentWorkResponse } from '@/student/services/StudentDashboardService';
 import type { StudentWorkCard } from '@/student/types/models/studentWorkCard';
-import { mapToStudentWorkCard } from '@/student/lib/dashboardUtils';
+import { mapToStudentWorkCard } from '@/student/utils/dashboardUtils.ts';
 
 /**
  * Маппит StudentWorkResponse[] → StudentWorkCard[].

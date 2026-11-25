@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 
 import { AuthService } from '@/auth/services/AuthService';
-import { buildStudentStatCells } from '@/student/lib/formatStudentStats';
+import { buildStudentStatCells } from '@/student/utils/formatStudentStats.ts';
 import { IconCopy, IconTrapezoidShape, IconTrianglesFrame } from '@/shared/icons';
 import { Loader } from '@/shared/ui-kit/Loader/Loader';
 import { useUserProfile } from '@/user/hooks/useUserProfile';

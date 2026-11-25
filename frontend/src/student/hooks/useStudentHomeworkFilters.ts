@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import type { WorkStatus } from '@/student/types/work';
-import type { DatePreset, DateRange } from '@/student/lib/datePresets';
-import { getDateRange } from '@/student/lib/datePresets';
+import type { DatePreset, DateRange } from '@/student/utils/datePresets.ts';
+import { getDateRange } from '@/student/utils/datePresets.ts';
 import type { HomeworkFilters } from '@/student/services/StudentDashboardService';
 
 export type StatusFilter = 'all' | WorkStatus;

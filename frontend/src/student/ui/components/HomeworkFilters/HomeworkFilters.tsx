@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import type { WorkStatus } from '@/student/types/work';
 import type { StatusFilter, DatePreset, DateRange } from '@/student/hooks/useHomeworkFilters';
-import { PRESET_LABELS } from '@/student/lib/datePresets';
+import { PRESET_LABELS } from '@/student/utils/datePresets.ts';
 import { DateTimePicker } from '@/shared/ui-kit/DateTimePicker/DateTimePicker';
 import styles from './HomeworkFilters.module.scss';
 

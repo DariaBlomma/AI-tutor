@@ -1,6 +1,6 @@
 import { useMemo, useCallback } from 'react';
-import type { DatePreset, DateRange } from '@/student/lib/datePresets';
-import { PRESET_LABELS } from '@/student/lib/datePresets';
+import type { DatePreset, DateRange } from '@/student/utils/datePresets.ts';
+import { PRESET_LABELS } from '@/student/utils/datePresets.ts';
 import type { FilterChipType } from '@/task/types/ui';
 import { FILTER_CHIP_LABELS, UITaskStatus } from '@/task/types/ui';
 import { DateTimePicker } from '@/shared/ui-kit/DateTimePicker/DateTimePicker';

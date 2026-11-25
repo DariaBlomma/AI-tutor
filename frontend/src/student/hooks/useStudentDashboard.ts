@@ -1,5 +1,5 @@
 import { useStudentDashboardData } from '@/student/hooks/useStudentDashboardData';
-import { mapToStudentWorkCard } from '@/student/lib/dashboardUtils';
+import { mapToStudentWorkCard } from '@/student/utils/dashboardUtils.ts';
 import type { StudentWorkCard } from '@/student/types/models/studentWorkCard';
 import { useMemo } from 'react';
 

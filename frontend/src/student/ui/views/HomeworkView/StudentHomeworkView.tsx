@@ -7,7 +7,7 @@ import { useStudentHomeworkData } from '@/student/hooks/useStudentHomeworkData';
 import { useMappedHomework } from '@/student/hooks/useMappedHomework';
 import { Loader } from '@/shared/ui-kit/Loader/Loader';
 import { Pagination } from '@/shared/ui-kit/Pagination/Pagination';
-import type { DatePreset } from '@/student/lib/datePresets';
+import type { DatePreset } from '@/student/utils/datePresets.ts';
 import type { FilterChipType } from '@/task/types/ui';
 import styles from './StudentHomeworkView.module.scss';
 
