@@ -218,7 +218,11 @@ export function StudentWorkExecutionView({ workId }: WorkExecutionViewProps) {
                     placeholder="Введите ответ"
                     value={answer}
                     onChange={(e) => setAnswer(e.target.value)}
-                    disabled={isSubmitting || (feedback?.correct ?? false) || (feedback && !feedback.correct && feedback.attemptsCount >= 3)}
+                    disabled={
+                        isSubmitting ||
+                        Boolean(feedback?.correct) ||
+                        Boolean(feedback && !feedback.correct && feedback.attemptsCount >= 3)
+                    }
                     error={feedback && !feedback.correct ? 'Неверный ответ' : undefined}
                     variant="full"
                 />
