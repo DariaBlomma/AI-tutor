@@ -1,4 +1,4 @@
-import styles from './StudentAssignmentList.module.scss';
+import styles from '../StudentAssignmentList/StudentAssignmentList.module.scss';
 
 interface SectionProps {
     title: string;
@@ -6,7 +6,7 @@ interface SectionProps {
     children: React.ReactNode;
 }
 
-export function Section({ title, count, children }: SectionProps) {
+export function StudentSection({ title, count, children }: SectionProps) {
     return (
         <div className={styles.section}>
             <div className={styles.sectionHeader}>

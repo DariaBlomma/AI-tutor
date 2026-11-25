@@ -1,7 +1,7 @@
 import type { StudentWorkCard } from '@/student/types/models/studentWorkCard.ts';
 import { TaskAssignmentItem } from '@/task/ui/base/TaskAssignmentItem';
 import { Loader } from '@/shared/ui-kit/Loader/Loader.tsx';
-import { Section } from './Section.tsx';
+import { StudentSection } from '../StudentSection/StudentSection.tsx';
 import styles from './StudentAssignmentList.module.scss';
 
 interface StudentAssignmentListProps {
@@ -35,18 +35,18 @@ export function StudentAssignmentList({ block1, block2, isLoading }: StudentAssi
     return (
         <>
             {block1.length > 0 && (
-                <Section title="Нужно сделать" count={block1.length}>
+                <StudentSection title="Нужно сделать" count={block1.length}>
                     {block1.map(card => (
                         <TaskAssignmentItem key={card.id} card={card} />
                     ))}
-                </Section>
+                </StudentSection>
             )}
             {block2.length > 0 && (
-                <Section title="Новые задания" count={block2.length}>
+                <StudentSection title="Новые задания" count={block2.length}>
                     {block2.map(card => (
                         <TaskAssignmentItem key={card.id} card={card} />
                     ))}
-                </Section>
+                </StudentSection>
             )}
         </>
     );

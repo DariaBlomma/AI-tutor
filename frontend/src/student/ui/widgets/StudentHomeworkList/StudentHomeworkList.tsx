@@ -9,7 +9,7 @@ export interface HomeworkListProps {
     onItemPress: (workId: number) => void;
 }
 
-export function HomeworkList({ works, isLoading, onItemPress }: HomeworkListProps) {
+export function StudentHomeworkList({ works, isLoading, onItemPress }: HomeworkListProps) {
     if (isLoading) {
         return (
             <div className={styles.loading}>
