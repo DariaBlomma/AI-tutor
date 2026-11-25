@@ -7,7 +7,7 @@ import { Loader } from '@/shared/ui-kit/Loader/Loader';
 import { BaseInputText } from '@/shared/ui-kit/BaseInputText/BaseInputText';
 import { parseWordFormationContent, parseGapFillContent } from '@/task/utils/parseTaskContent';
 import type { CefrLevel, ItemType } from '@/task/types';
-import styles from './WorkExecutionView.module.scss';
+import styles from './StudentWorkExecutionView.module.scss';
 
 /** Форматирует секунды в «3 мин 12 с». */
 function formatElapsed(seconds: number): string {
@@ -20,7 +20,7 @@ interface WorkExecutionViewProps {
     workId: string;
 }
 
-export function WorkExecutionView({ workId }: WorkExecutionViewProps) {
+export function StudentWorkExecutionView({ workId }: WorkExecutionViewProps) {
     const navigate = useNavigate();
     const {
     workDetail,
