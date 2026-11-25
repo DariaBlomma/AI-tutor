@@ -119,13 +119,15 @@ teacher/
 | тип пропсов          | PascalCase     | TeacherHomeViewProps         | —       |
 
 ## 5. ИМПОРТ / ЭКСПОРТ
-- Компонент: import { TeacherHomeView } from '@/teacher/ui/views/TeacherHomeView/TeacherHomeView'
-  (полный путь, БЕЗ barrel в папке верстки).
+- Компонент: import { TeacherHomeView } from '@/teacher/ui/views/TeacherHomeView/TeacherHomeView.tsx'
+  (полный путь С расширением .tsx, БЕЗ barrel в папке верстки).
 - Тип: import type { TeacherReport } from '@/teacher/types'  (через barrel types/).
   UserRole: import type { UserRole } from '@/user/types' (владелец домена — user, не auth).
 - Хук/сервис/утилита: через barrel модуля (import { useTeacherName } from '@/teacher/hooks').
 - Внутри одной папки — относительный путь; всё остальное — @/.
 - Циклических импортов типов избегать: тип живёт у владельца домена.
+- Расширение .tsx обязательно при импорте компонентов из папок views/widgets/base/layouts.
+  Расширение .ts при импорте из barrel (types, hooks, services, utils, data) НЕ указывается.
 
 ## 6. ДАННЫЕ И СОСТОЯНИЕ
 - data/: константы, переменные, объекты модуля. БЕЗ функций (функции -> utils/).
@@ -157,7 +159,8 @@ teacher/
 4. Тип? -> DTO бэка в types/models/, фронт-тип/Props в types/ui/, форма в types/forms.ts;
    kebab-case; barrel на месте; НЕ объявлять в .tsx.
 5. Есть логика с React? -> hooks/useX.ts. Чистая функция? -> utils/. Константа/объект? -> data/.
-6. Импорт вне папки через @/; типы через barrel types/.
+6. Импорт вне папки через @/; типы через barrel types/;
+   импорт компонента — с расширением .tsx (например, '@/teacher/ui/views/.../View.tsx').
 7. Нет lib/, нет components/, нет вложенных widgets/, нет моков вне SHOW_TMP_DATA,
    нет папки во множественном числе.
 
@@ -173,3 +176,4 @@ teacher/
 - ❌ самодельная обёртка ответа { success, data }  ✅ чистый DTO, зеркалящий Java-DTO.
 - ❌ widgets/ внутри views/             ✅ все виджеты в ui/widgets/ модуля.
 - ❌ функции в data/                    ✅ функции в utils/, в data/ только константы/объекты.
+- ❌ import { View } from '@/teacher/ui/views/View' (без расширения) ✅ import { View } from '@/teacher/ui/views/View/View.tsx' (с .tsx)
