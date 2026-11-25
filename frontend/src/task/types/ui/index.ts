@@ -1,5 +1,6 @@
 export * from './task-status';
 export type { RSType, TaskCourseSelectMultiProps } from './task-course-select-multi';
+export type { TaskInstructionSectionProps } from './task-instruction-section';
 
 import type { ItemType } from '../models';
 

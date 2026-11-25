@@ -1,4 +1,4 @@
-export interface InstructionSectionProps {
+export interface TaskInstructionSectionProps {
     value: string;
     /** Зеркалит @Size(max = 1000) из TaskCreateRequest/TaskUpdateRequest. */
     maxLength: number;

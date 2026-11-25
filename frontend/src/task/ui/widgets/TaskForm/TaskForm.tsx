@@ -3,7 +3,7 @@ import { BaseInputText } from '@/shared/ui-kit/BaseInputText/BaseInputText';
 import { BaseSelectMulti } from '@/shared/ui-kit/BaseSelectMulti/BaseSelectMulti';
 import { BaseSelectSingle } from '@/shared/ui-kit/BaseSelectSingle/BaseSelectSingle';
 import { TaskCourseSelectMulti } from '@/task/ui/widgets/TaskCourseSelectMulti/TaskCourseSelectMulti.tsx';
-import { InstructionSection } from '@/task/ui/widgets/InstructionSection/InstructionSection';
+import { TaskInstructionSection } from '@/task/ui/widgets/TaskInstructionSection/TaskInstructionSection.tsx';
 import { ItemTypeSelect } from '@/task/ui/widgets/ItemTypeSelect/ItemTypeSelect';
 import { TextSection } from '@/task/ui/widgets/TextSection/TextSection';
 import { TaskItemCard } from '@/task/ui/widgets/TaskItemCard/TaskItemCard';
@@ -165,7 +165,7 @@ export function TaskForm({
             </div>
 
             {/* ИНСТРУКЦИЯ — необязательное ТЗ для ученика, есть у любого типа заданий */}
-            <InstructionSection
+            <TaskInstructionSection
                 value={instruction}
                 maxLength={INSTRUCTION_MAX_LENGTH}
                 onChange={setInstruction}

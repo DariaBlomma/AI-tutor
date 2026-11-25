@@ -1,10 +1,10 @@
 import { BaseInputText } from '@/shared/ui-kit/BaseInputText/BaseInputText';
-import type { InstructionSectionProps } from './types';
-import styles from './InstructionSection.module.scss';
+import type { TaskInstructionSectionProps } from '@/task/types/ui';
+import styles from './TaskInstructionSection.module.scss';
 
 // Блок «Инструкция» — необязательное ТЗ для ученика («что нужно сделать в задании»).
 // Есть у любого типа заданий (tasks.instruction, миграция 018); на механику не влияет.
-export function InstructionSection({ value, maxLength, onChange, error, disabled = false }: InstructionSectionProps) {
+export function TaskInstructionSection({ value, maxLength, onChange, error, disabled = false }: TaskInstructionSectionProps) {
     return (
         <div className={styles.section}>
             <div className={styles.sectionTitle}>Инструкция</div>
