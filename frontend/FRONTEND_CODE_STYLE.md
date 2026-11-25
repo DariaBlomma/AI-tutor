@@ -3,12 +3,15 @@
 
 ## 0. ЗОЛОТЫЕ ПРАВИЛА (нарушение = переделать)
 1. Файл .tsx = ТОЛЬКО JSX + вызовы хуков + минимальные props/state.
-    - логика с React (fetch, подписки, эффекты) -> hooks/useX.ts
-    - чистые функции без React (формат, подсчёт, маппинг, валидация) -> utils/
+   - логика с React (fetch, подписки, эффекты) -> hooks/useX.ts
+   - чистые функции без React (формат, подсчёт, маппинг, валидация) -> utils/
 2. Типы НЕ объявлять в .tsx. Типы живут ТОЛЬКО в types/ на уровне модуля
    (например, teacher/types/). В доменных компонентах (views/widgets/base/layouts)
    папки types/ ЗАПРЕЩЕНЫ. (Исключение: локальный types/ допустим только внутри
    shared-компонентов). Импорт типов — из barrel types/ модуля, а НЕ из файла верстки.
+   ГРУППИРОВКА: семантически связанные типы (DTO, Props, фильтры, формы) объединять
+   в ОДИН файл по смыслу/домену, а НЕ создавать отдельный файл на каждый тип.
+   Пример: все типы для TeacherHomeView -> teacher-home-view.ts (не teacher-name.ts + teacher-id.ts).
 3. Папки lib/ и components/ ЗАПРЕЩЕНЫ. Хелперы -> utils/, компоненты -> ui/.
 4. barrel index.ts создаётся ТОЛЬКО в папках, группирующих .ts-файлы
    (types, hooks, services, data, utils). В папках верстки
@@ -19,6 +22,11 @@
 6. Компонент доменного модуля всегда начинается с префикса модуля. В shared/ — без префикса.
 7. Моки запрещены на готовых страницах; временная вёрстка с моками — только под SHOW_TMP_DATA.
 8. Импорты вне текущей папки — через алиас @/. Относительные — только внутри одной папки.
+9. КРИТЕРИЙ shared/ vs домен: компонент идёт в shared/ ТОЛЬКО если он семантически
+   универсален (не зависит от доменной логики). НЕ смотреть на количество использований —
+   смотреть на смысл. Компонент с доменными данными/логикой остаётся в модуле, даже если
+   переиспользуется. Компонент без доменной специфики идёт в shared/, даже если используется
+   в одном месте.
 
 ## 1. ДЕРЕВО src/
 src/
@@ -29,7 +37,7 @@ src/
 │   ├── __root.tsx              # guard (loader) + LayoutRoot + <Outlet/>
 │   └── *.tsx                   # рендерят view из доменных модулей, логики здесь нет
 ├── shared/                     # общее между доменами (без префиксов)
-│   ├── ui-kit/                 # BaseInputText, BaseInputPassword, Loader...
+│   ├── ui-kit/                 # BaseInputText, BaseInputPassword, Loader, BaseCard...
 │   ├── icons/                  # IconHome, IconReports... (size через width/height props)
 │   ├── widgets/                # AppBottomNav, AppSidebar...
 │   ├── layouts/                # LayoutRoot, AuthTriangleFormLayout...
@@ -52,14 +60,13 @@ teacher/
 │   ├── TeacherReportsService.ts   # const REPORTS_PATH = '/teacher/reports'
 │   └── index.ts
 ├── types/                      # .ts, barrel ВЛОЖЕННЫЙ (низ -> вверх)
-│   ├── models/                 # DTO с бэка (зеркалят Java-DTO)
-│   │   ├── teacher-report.ts      # kebab-case
+│   ├── models/                 # DTO с бэка (зеркалят Java-DTO); связанные типы в ОДНОМ файле
+│   │   ├── teacher-report.ts      # kebab-case: TeacherReport + TeacherReportStatus + TeacherReportFilters
 │   │   └── index.ts               # barrel
 │   ├── ui/                     # чисто фронт: опции дропдаунов, составные из моделей, Props
-│   │   ├── teacher-report-filters.ts
-│   │   ├── teacher-home-view.ts   # export type TeacherHomeViewProps
+│   │   ├── teacher-home-view.ts   # export type TeacherHomeViewProps + связанные типы
 │   │   └── index.ts               # barrel
-│   ├── forms.ts                # типы форм (один файл)
+│   ├── forms.ts                # типы форм (один файл на все формы модуля)
 │   └── index.ts                # export * from './models'; './ui'; './forms'
 ├── data/                       # константы/переменные/объекты модуля (БЕЗ функций);
 │   ├── nav-items.ts            # моки внутри — только под SHOW_TMP_DATA; barrel
@@ -67,23 +74,25 @@ teacher/
 ├── utils/                      # чистые функции модуля (без React); barrel
 │   ├── format-report.ts
 │   └── index.ts
-└── ui/                         # 4 папки; НЕТ components/, НЕТ lib/, НЕТ вложенных widgets/
-├── views/                  # страницы по URL, суффикс View
-│   └── TeacherHomeView/
-│       ├── TeacherHomeView.tsx        # БЕЗ index.ts
-│       └── TeacherHomeView.module.scss
-├── widgets/                # блок С логикой (API/фильтрация/навигация); ВСЕГДА на уровне ui/widgets/, НЕ внутри views/
-│   └── TeacherStatCards/
-│       ├── TeacherStatCards.tsx       # БЕЗ index.ts
-│       └── TeacherStatCards.module.scss
-├── base/                   # карточка/чип/прогресс-бар БЕЗ логики
-│   └── TeacherAssignmentItem/
-│       ├── TeacherAssignmentItem.tsx
-│       └── TeacherAssignmentItem.module.scss
-└── layouts/                # обёртка/сетка/шаблон БЕЗ логики, суффикс Layout
-└── TeacherDashboardLayout/
-├── TeacherDashboardLayout.tsx
-└── TeacherDashboardLayout.module.scss
+└── ui/                         # 4 папки; НЕТ components/, НЕТ lib/, НЕТ вложенных widgets/,
+                                # НЕТ types/ внутри
+    ├── views/                  # страницы по URL, суффикс View
+    │   └── TeacherHomeView/
+    │       ├── TeacherHomeView.tsx        # БЕЗ index.ts
+    │       └── TeacherHomeView.module.scss
+    ├── widgets/                # блок С логикой (API/фильтрация/навигация);
+    │   │                     # ВСЕГДА на уровне ui/widgets/, НЕ внутри views/
+    │   └── TeacherStatCards/
+    │       ├── TeacherStatCards.tsx       # БЕЗ index.ts
+    │       └── TeacherStatCards.module.scss
+    ├── base/                   # карточка/чип/прогресс-бар БЕЗ логики
+    │   └── TeacherAssignmentItem/
+    │       ├── TeacherAssignmentItem.tsx
+    │       └── TeacherAssignmentItem.module.scss
+    └── layouts/                # обёртка/сетка/шаблон БЕЗ логики, суффикс Layout
+        └── TeacherDashboardLayout/
+            ├── TeacherDashboardLayout.tsx
+            └── TeacherDashboardLayout.module.scss
 
 # Примечания к дереву:
 # - В доменных модулях (teacher/, student/ и т.д.) папки types/ внутри
@@ -93,7 +102,26 @@ teacher/
 # - shared-компонент со своими типами/данными: shared/widgets/AppBottomNav/
 #   содержит AppBottomNav.tsx + types/ + data/ (types/ и data/ имеют barrel, корень папки — нет).
 
-## 3. КУДА ПОЛОЖИТЬ КОМПОНЕНТ (решать по таблице, не на глаз)
+## 3. КУДА ПОЛОЖИТЬ КОМПОНЕНТ (решать по таблицам, не на глаз)
+
+### 3.1. КРИТЕРИЙ: shared/ или доменный модуль?
+| Критерий | shared/ | доменный модуль (teacher/, student/, etc.) |
+|----------|---------|-------------------------------------------|
+| Зависит от доменных типов (TeacherReport, StudentHomework)? | ❌ нет | ✅ да |
+| Использует доменные хуки/сервисы (useTeacherReports, getCourses)? | ❌ нет | ✅ да |
+| Имеет доменный контекст в названии/логике (Teacher*, Student*)? | ❌ нет | ✅ да |
+| Универсален по смыслу (карточка-обёртка, лоадер, бейдж, инпут)? | ✅ да | ❌ нет |
+| Работает с примитивами/общими DTO (string, number, Date)? | ✅ да | ❌ нет |
+
+### Примеры:
+- `BaseCard` (просто обёртка со стилями) → `shared/ui-kit/` ✅
+- `ReportCard` (показывает данные отчёта учителя) → `teacher/ui/widgets/` ✅
+- `StatusBadge` (просто цветной бейдж со статусом) → `shared/ui-kit/` ✅
+- `TeacherStatusBadge` (статус учителя со специфичной логикой) → `teacher/ui/base/` ✅
+- `Loader` (универсальный спиннер) → `shared/ui-kit/` ✅
+- `HomeworkLoader` (лоадер с текстом "Загружаем домашку...") → `student/ui/base/` ✅
+
+### 3.2. Таблица размещения компонентов:
 | Что это                                  | Куда                         | Суффикс/префикс            |
 |------------------------------------------|------------------------------|----------------------------|
 | страница по URL                          | ui/views/                    | View                       |
@@ -105,23 +133,34 @@ teacher/
 | инпут/кнопка/универсальный атом          | shared/ui-kit/               | без префикса               |
 | иконка                                   | shared/icons/                | Icon + без префикса        |
 | глобальный виджет (нижняя навигация)     | shared/widgets/              | без префикса               |
+
 # Разграничения:
 # - переиспользуется ТОЛЬКО вёрстка -> layouts, а не widgets.
 # - есть логика/фильтрация -> widgets, а не base.
 # - если только вёрстка переиспользуется между доменами -> shared/layouts.
+# - КОМПОНЕНТ УНИВЕРСАЛЕН ПО СМЫСЛУ -> shared/, даже если используется в одном месте.
+# - КОМПОНЕНТ ИМЕЕТ ДОМЕННУЮ СПЕЦИФИКУ -> доменный модуль, даже если переиспользуется.
 
 ## 4. ИМЕНОВАНИЕ (по типу файла)
-| Тип файла            | Регистр        | Пример                       | barrel? |
-|----------------------|----------------|------------------------------|---------|
-| компонент .tsx       | PascalCase     | TeacherHomeView.tsx          | нет     |
-| стиль .module.scss   | PascalCase     | TeacherHomeView.module.scss  | нет     |
-| хук .ts              | camelCase useX | useTeacherReports.ts         | да      |
-| сервис .ts           | PascalCase     | TeacherReportsService.ts     | да      |
-| тип .ts              | kebab-case     | teacher-report.ts            | да      |
-| утилита .ts          | kebab-case     | format-report.ts             | да      |
-| данные/конфиг .ts    | kebab-case     | nav-items.ts                 | да      |
-| константы-значения   | UPPER_SNAKE    | REPORTS_PATH, SHOW_TMP_DATA  | —       |
-| тип пропсов          | PascalCase     | TeacherHomeViewProps         | —       |
+| Тип файла            | Регистр        | Пример                       | barrel? | Группировка |
+|----------------------|----------------|------------------------------|---------|-------------|
+| компонент .tsx       | PascalCase     | TeacherHomeView.tsx          | нет     | —           |
+| стиль .module.scss   | PascalCase     | TeacherHomeView.module.scss  | нет     | —           |
+| хук .ts              | camelCase useX | useTeacherReports.ts         | да      | один хук = один файл |
+| сервис .ts           | PascalCase     | TeacherReportsService.ts     | да      | один сервис = один файл |
+| тип .ts              | kebab-case     | teacher-report.ts            | да      | ВСЕ связанные типы в одном файле |
+| утилита .ts          | kebab-case     | format-report.ts             | да      | одна функция = один файл |
+| данные/конфиг .ts    | kebab-case     | nav-items.ts                 | да      | связанные константы в одном файле |
+| константы-значения   | UPPER_SNAKE    | REPORTS_PATH, SHOW_TMP_DATA  | —       | —           |
+| тип пропсов          | PascalCase     | TeacherHomeViewProps         | —       | в файле компонента (teacher-home-view.ts) |
+
+# ПРАВИЛО ГРУППИРОВКИ ТИПОВ:
+# - Один файл = одна семантическая группа (например, teacher-report.ts содержит
+#   TeacherReport, TeacherReportStatus, TeacherReportFilters).
+# - НЕ создавать teacher-name.ts, teacher-id.ts, teacher-role.ts — это один файл
+#   teacher.ts или teacher-common.ts.
+# - Исключение: если файл становится >200 строк, можно разделить на
+#   teacher-report-core.ts и teacher-report-filters.ts.
 
 ## 5. ИМПОРТ / ЭКСПОРТ
 - Компонент: import { TeacherHomeView } from '@/teacher/ui/views/TeacherHomeView/TeacherHomeView.tsx'
@@ -131,7 +170,9 @@ teacher/
 - Хук/сервис/утилита: через barrel модуля (import { useTeacherName } from '@/teacher/hooks').
 - Внутри одной папки — относительный путь; всё остальное — @/.
 - Циклических импортов типов избегать: тип живёт у владельца домена.
-- ПРАВИЛО РАСШИРЕНИЙ: При импорте конкретного файла расширение ОБЯЗАТЕЛЬНО (.tsx для компонентов, .ts для хуков/сервисов/утилит/типов). При импорте через barrel-папку (директорию) расширение не указывается.
+- ПРАВИЛО РАСШИРЕНИЙ: При импорте конкретного файла расширение ОБЯЗАТЕЛЬНО
+  (.tsx для компонентов, .ts для хуков/сервисов/утилит/типов).
+  При импорте через barrel-папку (директорию) расширение не указывается.
 
 ## 6. ДАННЫЕ И СОСТОЯНИЕ
 - data/: константы, переменные, объекты модуля. БЕЗ функций (функции -> utils/).
@@ -158,15 +199,20 @@ teacher/
 1. Это компонент или хук/сервис/тип/утилита/данные?
 2. Компонент? -> есть префикс домена (или это shared без префикса)? верный суффикс
    (View/Layout/Item/Widget)?
+   КРИТЕРИЙ shared/: компонент универсален по смыслу (не зависит от доменных типов/хуков)?
+   -> shared/. Компонент имеет доменную специфику? -> доменный модуль.
+   НЕ смотреть на количество использований — смотреть на семантику.
 3. Компонент? -> положить в ui/{views,widgets,base,layouts}/<Name>/<Name>.tsx + .module.scss,
    index.ts НЕ создавать. Виджеты — ТОЛЬКО в ui/widgets/ модуля, НЕ внутри views/.
 4. Тип? -> DTO бэка в types/models/, фронт-тип/Props в types/ui/, форма в types/forms.ts;
-   kebab-case; barrel на месте; НЕ объявлять в .tsx; НЕ создавать папку types/ внутри ui/.
-5. Есть логика с React? -> hooks/useX.ts. Чистая функция? -> utils/. Константа/объект? -> data/.
+   kebab-case; barrel на месте; НЕ объявлять в .tsx; НЕ создавать папку types/ внутри ui/;
+   ГРУППИРОВАТЬ семантически связанные типы в ОДИН файл (не один тип = один файл).
+5. Есть логика с React? -> hooks/useX.ts. Чистая функция? -> utils/.
+   Константа/объект? -> data/.
 6. Импорт вне папки через @/; типы через barrel types/;
    импорт конкретного файла — всегда с расширением (.tsx для верстки, .ts для логики/типов).
-7. Нет lib/, нет components/, нет вложенных widgets/, нет моков вне SHOW_TMP_DATA,
-   нет папки во множественном числе.
+7. Нет lib/, нет components/, нет вложенных widgets/, нет types/ внутри ui/,
+   нет моков вне SHOW_TMP_DATA, нет папки во множественном числе.
 
 ## 10. АНТИПАТТЕРНЫ (так НЕ делать)
 - ❌ fetch/useEffect в теле компонента.  ✅ useTeacherReports() в hooks/.
@@ -183,5 +229,18 @@ teacher/
 - ❌ import без расширения файла.
   ✅ import { View } from '@/teacher/ui/views/View/View.tsx' (с .tsx)
   ✅ import { useX } from '@/teacher/hooks/useX.ts' (с .ts)
-- teacher/ui/widgets/TeacherStatCards/types/teacher-stat-cards.ts 
-    ✅ teacher/types/ui/teacher-stat-cards.ts (все типы только на уровне модуля)
+- ❌ teacher/ui/widgets/TeacherStatCards/types/teacher-stat-cards.ts
+  ✅ teacher/types/ui/teacher-stat-cards.ts (все типы только на уровне модуля)
+- ❌ teacher/types/models/teacher-name.ts + teacher/types/models/teacher-id.ts
+     + teacher/types/models/teacher-role.ts
+  ✅ teacher/types/models/teacher.ts (все типы Teacher в одном файле)
+- ❌ teacher/types/ui/teacher-home-view-props.ts + teacher/types/ui/teacher-home-view-state.ts
+  ✅ teacher/types/ui/teacher-home-view.ts (все типы для TeacherHomeView в одном файле)
+- ❌ Компонент в teacher/, потому что "пока используется только там" (хотя по смыслу универсален).
+  ✅ BaseCard в shared/ui-kit/, даже если сейчас используется только в teacher/.
+- ❌ Компонент в shared/, потому что "переиспользуется в двух модулях" (хотя имеет доменную логику).
+  ✅ ReportCard в teacher/ui/widgets/, даже если используется и в student/.
+- ❌ StatusBadge в teacher/ui/base/ (просто цветной бейдж без доменной логики).
+  ✅ StatusBadge в shared/ui-kit/.
+- ❌ TeacherStatusBadge в shared/ui-kit/ (имеет доменную специфику учителя).
+  ✅ TeacherStatusBadge в teacher/ui/base/.
