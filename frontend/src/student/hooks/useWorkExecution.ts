@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { StudentWorkService } from '@/student/services/StudentWorkService';
 import { extractErrorMessage } from '@/core/api/utils/errors';
@@ -11,7 +11,6 @@ export interface FeedbackState {
     allItemsSolved: boolean;
 }
 
-// Убрали id. attempt (1, 2, 3) и так уникален в рамках одного вопроса
 export interface PreviousAnswer {
     attempt: number;
     value: string;
@@ -33,8 +32,6 @@ export interface UseWorkExecutionResult {
     previousAnswers: PreviousAnswer[];
     itemResults: ItemResult[];
     remainingAttempts: number;
-    showHint: boolean;
-    toggleHint: () => void;
     answer: string;
     setAnswer: (value: string) => void;
     feedback: FeedbackState | null;
@@ -44,9 +41,17 @@ export interface UseWorkExecutionResult {
     completeWork: () => Promise<void>;
     isSubmitting: boolean;
     isCompleting: boolean;
+    isExpired: boolean;
+    retryComplete: () => void;
 }
 
 const MAX_ATTEMPTS = 3;
+
+/** Проверяет, является ли ошибка признаком истечения срока (EXPIRED). */
+function isExpiredError(error: unknown): boolean {
+    const msg = extractErrorMessage(error) ?? '';
+    return msg.includes('EXPIRED') || msg.includes('истёк') || msg.includes('Срок');
+}
 
 export function useWorkExecution(workId: number): UseWorkExecutionResult {
     const queryClient = useQueryClient();
@@ -64,7 +69,7 @@ export function useWorkExecution(workId: number): UseWorkExecutionResult {
     const currentItemIndex = useMemo(() => {
         if (!workDetail) return 0;
         const index = workDetail.progress.findIndex(
-        (p) => p.status !== 'SOLVED' && p.status !== 'FAILED'
+            (p) => p.status !== 'SOLVED' && p.status !== 'FAILED',
         );
         return index === -1 ? workDetail.progress.length : index;
     }, [workDetail]);
@@ -77,28 +82,24 @@ export function useWorkExecution(workId: number): UseWorkExecutionResult {
         return workDetail.progress.filter((p) => p.status === 'SOLVED').length;
     }, [workDetail]);
 
-    // 1. ЛОКАЛЬНАЯ ИСТОРИЯ ТОЛЬКО ДЛЯ ТЕКУЩЕЙ СЕССИИ
     const [sessionAttempts, setSessionAttempts] = useState<PreviousAnswer[]>([]);
 
-    // 2. ПРОСТАЯ И ПОНИТНАЯ ЛОГИКА СБОРА ПОПЫТОК
     const previousAnswers = useMemo<PreviousAnswer[]>(() => {
-        // Если есть данные текущей сессии, показываем их (они содержат реальные тексты ответов)
         if (sessionAttempts.length > 0) {
             return sessionAttempts;
         }
-        // Фолбэк после перезагрузки страницы: показываем только последнюю попытку,
-        // так как бэкенд хранит только lastAnswer
         if (currentProgress && currentProgress.answerAttempts > 0 && currentProgress.lastAnswer) {
-            return [{
-                attempt: currentProgress.answerAttempts,
-                value: currentProgress.lastAnswer,
-                correct: false, // При перезагрузке мы не знаем точно, но раз мы всё еще на этом шаге, скорее всего нет
-            }];
+            return [
+                {
+                    attempt: currentProgress.answerAttempts,
+                    value: currentProgress.lastAnswer,
+                    correct: false,
+                },
+            ];
         }
         return [];
     }, [sessionAttempts, currentProgress]);
 
-    // 3. ОСТАВШИЕСЯ ПОПЫТКИ СЧИТАЕМ СТРОГО ПО ДАННЫМ БЭКЕНДА
     const remainingAttempts = useMemo(() => {
         if (!currentProgress) return MAX_ATTEMPTS;
         return Math.max(0, MAX_ATTEMPTS - currentProgress.answerAttempts);
@@ -114,15 +115,14 @@ export function useWorkExecution(workId: number): UseWorkExecutionResult {
     }, [workDetail]);
 
     const [answer, setAnswer] = useState('');
-    const [showHint, setShowHint] = useState(false);
     const [lastFeedback, setLastFeedback] = useState<FeedbackState | null>(null);
+    const [isExpired, setIsExpired] = useState(false);
 
-    // Сброс всех локальных состояний при переходе к новому вопросу
+    // Сброс локальных состояний при переходе к новому вопросу
     useEffect(() => {
         setAnswer('');
         setLastFeedback(null);
-        setShowHint(false);
-        setSessionAttempts([]); // <-- Очищаем историю попыток для нового вопроса
+        setSessionAttempts([]);
     }, [currentItemIndex]);
 
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -160,17 +160,21 @@ export function useWorkExecution(workId: number): UseWorkExecutionResult {
                 allItemsSolved: response.allItemsSolved,
             });
 
-            // ДОБАВЛЯЕМ реальный ответ пользователя в историю сессии
             setSessionAttempts((prev) => [
-            ...prev,
-            {
-                attempt: response.attemptsCount,
-                value: variables.answerText, // <-- Берем текст из запроса
-                correct: response.correct,
-            },
+                ...prev,
+                {
+                    attempt: response.attemptsCount,
+                    value: variables.answerText,
+                    correct: response.correct,
+                },
             ]);
 
             queryClient.invalidateQueries({ queryKey });
+        },
+        onError: (err) => {
+            if (isExpiredError(err)) {
+                setIsExpired(true);
+            }
         },
     });
 
@@ -183,6 +187,12 @@ export function useWorkExecution(workId: number): UseWorkExecutionResult {
         queryClient.invalidateQueries({ queryKey });
     }, [queryClient, queryKey]);
 
+    // Ref гарантирует однократный запуск завершения
+    const completionStartedRef = useRef(false);
+
+    // Определяем ДО useEffect завершения
+    const allItemsSolved = currentItemIndex === totalItems;
+
     const completeMutation = useMutation({
         mutationFn: () => StudentWorkService.completeWork(workId),
         onSuccess: () => {
@@ -190,11 +200,35 @@ export function useWorkExecution(workId: number): UseWorkExecutionResult {
             queryClient.invalidateQueries({ queryKey: ['student', 'dashboard'] });
             queryClient.invalidateQueries({ queryKey: ['student', 'work', workId, 'report'] });
         },
+        onError: (err) => {
+            if (isExpiredError(err)) {
+                setIsExpired(true);
+            }
+            // При сетевой ошибке сбрасываем ref, чтобы дать повторить
+            if (!isExpiredError(err)) {
+                completionStartedRef.current = false;
+            }
+        },
     });
 
     const completeWork = useCallback(async () => {
         await completeMutation.mutateAsync();
     }, [completeMutation]);
+
+    // Определяем ДО useEffect завершения
+    const isCompleting = completeMutation.isPending;
+
+    const retryComplete = useCallback(() => {
+        completionStartedRef.current = false;
+    }, []);
+
+    // Автоматическое завершение: только вызываем мутацию, навигация — в компоненте
+    useEffect(() => {
+        if (allItemsSolved && !completionStartedRef.current && !isLoading && !isCompleting) {
+            completionStartedRef.current = true;
+            completeWork();
+        }
+    }, [allItemsSolved, isLoading, isCompleting, completeWork]);
 
     return {
         workDetail: workDetail ?? null,
@@ -209,8 +243,6 @@ export function useWorkExecution(workId: number): UseWorkExecutionResult {
         previousAnswers,
         itemResults,
         remainingAttempts,
-        showHint,
-        toggleHint: useCallback(() => setShowHint((p) => !p), []),
         answer,
         setAnswer,
         feedback: lastFeedback,
@@ -219,6 +251,8 @@ export function useWorkExecution(workId: number): UseWorkExecutionResult {
         nextItem,
         completeWork,
         isSubmitting: submitMutation.isPending,
-        isCompleting: completeMutation.isPending,
+        isCompleting,
+        isExpired,
+        retryComplete,
     };
 }

@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
 public class StudentExecutionService {
 
     /** Бизнес-лимит подсказок на один пункт (формат Word Formation). */
-    private static final int MAX_HINTS = 3;
+    private static final int MAX_HINTS = 2;
 
     /** Максимальное количество попыток на один пункт. */
     private static final int MAX_ATTEMPTS = 3;
@@ -255,11 +255,10 @@ public class StudentExecutionService {
     @Transactional(readOnly = true)
     public WorkReportDetailDto getWorkReport(Long studentId, Long workId) {
         StudentWork work = loadOwnedWork(studentId, workId);
-        if (work.getStatus() != WorkStatus.COMPLETED) {
-            throw new ConflictException("Детали доступны только для выполненных работ. Текущий статус: "
+        if (work.getStatus() != WorkStatus.COMPLETED && work.getStatus() != WorkStatus.EXPIRED) {
+            throw new ConflictException("Детали доступны только для выполненных или просроченных работ. Текущий статус: "
                     + work.getStatus());
         }
-
         Task task = work.getTask();
         List<StudentWorkItemProgress> progresses = progressRepository.findByWorkIdWithItem(workId);
         int errors = countFinalErrors(progresses);
