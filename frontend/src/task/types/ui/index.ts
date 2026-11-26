@@ -1,3 +1,5 @@
+import {DatePreset, DateRange, FilterChipType, TaskApiFilters} from "@/task/types";
+
 export * from './task-status';
 export type { RSType, TaskCourseSelectMultiProps } from './task-course-select-multi';
 export type { TaskInstructionSectionProps } from './task-instruction-section';
@@ -37,4 +39,18 @@ export interface TaskItemDraft {
     rightLabel: string;
     /** Пояснение ко всем типам. */
     explanation: string;
+}
+
+/** Результат хука. */
+export interface UseTaskFiltersResult {
+    statusFilter: FilterChipType;
+    setStatusFilter: (status: FilterChipType) => void;
+    datePreset: DatePreset;
+    setDatePreset: (preset: DatePreset) => void;
+    dateRange: DateRange;
+    setDateRange: (range: DateRange) => void;
+    page: number;
+    setPage: (page: number) => void;
+    apiParams: TaskApiFilters;
+    resetFilters: () => void;
 }

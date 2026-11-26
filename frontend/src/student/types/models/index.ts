@@ -27,3 +27,24 @@ export type {
 
 // Реэкспорт типов для карточек работ студента.
 export type { StudentWorkCard } from './studentWorkCard';
+
+export interface StudentWorkResponse {
+    id: number;
+    taskId: number;
+    taskPublicId: string;
+    taskName: string;
+    status: WorkStatus;
+    deadline: string | null;
+    createdAt: string;
+    startedAt: string | null;
+    completedAt: string | null;
+    levels?: string[] | null;
+    taskTypes?: Array<{ id: number; name: string; description: string | null; isActive: boolean }> | null;
+    topics?: Array<{ id: number; name: string }> | null;
+    itemTypes?: string[] | null;
+    isMixed?: boolean | null;
+    /** Количество решённых пунктов. */
+    completedItems?: number | null;
+    /** Общее количество пунктов. */
+    totalItems?: number | null;
+}

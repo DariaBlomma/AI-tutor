@@ -17,5 +17,7 @@ export function mapToStudentWorkCard(work: StudentWorkResponse): StudentWorkCard
         topics: work.topics ?? null,
         itemTypes: work.itemTypes ?? null,
         isMixed: work.isMixed ?? null,
+        completedItems: work.completedItems ?? 0,
+        totalItems: work.totalItems ?? 0,
     };
 }

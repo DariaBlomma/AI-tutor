@@ -77,8 +77,6 @@ export const UI_STATUS_TO_BACKEND: Record<Exclude<FilterChipType, 'all'>, Backen
     },
     [UITaskStatus.IN_PROGRESS]: {
         status: 'IN_PROGRESS',
-        deadlineFrom: () => daysAgoToISO(0),
-        deadlineTo: () => daysAheadToISO(URGENT_DEADLINE_DAYS),
     },
     [UITaskStatus.COMPLETED]: {
         status: 'COMPLETED',
@@ -87,7 +85,6 @@ export const UI_STATUS_TO_BACKEND: Record<Exclude<FilterChipType, 'all'>, Backen
         status: 'EXPIRED',
     },
 };
-
 /**
  * Маппинг бэкенд-статуса на UI-статус.
  * - ASSIGNED + deadline ≤ 14 дней → URGENT
@@ -105,13 +102,17 @@ export function mapBackendStatusToUI(
     if (status === 'IN_PROGRESS') return UITaskStatus.IN_PROGRESS;
     if (status === 'COMPLETED') return UITaskStatus.COMPLETED;
     if (status === 'EXPIRED') return UITaskStatus.OVERDUE;
+
     if (status === 'ASSIGNED') {
+        // КРИТИЧНЫЙ ФИКС: задание без дедлайна всегда "Новое", пока не начато
+        if (!deadline) return UITaskStatus.NEW;
+
         const days = daysUntilDeadline(deadline);
         if (days >= 0 && days <= URGENT_DEADLINE_DAYS) return UITaskStatus.URGENT;
-        // «Новое» только если создано ≤ 14 дней назад
         if (days > URGENT_DEADLINE_DAYS && isCreatedRecently(createdAt)) return UITaskStatus.NEW;
         return UITaskStatus.URGENT;
     }
+
     return UITaskStatus.NEW;
 }
 
@@ -150,7 +151,16 @@ export function daysAheadToISO(daysAhead: number): string {
 /** Проверка: задача создана не более N дней назад. */
 export function isCreatedRecently(createdAt: string | null | undefined): boolean {
     if (!createdAt) return false;
-    const now = Date.now();
-    const created = new Date(createdAt).getTime();
-    return created >= now - CREATED_RECENTLY_DAYS * 24 * 60 * 60 * 1000;
+
+    // Унифицируем с daysUntilDeadline: используем начало сегодняшнего дня (00:00:00)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const created = new Date(createdAt);
+    created.setHours(0, 0, 0, 0);
+
+    const MS_PER_DAY = 24 * 60 * 60 * 1000;
+    const daysDiff = Math.floor((today.getTime() - created.getTime()) / MS_PER_DAY);
+
+    return daysDiff <= CREATED_RECENTLY_DAYS;
 }

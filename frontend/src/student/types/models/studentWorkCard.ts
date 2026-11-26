@@ -18,4 +18,6 @@ export interface StudentWorkCard {
     topics?: Array<{ id: number; name: string }> | null;
     itemTypes?: string[] | null;
     isMixed?: boolean | null;
+    completedItems: number;
+    totalItems: number;
 }

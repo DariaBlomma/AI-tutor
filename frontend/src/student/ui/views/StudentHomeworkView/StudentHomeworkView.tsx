@@ -73,23 +73,20 @@ export function StudentHomeworkView() {
                 <div className={styles.empty}>Нет заданий</div>
             ) : (
                 <div className={styles.list}>
-                    {cards.map((card) => {
-                        const work = works.find((w) => w.id === card.id);
-                        const completedItems = work?.completedItems ?? 0;
-                        const totalItems = work?.totalItems ?? 0;
-
-                        return (
-                            <TaskAssignmentItem
-                                key={card.id}
-                                card={card}
-                                showProgress={
-                                    totalItems > 0 ? (
-                                        <StudentHomeworkProgressBar completed={completedItems} total={totalItems} />
-                                    ) : undefined
-                                }
-                            />
-                        );
-                    })}
+                    {cards.map((card) => (
+                        <TaskAssignmentItem
+                            key={card.id}
+                            card={card}
+                            showProgress={
+                            card.totalItems > 0 ? (
+                                <StudentHomeworkProgressBar
+                                    completed={card.completedItems}
+                                    total={card.totalItems}
+                                />
+                            ) : undefined
+                            }
+                        />
+                    ))}
                 </div>
             )}
 

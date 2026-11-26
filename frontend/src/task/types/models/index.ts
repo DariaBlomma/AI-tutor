@@ -1,6 +1,9 @@
 // Типы модуля «Банк заданий» — зеркалят DTO бэкенда
 // (com.aitutor.backend.dto.task / topic / tasktype).
 
+import {WorkStatus} from "@/student/types/work.ts";
+import {DatePreset} from "@/task/types";
+
 /** com.aitutor.backend.enums.ItemType — механика пункта задания. */
 export type ItemType = 'WORD_FORMATION' | 'GAP_FILL' | 'TFNS' | 'MATCHING';
 
@@ -252,4 +255,20 @@ export interface TaskItemResponseDto {
     correctAnswer: string | null;
     content: string | null;
     position: number;
+}
+
+/** Параметры фильтрации для API. */
+export interface TaskApiFilters {
+    page: number;
+    size: number;
+    sortBy?: 'deadline' | 'status' | 'createdAt';
+    sortDirection?: 'asc' | 'desc';
+    status?: WorkStatus;
+    deadlineFrom?: string | null;
+    deadlineTo?: string | null;
+    deadlineExcludeFrom?: string | null;
+    createdAtFrom?: string | null;
+    completedAtFrom?: string | null;
+    completedAtTo?: string | null;
+    datePreset?: DatePreset;
 }
