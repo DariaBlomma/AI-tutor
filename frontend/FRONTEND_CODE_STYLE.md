@@ -174,6 +174,39 @@ teacher/
   (.tsx для компонентов, .ts для хуков/сервисов/утилит/типов).
   При импорте через barrel-папку (директорию) расширение не указывается.
 
+### 5.1. ПРАВИЛА БАРРЕЛЬ-ФАЙЛОВ (index.ts)
+
+**Синтаксис:**
+- В barrel-файле использовать ТОЛЬКО `export * from './file'`.
+- ЗАПРЕЩЕНО использовать именованный экспорт: `export { Type1 } from './file1'`.
+- Каждый файл в папке ОБЯЗАН быть подключён к barrel через `export *`.
+
+**Правильно:**
+```typescript
+// types/models/index.ts
+export * from './teacher-report';
+export * from './student-work';
+```
+
+**Неправильно:**
+```typescript
+// ❌ Именованный экспорт
+export { TeacherReport } from './teacher-report';
+export { StudentWorkResponse } from './student-work';
+
+// ❌ Файл не подключён к barrel
+export * from './student-work';
+```
+
+**Правило полноты:**
+- Barrel-файл должен содержать `export *` для КАЖДОГО .ts-файла в папке.
+- При создании нового файла в папке СРАЗУ добавляй его в barrel.
+- Если в папке 3 файла — в barrel должно быть 3 строки `export *`.
+
+**Исключение:**
+- В папках верстки (ui/views/, ui/widgets/, ui/base/, ui/layouts/) barrel НЕ создаётся.
+- Импорт компонента — по полному пути с расширением .tsx.
+
 ## 6. ДАННЫЕ И СОСТОЯНИЕ
 - data/: константы, переменные, объекты модуля. БЕЗ функций (функции -> utils/).
   Моки внутри data/ — только под SHOW_TMP_DATA.
@@ -244,3 +277,9 @@ teacher/
   ✅ StatusBadge в shared/ui-kit/.
 - ❌ TeacherStatusBadge в shared/ui-kit/ (имеет доменную специфику учителя).
   ✅ TeacherStatusBadge в teacher/ui/base/.
+- ❌ `export { TeacherReport } from './teacher-report'` в barrel-файле.
+  ✅ `export * from './teacher-report'` в barrel-файле.
+- ❌ Создан файл `types/models/teacher-report.ts`, но не добавлен в `types/models/index.ts`.
+  ✅ Каждый новый файл в папке СРАЗУ подключается к barrel через `export *`.
+- ❌ В barrel-файле только часть файлов папки (неполный barrel).
+  ✅ Barrel содержит `export *` для ВСЕХ .ts-файлов папки.
